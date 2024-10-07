@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:fe_project/pages/question_page.dart';
 import 'package:flutter/material.dart';
 
@@ -6,6 +8,13 @@ class CategoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double blockHeight = 75.0;
+    const Map<String, List<String>> categoryMap = {
+      "テクノロジ系": ["基礎理論", "アルゴリズムとプログラミング", "コンピュータの構成要素", "システムの構成要素", "ソフトウェア", "ハードウェア", "ヒューマンインターフェイス", "マルチメディア", "データベース", "ネットワーク", "セキュリティ", "システム開発技術", "ソフトウェア開発管理技術"],
+      "テスト": ["aaa", "iii"],
+    };
+    const List<String> categoryList = ["基礎理論", "アルゴリズムとプログラミング", "コンピュータの構成要素", "システムの構成要素", "ソフトウェア", "ハードウェア", "ヒューマンインターフェイス", "マルチメディア", "データベース", "ネットワーク", "セキュリティ", "システム開発技術", "ソフトウェア開発管理技術"];
+
     return Scaffold(
       appBar: AppBar(
         leading:
@@ -13,20 +22,67 @@ class CategoryPage extends StatelessWidget {
           onTap:(){ Navigator.pop(context);}
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('a'),
+        title: Text('カテゴリ詳細'),
       ),
       body:
-       ListView(
-         children: [
-           ListTile(
-             onTap: (){
-               Navigator.push(context, MaterialPageRoute(
-                 builder: (context) => QuestionPage()
-               ));
-             },
-           )
-         ],
-       )
-        );
+        ListView.builder(
+          itemCount: categoryList.length,
+          itemBuilder: (context, index) {
+            return  Container(
+            height: blockHeight,
+            child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuestionPage(), // 次のページに遷移
+                  ),
+                );
+              },
+              title: Text(categoryList[index]), // 各カテゴリー名を表示
+              trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+            );
+    }// ListView(
+    //   children: [
+    //     Container(
+    //       height: blockHeight, // 縦幅を設定
+    //       child: ListTile(
+    //         onTap: (){
+    //           Navigator.push(context, MaterialPageRoute(
+    //               builder: (context) => QuestionPage()
+    //           ));
+    //         },
+    //         title: Text("基礎理論"),
+    //         trailing: Icon(Icons.keyboard_arrow_right),
+    //       ),
+    //     ),
+    //     Container(
+    //       height: blockHeight, // 縦幅を設定
+    //       child: ListTile(
+    //         onTap: (){
+    //           Navigator.push(context, MaterialPageRoute(
+    //               builder: (context) => QuestionPage()
+    //           ));
+    //         },
+    //         title: Text("基礎理論"),
+    //         trailing: Icon(Icons.keyboard_arrow_right),
+    //       ),
+    //     ),
+    //     Container(
+    //       height: blockHeight, // 縦幅を設定
+    //       child: ListTile(
+    //         onTap: (){
+    //           Navigator.push(context, MaterialPageRoute(
+    //               builder: (context) => QuestionPage()
+    //           ));
+    //         },
+    //         title: Text("基礎理論"),
+    //         trailing: Icon(Icons.keyboard_arrow_right),
+    //       ),
+    //     ),
+    //   ],
+    // )
+        ));
+    }
   }
-}

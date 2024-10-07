@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // 外側の余白
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2), // ボーダーの色と幅
+        border: Border.all(color: Colors.lightGreen, width: 2), // ボーダーの色と幅
         borderRadius: BorderRadius.circular(8), // 角を丸める
       ),
       child: ListTile(

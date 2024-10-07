@@ -8,10 +8,12 @@ class CategoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String categoryName = "テクノロジ系"; // 後で動的に変える
     const double blockHeight = 75.0;
     const Map<String, List<String>> categoryMap = {
       "テクノロジ系": ["基礎理論", "アルゴリズムとプログラミング", "コンピュータの構成要素", "システムの構成要素", "ソフトウェア", "ハードウェア", "ヒューマンインターフェイス", "マルチメディア", "データベース", "ネットワーク", "セキュリティ", "システム開発技術", "ソフトウェア開発管理技術"],
-      "テスト": ["aaa", "iii"],
+      "ストラテジ系": ["aaa", "iii"],
+      "マネジメント系": ["mamamaa", "mimimi"],
     };
     const List<String> categoryList = ["基礎理論", "アルゴリズムとプログラミング", "コンピュータの構成要素", "システムの構成要素", "ソフトウェア", "ハードウェア", "ヒューマンインターフェイス", "マルチメディア", "データベース", "ネットワーク", "セキュリティ", "システム開発技術", "ソフトウェア開発管理技術"];
 
@@ -26,7 +28,7 @@ class CategoryPage extends StatelessWidget {
       ),
       body:
         ListView.builder(
-          itemCount: categoryList.length,
+          itemCount: categoryMap[categoryName]!.length,
           itemBuilder: (context, index) {
             return  Container(
             height: blockHeight,
@@ -39,50 +41,12 @@ class CategoryPage extends StatelessWidget {
                   ),
                 );
               },
-              title: Text(categoryList[index]), // 各カテゴリー名を表示
+              title: Text(categoryMap[categoryName]![index]), // 各カテゴリー名を表示
               trailing: Icon(Icons.keyboard_arrow_right),
               ),
             );
     }// ListView(
-    //   children: [
-    //     Container(
-    //       height: blockHeight, // 縦幅を設定
-    //       child: ListTile(
-    //         onTap: (){
-    //           Navigator.push(context, MaterialPageRoute(
-    //               builder: (context) => QuestionPage()
-    //           ));
-    //         },
-    //         title: Text("基礎理論"),
-    //         trailing: Icon(Icons.keyboard_arrow_right),
-    //       ),
-    //     ),
-    //     Container(
-    //       height: blockHeight, // 縦幅を設定
-    //       child: ListTile(
-    //         onTap: (){
-    //           Navigator.push(context, MaterialPageRoute(
-    //               builder: (context) => QuestionPage()
-    //           ));
-    //         },
-    //         title: Text("基礎理論"),
-    //         trailing: Icon(Icons.keyboard_arrow_right),
-    //       ),
-    //     ),
-    //     Container(
-    //       height: blockHeight, // 縦幅を設定
-    //       child: ListTile(
-    //         onTap: (){
-    //           Navigator.push(context, MaterialPageRoute(
-    //               builder: (context) => QuestionPage()
-    //           ));
-    //         },
-    //         title: Text("基礎理論"),
-    //         trailing: Icon(Icons.keyboard_arrow_right),
-    //       ),
-    //     ),
-    //   ],
-    // )
+
         ));
     }
   }

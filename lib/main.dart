@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'カテゴリ'),
+      home: const MyHomePage(title: 'カテゴリを選択'),
     );
   }
 }

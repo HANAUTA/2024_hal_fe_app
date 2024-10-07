@@ -77,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Text(
             category,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24, // フォントサイズを大きく
               fontWeight: FontWeight.bold, // 太字にする
             ),

@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   fl_chart: ^0.69.0  # fl_chartを追加
+  firebase_core: ^3.6.0
 
 dev_dependencies:
   flutter_test:

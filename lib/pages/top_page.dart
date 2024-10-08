@@ -11,7 +11,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final int correctAnswers = 70; // 正解数
+  final int correctAnswers = 250; // 正解数
   final int totalQuestions = 500; // 総問題数
 
   @override
@@ -26,8 +26,12 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        centerTitle: true,
       ),
-      body: SafeArea(
+      body:
+      SafeArea(
+        child: Container(
+        color: const Color(0xFFE4F9F5), // SafeAreaの背景色を設定
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center, // 縦方向に中央揃え
           children: [
@@ -40,7 +44,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     '正解数 $correctAnswers / $totalQuestions 問中',
                     style: TextStyle(
                       fontSize: screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
-                      fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
                     textAlign: TextAlign.center,
@@ -55,13 +58,20 @@ class _MyHomePageState extends State<MyHomePage> {
                           width: screenWidth * 0.8,
                           height: screenHeight * 0.03,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black, width: 1),
+                            border: Border.all(color: Colors.black, width: 0),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                         FractionallySizedBox(
                           widthFactor: progress, // 進捗率に基づいてバーの幅を調整
                           child: Container(
-                            color: Colors.green, // 正解の進捗部分の色
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 0),
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color(0xFF30E3CA),
+                            ),
+
+                            // 正解の進捗部分の色
                           ),
                         ),
                       ],
@@ -99,6 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+      )
     );
   }
 
@@ -108,8 +119,8 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Container(
         margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01), // 上下の余白
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.lightGreen, width: 2), // ボーダーの色と幅
-          borderRadius: BorderRadius.circular(8), // 角を丸める
+          border: Border.all(color: const Color(0xFF11999E), width: 2), // ボーダーの色と幅
+          borderRadius: BorderRadius.circular(20), // 角を丸める
         ),
         child: ListTile(
           contentPadding: EdgeInsets.symmetric(
@@ -130,7 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
-                fontWeight: FontWeight.bold, // 太字にする
               ),
             ),
           ),

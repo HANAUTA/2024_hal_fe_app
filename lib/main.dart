@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'pages/top_page.dart';
 
 void main() {
@@ -14,11 +13,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'カテゴリ',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF30E3CA)),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'カテゴリを選択'),
     );
   }
 }
-

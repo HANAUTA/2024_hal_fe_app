@@ -14,6 +14,7 @@ class _QuestionPageState extends State<QuestionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -118,41 +119,44 @@ class _QuestionPageState extends State<QuestionPage> {
         ),
       ),
       // Fixed BottomAppBar
-      bottomNavigationBar: BottomAppBar(
-        child: _currentTabIndex == 0 // "問題"タブの場合
-            ? Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              child: buildAnswerButton("ア"),
-            ),
-            Expanded(
-              child: buildAnswerButton("イ"),
-            ),
-            Expanded(
-              child: buildAnswerButton("ウ"),
-            ),
-            Expanded(
-              child: buildAnswerButton("エ"),
-            ),
-            Icon(Icons.keyboard_arrow_right, size: 30), // Always shown
-          ],
-        )
-            : const Row(
-          mainAxisAlignment: MainAxisAlignment.center, // 中央寄せ
-          children: [
-            // '次の問題へ'とアイコンを中央に表示
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0), // テキストとアイコンの間のスペース
-              child: Row(
-                children: [
-                  Text('次の問題へ', style: TextStyle(fontSize: 16)),
-                  SizedBox(width: 8), // テキストとアイコンの間のスペース
-                  Icon(Icons.keyboard_arrow_right, size: 30), // Always shown
-                ],
+      bottomNavigationBar: Container(
+        child: BottomAppBar(
+          color: const Color(0xFFE4F9F5),
+          child: _currentTabIndex == 0 // "問題"タブの場合
+              ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: buildAnswerButton("ア"),
               ),
-            ),
-          ],
+              Expanded(
+                child: buildAnswerButton("イ"),
+              ),
+              Expanded(
+                child: buildAnswerButton("ウ"),
+              ),
+              Expanded(
+                child: buildAnswerButton("エ"),
+              ),
+              Icon(Icons.keyboard_arrow_right, size: 30), // Always shown
+            ],
+          )
+              : const Row(
+            mainAxisAlignment: MainAxisAlignment.center, // 中央寄せ
+            children: [
+              // '次の問題へ'とアイコンを中央に表示
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0), // テキストとアイコンの間のスペース
+                child: Row(
+                  children: [
+                    Text('次の問題へ', style: TextStyle(fontSize: 16)),
+                    SizedBox(width: 8), // テキストとアイコンの間のスペース
+                    Icon(Icons.keyboard_arrow_right, size: 30), // Always shown
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

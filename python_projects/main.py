@@ -8,6 +8,8 @@ import csv
 
 
 mondai_datas = []
+category_name = {"ストラテジ系": "strategyStage", "テクノロジ系": "technologyStage", "マネジメント系": "managementStage"}
+kotae_dict = {"ア": "lia", "イ": "lii", "ウ": "liu", "エ": "lie"}
 
 # オプション設定
 chrome_options = Options()
@@ -60,42 +62,110 @@ submit_button.click()
 time.sleep(1)
 
 cnt = 0
-while True:
-    mondai_main = driver.find_element(By.CLASS_NAME, 'main')
-    mondai_data = []
+
+def get_mondai_bun(mondai_main):
+    # 問題文を取得
     if cnt >= 1:
         mondai_bun = driver.find_element(By.XPATH, '/html/body/div[1]/div/main/div[2]/div[2]')
     else:
         mondai_bun = driver.find_element(By.XPATH, '/html/body/div[1]/div/main/div[2]/div[1]')
-    mondai_data.append(mondai_bun.text)
-    mondai_kotae_list = mondai_main.find_element(By.CLASS_NAME, 'selectList')
-    # 'li'要素を全て取得
-    mondai_kotae = mondai_kotae_list.find_elements(By.TAG_NAME, 'li')
 
-    # 各li要素の中にあるspanタグのテキストを取得
-    kotaes = []
-    for kotae in mondai_kotae:
-        kotae_text = kotae.find_element(By.TAG_NAME, 'span').text
-        kotaes.append(kotae_text)
+    return mondai_bun.text
     
-
-    mondai_data.append(kotaes)
-
+def get_mondai_nendo(mondai_main):
     # 問題年度を取得
     mondai_nendo = mondai_main.find_element(By.CLASS_NAME, 'anslink').text
 
-    mondai_data.append(mondai_nendo)
+    return mondai_nendo
 
+def get_mondai_category(mondai_main):
+    # 問題カテゴリを取得
     mondai_category = mondai_main.find_element(By.TAG_NAME, 'p').text
-    mondai_data.append(mondai_category)
+
+    category = mondai_category.split('»')[0].strip()
+    category = category_name[category]
+
+    series = mondai_category.split('»')[1].strip()
+    stage = mondai_category.split('»')[2].strip()    
+
+    return [category, series, stage]
+
+def get_mondai_answer(mondai_main, answer):
+
+    # 正解を取得
+    mondai_kotae_elem = mondai_main.find_element(By.CLASS_NAME, kotae_dict[answer])
+    kotae_text = mondai_kotae_elem.find_element(By.CLASS_NAME, 'cite').text
+
+    return kotae_text
+
+def get_mondai_failure(mondai_main, answer):
+    matigai_ls = ["lia", "lii", "liu", "lie"]
+    matigai_ls.remove(kotae_dict[answer])
+    matigai_texts = []
+    for matigai in matigai_ls:
+        matigai_elem = mondai_main.find_element(By.CLASS_NAME, matigai)
+        matigai_texts.append(matigai_elem.find_element(By.CLASS_NAME, 'cite').text)
+
+    return matigai_texts
+
+def get_mondai_kaisetsu(mondai_main):
+    # 解説を取得
+    kaisetsu_div = mondai_main.find_element(By.ID, 'kaisetsu')
+    kaisetu_all_text = kaisetsu_div.find_element(By.CLASS_NAME, 'ansbg').text
 
 
+    return kaisetu_all_text
 
+while True:
+    # この問題のデータすべて取得
+    mondai_main = driver.find_element(By.CLASS_NAME, 'main')
+    mondai_data = []
+
+    # 問題文を取得
+    mondai_bun = get_mondai_bun(mondai_main)
+    # 問題文を追加
+    mondai_data.append(mondai_bun)
+
+    # 問題年度を取得
+    mondai_nendo = get_mondai_nendo(mondai_main)
+    # 問題年度を追加
+    mondai_data.append(mondai_nendo)       
+
+
+    # 問題カテゴリを取得
+    category, series, stage = get_mondai_category(mondai_main)
+    # 問題カテゴリを追加
+    mondai_data.append([category, series, stage])
+
+    time.sleep(1)
+    # 答えと解説を表示
+    answer_button = driver.find_element(By.ID, 'showAnswerBtn')
+    answer_button.click()
+    time.sleep(1)
+    # 答え記号取得
+    answer = driver.find_element(By.ID, 'answerChar').text
+    # 正解を取得
+    kotae_text = get_mondai_answer(mondai_main, answer)
+    # 正解を追加
+    mondai_data.append(kotae_text)
+
+    # 間違い選択肢を取得,追加
+    matigai_texts = get_mondai_failure(mondai_main, answer)
+    mondai_data.append(matigai_texts)
+    
+    
+
+    # 解説を取得
+    kaisetsu = get_mondai_kaisetsu(mondai_main)
+    # 解説を追加
+    mondai_data.append(kaisetsu)
+
+    # 問題データを追加
     mondai_datas.append(mondai_data)
 
 
     cnt += 1
-
+    break
     if cnt >= 10:
         break
 
@@ -115,32 +185,41 @@ with open('mondai_datas.csv', 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
     
     # ヘッダーを記入（任意）
-    writer.writerow(['問題文', '選択肢ア', '選択肢イ', '選択肢ウ', '選択肢エ', '年度', 'カテゴリ'])
+    writer.writerow(['question', 'link', 'category', 'series_name', 'stage_name', 'answer', 'failure1', 'failure2', 'failure3', 'comment'])
     
     # データを一行ずつ書き込む
     for mondai in mondai_datas:
-        # 問題文、選択肢（リストを結合して1つの文字列にする）、年度、カテゴリを一行として書き込む
-        mondai_bun = mondai[0].replace('\n', ' ')
-        mondai_kotae = mondai[1]
-        mondai_kotae_a = mondai_kotae[0].replace('\n', ' ')
-        mondai_kotae_i = mondai_kotae[1].replace('\n', ' ')
-        mondai_kotae_u = mondai_kotae[2].replace('\n', ' ')
-        mondai_kotae_e = mondai_kotae[3].replace('\n', ' ')
-        mondai_nendo = mondai[2].replace('\n', ' ').split('／')[0]
-        mondai_category = mondai[3]
+        mondai_bun = mondai[0]
+        mondai_nendo = mondai[1]
+        mondai_category = mondai[2][0]
+        mondai_series = mondai[2][1]
+        mondai_stage = mondai[2][2]
+        mondai_answer = mondai[3]
+        mondai_failure1 = mondai[4][0]
+        mondai_failure2 = mondai[4][1]
+        mondai_failure3 = mondai[4][2]
+        mondai_comment = mondai[5]
         print('-' * 20)
         print(mondai_bun)
-        print('-' * 20)
-        print(mondai_kotae_a)
-        print(mondai_kotae_i)
-        print(mondai_kotae_u)
-        print(mondai_kotae_e)
         print('-' * 20)
         print(mondai_nendo)
         print('-' * 20)
         print(mondai_category)
         print('-' * 20)
+        print(mondai_series)
+        print('-' * 20)
+        print(mondai_stage)
+        print('-' * 20)
+        print(mondai_answer)
+        print('-' * 20)
+        print(mondai_failure1)
+        print(mondai_failure2)
+        print(mondai_failure3)
+        print('-' * 20)
+        print(mondai_comment)
+        print('-' * 20)
+        writer.writerow([mondai_bun, mondai_nendo, mondai_category, mondai_series, mondai_stage, mondai_answer, mondai_failure1, mondai_failure2, mondai_failure3, mondai_comment])
 
-        writer.writerow([mondai_bun, mondai_kotae_a, mondai_kotae_i, mondai_kotae_u, mondai_kotae_e, mondai_nendo, mondai_category])
+
 
 print("CSVファイルにデータを書き出しました")

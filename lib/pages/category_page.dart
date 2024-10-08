@@ -19,9 +19,11 @@ class CategoryPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading:
-        ListTile(
-          onTap:(){ Navigator.pop(context);}
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('カテゴリ詳細'),

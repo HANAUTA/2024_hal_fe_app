@@ -1,6 +1,5 @@
 import 'package:fe_project/pages/category_page.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -12,19 +11,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  final int correctAnswers = 70; // 正解数
+  final int totalQuestions = 500; // 総問題数
 
   @override
   Widget build(BuildContext context) {
     // 画面の高さと幅を取得
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+
+    double progress = correctAnswers / totalQuestions; // 進捗を計算
 
     return Scaffold(
       appBar: AppBar(
@@ -33,16 +29,59 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: SafeArea(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // 縦方向に中央揃え
           children: [
-            // 円グラフを表示
-            SizedBox(
-              height: screenHeight * 0.25, // 画面の高さの25%を使用
-              child: PieChart(
-                PieChartData(
-                  sections: showingSections(),
-                  borderData: FlBorderData(show: false), // 境界線を非表示
-                  centerSpaceRadius: screenHeight * 0.05, // 画面高さに対してスペースを指定
-                ),
+            // 正解数と進捗バーを表示
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
+              child: Column(
+                children: [
+                  Text(
+                    '正解数 $correctAnswers / $totalQuestions 問中',
+                    style: TextStyle(
+                      fontSize: screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  SizedBox(
+                    width: screenWidth * 0.8, // バーの幅
+                    height: screenHeight * 0.03, // バーの高さ
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: screenWidth * 0.8,
+                          height: screenHeight * 0.03,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black, width: 1),
+                          ),
+                        ),
+                        FractionallySizedBox(
+                          widthFactor: progress, // 進捗率に基づいてバーの幅を調整
+                          child: Container(
+                            color: Colors.green, // 正解の進捗部分の色
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  // 50%と100%のラベル表示
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Spacer(),// 50%の位置に合わせるためのスペーサー!!あとで変更!!
+                        Text('50%'),
+                        Spacer(),
+                        Text('100%'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             // カテゴリのリスト
@@ -63,12 +102,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  // 引数でscreenWidthとscreenHeightを渡す
   Widget _buildCategoryTile(double screenWidth, double screenHeight, String category) {
     return FractionallySizedBox(
       widthFactor: 0.8, // 全体の80%の幅を指定
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01), // 外側の上下の余白を画面高さに基づいて指定
+        margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01), // 上下の余白
         decoration: BoxDecoration(
           border: Border.all(color: Colors.lightGreen, width: 2), // ボーダーの色と幅
           borderRadius: BorderRadius.circular(8), // 角を丸める
@@ -82,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const CategoryPage(),
+                builder: (context) => const CategoryPage(), // カテゴリページに遷移
               ),
             );
           },
@@ -100,25 +138,5 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
-  }
-
-  List<PieChartSectionData> showingSections() {
-    final correctAnswers = 70; // 正解の数
-    final incorrectAnswers = 30; // 不正解の数
-
-    return [
-      PieChartSectionData(
-        color: Colors.green,
-        value: correctAnswers.toDouble(),
-        title: '正解\n$correctAnswers%', // 緑の部分に「正解」と割合を表示
-        radius: 40, // 円グラフのセクションのサイズを調整
-      ),
-      PieChartSectionData(
-        color: Colors.red,
-        value: incorrectAnswers.toDouble(),
-        title: '不正解\n$incorrectAnswers%', // 赤の部分に「不正解」と割合を表示
-        radius: 40, // 円グラフのセクションのサイズを調整
-      ),
-    ];
   }
 }

@@ -122,11 +122,46 @@ class _QuestionPageState extends State<QuestionPage> {
         ),
       ),
       // Fixed BottomAppBar
-      bottomNavigationBar: Container(
-        child: BottomAppBar(
-          color: const Color(0xFFE4F9F5),
-          child: _currentTabIndex == 0 // "問題"タブの場合
-              ? Row(
+      bottomNavigationBar: BottomAppBar(
+        color: const Color(0xFFE4F9F5),
+        child: SizedBox(
+          height: 56, // ボトムバーの高さを指定
+          child: _currentTabIndex == 1 // 解説タブの場合
+              ? GestureDetector(
+            onTap: () {
+              // 次のページに遷移
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const QuestionPage()),
+              );
+            },
+            child: Container(
+              color: const Color(0xFFE4F9F5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  const Expanded(
+                    child: Center(
+                      child: Text('次の問題へ', style: TextStyle(fontSize: 16)),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.keyboard_arrow_right, size: 30),
+                    onPressed: () {
+                      // 右矢印ボタンのタップ時の動作
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const QuestionPage()),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          )
+              : Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
@@ -160,27 +195,6 @@ class _QuestionPageState extends State<QuestionPage> {
               IconButton(
                 icon: const Icon(Icons.keyboard_arrow_right, size: 30),
                 onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const QuestionPage()),
-                  );
-                },
-              ),
-            ],
-          )
-              : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Expanded(
-                child: Center(
-                  child: Text('次の問題へ', style: TextStyle(fontSize: 16)),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.keyboard_arrow_right, size: 30),
-                onPressed: () {
-                  // 次のページに遷移
                   Navigator.pop(context);
                   Navigator.push(
                     context,

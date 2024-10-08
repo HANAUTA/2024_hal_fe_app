@@ -89,23 +89,14 @@ class _QuestionPageState extends State<QuestionPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // First description (ア)
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                        ),
-                        padding: const EdgeInsets.all(10),
-                        child: const Text(
-                          "ア：IPアドレスを悪用した不正アクセスや侵入の危険性はないので、IPアドレスも含めたパケット全体の暗号化は必要ない。",
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ),
+                      buildOptionWithBorder("ア",
+                          "IPアドレスを悪用した不正アクセスや侵入の危険性はないので、IPアドレスも含めたパケット全体の暗号化は必要ない。"),
                       const SizedBox(height: 10),
-                      // Scrollable options (イ, ウ, エ, etc.)
-                      buildOption("イ", "iii"),
-                      buildOption("ウ", "uuu"),
-                      buildOption("エ", "eee"),
-                      buildOption("オ", "ooo"),
-                      buildOption("カ", "kkk"),
+                      buildOptionWithBorder("イ", "iii"),
+                      const SizedBox(height: 10),
+                      buildOptionWithBorder("ウ", "uuu"),
+                      const SizedBox(height: 10),
+                      buildOptionWithBorder("エ", "eee"),
                     ],
                   ),
                 ),
@@ -209,10 +200,15 @@ class _QuestionPageState extends State<QuestionPage> {
     );
   }
 
-  // Helper method to build options
-  Widget buildOption(String label, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+  // Helper method to build options with bottom border only
+  Widget buildOptionWithBorder(String label, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10), // 上下にパディングを追加
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Colors.grey), // 下部にボーダーを追加
+        ),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

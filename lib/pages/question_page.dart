@@ -80,21 +80,7 @@ class QuestionPage extends StatelessWidget {
                     buildOption("エ", "eee"),
                     buildOption("オ", "ooo"),
                     buildOption("カ", "kkk"),
-                    buildOption("イ", "iii"),
-                    buildOption("ウ", "uuu"),
-                    buildOption("エ", "eee"),
-                    buildOption("オ", "ooo"),
-                    buildOption("カ", "kkk"),
-                    buildOption("イ", "iii"),
-                    buildOption("ウ", "uuu"),
-                    buildOption("エ", "eee"),
-                    buildOption("オ", "ooo"),
-                    buildOption("カ", "kkk"),
-                    buildOption("イ", "iii"),
-                    buildOption("ウ", "uuu"),
-                    buildOption("エ", "eee"),
-                    buildOption("オ", "ooo"),
-                    buildOption("カ", "kkk"),
+
                     // Add more options as needed
                   ],
                 ),
@@ -103,13 +89,19 @@ class QuestionPage extends StatelessWidget {
             // Bottom bar with answer buttons and arrow icon
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center, // Aligns vertically
               children: [
-                buildAnswerButton("ア"),
-                buildAnswerButton("イ"),
-                buildAnswerButton("ウ"),
-                buildAnswerButton("エ"),
-                // Align arrow icon with buttons
+                Expanded(
+                  child: buildAnswerButton("ア"),
+                ),
+                Expanded(
+                  child: buildAnswerButton("イ"),
+                ),
+                Expanded(
+                  child: buildAnswerButton("ウ"),
+                ),
+                Expanded(
+                  child: buildAnswerButton("エ"),
+                ),
                 Icon(Icons.keyboard_arrow_right, size: 30),
               ],
             ),

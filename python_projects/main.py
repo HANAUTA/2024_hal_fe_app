@@ -18,6 +18,9 @@ category_name = {"ストラテジ系": "strategyStage", "テクノロジ系": "t
 kotae_dict = {"ア": "lia", "イ": "lii", "ウ": "liu", "エ": "lie"}
 kotae_dict_sentakusi = {"ア": "select_a", "イ": "select_i", "ウ": "select_u", "エ": "select_e"}
 
+# for debug
+skip_count = 0
+
 # オプション設定
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
@@ -126,64 +129,88 @@ def get_mondai_kaisetsu(mondai_main):
 
     return kaisetu_all_text
 
-while True:
-    # この問題のデータすべて取得
-    mondai_main = driver.find_element(By.CLASS_NAME, 'main')
-    mondai_data = []
-
-    # 問題文を取得
-    mondai_bun = get_mondai_bun(mondai_main)
-    # 問題文を追加
-    mondai_data.append(mondai_bun)
-
-    # 問題年度を取得
-    mondai_nendo = get_mondai_nendo(mondai_main)
-    # 問題年度を追加
-    mondai_data.append(mondai_nendo)       
-
-
-    # 問題カテゴリを取得
-    category, series, stage = get_mondai_category(mondai_main)
-    # 問題カテゴリを追加
-    mondai_data.append([category, series, stage])
-
-    time.sleep(2)
-    # 答えと解説を表示
-    answer_button = driver.find_element(By.ID, 'showAnswerBtn')
-    time.sleep(0.3)
-    answer_button.click()
-    time.sleep(0.4)
-    # 答え記号取得
-    answer = driver.find_element(By.ID, 'answerChar').text
-
-    # 正解を取得
-    kotae_text = get_mondai_answer(mondai_main, answer)
-    # 正解を追加
-    mondai_data.append(kotae_text)
-
-    # 間違い選択肢を取得,追加
-    matigai_texts = get_mondai_failure(mondai_main, answer)
-    mondai_data.append(matigai_texts)
+def tab_check():
+    tab_cnt = driver.window_handles
+    if len(tab_cnt) > 1:
+        driver.switch_to.window(driver.window_handles[-1])
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])
     
 
-    # 解説を取得
-    kaisetsu = get_mondai_kaisetsu(mondai_main)
-    # 解説を追加
-    mondai_data.append(kaisetsu)
+while True:
+    try:
+        
+        # この問題のデータすべて取得
+        mondai_main = driver.find_element(By.CLASS_NAME, 'main')
+        mondai_data = []
 
-    # 問題データを追加
-    mondai_datas.append(mondai_data)
+        # 問題文を取得
+        mondai_bun = get_mondai_bun(mondai_main)
+        # 問題文を追加
+        mondai_data.append(mondai_bun)
+
+        # 問題年度を取得
+        mondai_nendo = get_mondai_nendo(mondai_main)
+        # 問題年度を追加
+        mondai_data.append(mondai_nendo)       
 
 
-    cnt += 1
-    if cnt >= 10:
-        break
+        # 問題カテゴリを取得
+        category, series, stage = get_mondai_category(mondai_main)
+        # 問題カテゴリを追加
+        mondai_data.append([category, series, stage])
 
-    # 次の問題へ
-    next_button = driver.find_element(By.CLASS_NAME, 'submit')
-    next_button.click()
-    time.sleep(0.5)
+        time.sleep(0.2)
+        # 答えと解説を表示
+        answer_button = driver.find_element(By.ID, 'showAnswerBtn')
+        time.sleep(0.3)
+        answer_button.click()
+        time.sleep(0.4)
+        # 答え記号取得
+        tab_check()
+        answer = driver.find_element(By.ID, 'answerChar').text
 
+        if answer == "":
+            answer_button = driver.find_element(By.ID, 'showAnswerBtn')
+            time.sleep(0.3)
+            answer_button.click()
+            time.sleep(0.4)
+            # 答え記号取得
+            tab_check()
+            answer = driver.find_element(By.ID, 'answerChar').text
+
+        # 正解を取得
+        kotae_text = get_mondai_answer(mondai_main, answer)
+        # 正解を追加
+        mondai_data.append(kotae_text)
+
+        # 間違い選択肢を取得,追加
+        matigai_texts = get_mondai_failure(mondai_main, answer)
+        mondai_data.append(matigai_texts)
+        
+
+        # 解説を取得
+        kaisetsu = get_mondai_kaisetsu(mondai_main)
+        # 解説を追加
+        mondai_data.append(kaisetsu)
+
+        # 問題データを追加
+        mondai_datas.append(mondai_data)
+
+
+        cnt += 1
+        if cnt >= 10:
+            break
+
+        # 次の問題へ
+        next_button = driver.find_element(By.CLASS_NAME, 'submit')
+        next_button.click()
+        time.sleep(0.5)
+    except Exception as e:
+        print(e)
+        print("エラーが発生したためスキップ")
+        skip_count += 1
+        continue
 
 print(mondai_datas)
 
@@ -293,5 +320,6 @@ write_to_sheet(mondai_datas)
 
 
 # ユーザー操作を待機（無限ループでスクリプトを終了させない）
+print("スキップした回数" + str(skip_count))
 input("Enterキーを押すと終了")
 driver.quit()

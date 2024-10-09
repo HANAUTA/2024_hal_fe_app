@@ -15,26 +15,26 @@ class QuestionPage extends StatefulWidget {
 class _QuestionPageState extends State<QuestionPage> {
   int _currentTabIndex = 0; // 現在のタブのインデックスを保持
 
-  Future<void> fetchQuestion() async {
-    final docRef = FirebaseFirestore.instance
-        .collection('contents') // First part of the path
-        .doc('data') // Second part of the path
-        .collection('quizzes') // Third part of the path
-        .doc('data1'); // Fourth part of the path
-
-    final docSnapshot = await docRef.get();
-    final datas = docSnapshot.data();
-    print(datas!["quizDataList"][0]["series_name"]);
-  }
+  // Future<void> fetchQuestion() async {
+  //   final docRef = FirebaseFirestore.instance
+  //       .collection('contents') // First part of the path
+  //       .doc('data') // Second part of the path
+  //       .collection('quizzes') // Third part of the path
+  //       .doc('data1'); // Fourth part of the path
+  //
+  //   final docSnapshot = await docRef.get();
+  //   final datas = docSnapshot.data();
+  //   print(datas!["quizDataList"][0]["series_name"]);
+  // }
 
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width; // 画面の幅を取得
     final buttonSize = screenWidth * 0.15; // ボタンのサイズを画面幅の15%に設定
-    print('---------');
-    fetchQuestion();
-    print('---------');
+    // print('---------');
+    // fetchQuestion();
+    // print('---------');
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,

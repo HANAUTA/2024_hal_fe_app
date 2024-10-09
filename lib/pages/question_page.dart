@@ -104,7 +104,7 @@ class _QuestionPageState extends State<QuestionPage> {
             ] else if (_currentTabIndex == 1) ...[
               // 解説タブが選択されたときの内容
               const Text(
-                "解説内容をここに表示します。",
+                "購買，生産，販売及び物流の一連の業務を，企業間で全体最適の視点から見直し，納期短縮や在庫削減を図る。 SCM(Supply Chain Management)の説明です。   資材の調達から生産，保管，販売に至るまでの物流全体を，費用対効果が最適になるように総合的に管理し，合理化する。 物流管理システムの説明です。   電子・電機メーカーから，製品の設計や資材の調達，生産，物流，修理を一括して受託する。 EMS(Electronics Manufacturing Service)の説明です。   物流業務に加え，流通加工なども含めたアウトソーシングサービスを行い，また荷主企業の物流企画も代行する。 正しい。3PLの説明です。",
                 style: TextStyle(fontSize: 16),
               ),
               // ここに解説の詳細を追加

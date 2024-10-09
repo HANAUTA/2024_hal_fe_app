@@ -1,54 +1,92 @@
-import 'dart:ffi';
-
-import 'package:fe_project/pages/question_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fe_project/pages/question_page.dart';
 
-class CategoryPage extends StatelessWidget {
+class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
 
+  @override
+  _CategoryPageState createState() => _CategoryPageState();
+}
 
-  // Future<void> fetchQuestion() async {
-  //   final docRef = FirebaseFirestore.instance
-  //       .collection('contents') // First part of the path
-  //       .doc('data') // Second part of the path
-  //       .collection('quizzes') // Third part of the path
-  //       .doc('data1'); // Fourth part of the path
-  //
-  //   final docSnapshot = await docRef.get();
-  //   final datas = docSnapshot.data();
-  //   print(datas!["quizDataList"][0]["series_name"]);
-  // }
+class _CategoryPageState extends State<CategoryPage> {
+
+  Map<String, List<dynamic>> seriesMap = {}; // series_nameごとのリストを保存するマップ
+
+  // Firestoreからデータを取得し、series_nameごとに分類
+  Future<void> fetchQuestion() async {
+    final docRef = FirebaseFirestore.instance
+        .collection('contents')
+        .doc('data')
+        .collection('quizzes')
+        .doc('data1');
+
+    final docSnapshot = await docRef.get();
+    final datas = docSnapshot.data();
+
+    if (datas != null && datas.containsKey('quizDataList')) {
+      List<dynamic> quizDataList = datas['quizDataList'] as List<dynamic>;
+
+      // quizDataListをseries_nameごとに分類
+      Map<String, List<dynamic>> tempSeriesMap = {};
+      for (var quizData in quizDataList) {
+        String seriesName = quizData['series_name'];
+
+        // series_nameが既に存在するかを確認し、リストに追加
+        if (!tempSeriesMap.containsKey(seriesName)) {
+          tempSeriesMap[seriesName] = [];
+        }
+        tempSeriesMap[seriesName]!.add(quizData);
+      }
+
+      setState(() {
+        seriesMap = tempSeriesMap; // series_nameごとのリストをセット
+      });
+
+      // seriesMapをデバッグ用にprintする
+      print(seriesMap.keys);
+    }
+  }
+
+
+
+  final String categoryName = "テクノロジ系"; // 後で動的に変える
+  static const double blockHeight = 75.0;
+  static const Map<String, List<String>> categoryMap = {
+    "テクノロジ系": [
+      "テクノロジーまとめ",
+      "基礎理論",
+      "アルゴリズムとプログラミング",
+      "コンピュータの構成要素",
+      "システムの構成要素",
+      "ソフトウェア",
+      "ハードウェア",
+      "ヒューマンインターフェイス",
+      "マルチメディア",
+      "データベース",
+      "ネットワーク",
+      "セキュリティ",
+      "システム開発技術",
+      "ソフトウェア開発管理技術"
+    ],
+    "ストラテジ系": ["aaa", "iii"],
+    "マネジメント系": ["mamamaa", "mimimi"],
+  };
+
+  final int correctAnswers = 250; // 正解数
+  final int totalQuestions = 500; // 総問題数
+  double progress = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    // 進捗計算を行う
+    progress = correctAnswers / totalQuestions;
+    fetchQuestion();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final String categoryName = "テクノロジ系"; // 後で動的に変える
-    const double blockHeight = 75.0;
-    const Map<String, List<String>> categoryMap = {
-      "テクノロジ系": [
-        "テクノロジーまとめ",
-        "基礎理論",
-        "アルゴリズムとプログラミング",
-        "コンピュータの構成要素",
-        "システムの構成要素",
-        "ソフトウェア",
-        "ハードウェア",
-        "ヒューマンインターフェイス",
-        "マルチメディア",
-        "データベース",
-        "ネットワーク",
-        "セキュリティ",
-        "システム開発技術",
-        "ソフトウェア開発管理技術"
-      ],
-      "ストラテジ系": ["aaa", "iii"],
-      "マネジメント系": ["mamamaa", "mimimi"],
-    };
-
-    final int correctAnswers = 250; // 正解数
-    final int totalQuestions = 500; // 総問題数
-    double progress = correctAnswers / totalQuestions; // 進捗を計算
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,

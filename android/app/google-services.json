@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "854090627865",
+    "project_id": "hal-fe",
+    "storage_bucket": "hal-fe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854090627865:android:76cc643cec821250ec6388",
+        "android_client_info": {
+          "package_name": "com.example.fe_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpOsPM-eOkjfEhTGaChoextIOC79Gwb9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  sqflite: ^2.4.0
+  path: ^1.9.0
   cupertino_icons: ^1.0.8
   fl_chart: ^0.69.0  # fl_chartを追加
   firebase_core: ^3.6.0

@@ -2,9 +2,23 @@ import 'dart:ffi';
 
 import 'package:fe_project/pages/question_page.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CategoryPage extends StatelessWidget {
   const CategoryPage({super.key});
+
+
+  Future<void> fetchQuestion() async {
+    final docRef = FirebaseFirestore.instance
+        .collection('contents') // First part of the path
+        .doc('data') // Second part of the path
+        .collection('quizzes') // Third part of the path
+        .doc('data1'); // Fourth part of the path
+
+    final docSnapshot = await docRef.get();
+    final datas = docSnapshot.data();
+    print(datas!["quizDataList"][0]["series_name"]);
+  }
 
   @override
   Widget build(BuildContext context) {

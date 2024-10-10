@@ -265,7 +265,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: () {
-                    _checkAnswer(quizChoices['エ'] ?? "答えが見つかりませんでした。", context);
+                    _checkAnswer(quizChoices['エ'] ?? "選択肢が見つかりませんでした。", context);
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
@@ -282,34 +282,40 @@ class _QuestionPageState extends State<QuestionPage> {
     );
   }
 
-  // 選択肢ボタンにボーダーを追加するためのウィジェット
-  Widget buildOptionWithBorder(String optionLabel, String optionText) {
-    return GestureDetector(
-      onTap: () {
-        _checkAnswer(optionText, context); // 選択肢がタップされたときに回答をチェック
-      },
-      child: Container(
-        decoration: const BoxDecoration(
-          //下線部にボーダーを追加
-          border: Border(
-            bottom: BorderSide(color: Colors.black, width: 1),
-          ),
+  Widget buildOptionWithBorder(String label, String text) {
+    return Container(
+      decoration: BoxDecoration(
+        //下線部にのみborder
+        border: Border(
+          bottom: BorderSide(color: Colors.grey, width: 1),
         ),
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            Text(optionLabel, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(width: 8),
-            Expanded(child: Text(optionText, style: const TextStyle(fontSize: 16))),
-          ],
-        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        children: [
+          Text(label, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
+        ],
       ),
     );
   }
 
-  void _checkAnswer(String selectedChoice, context) {
+  void _checkAnswer(String selectedChoice, context) async {
     final correctAnswer = quizDataList[_randomIndex]['answer'].substring(2).trim(); // 正解を取得してトリム
     selectedChoice = selectedChoice.trim(); // 選択肢もトリムして比較
+
+    // 選択肢の判定に基づいてjudgeの値を設定
+    int judgeValue = selectedChoice == correctAnswer ? 2 : 1;
+    // データベースのjudgeフィールドを更新
+    await _database!.update(
+      'quizData',
+      {'judge': judgeValue}, // judgeフィールドを更新
+      where: 'id = ?', // 条件
+      whereArgs: [quizDataList[_randomIndex]['id']], // 条件に渡す引数
+    );
+
     if (selectedChoice == correctAnswer) {
       // 正解の処理
       showDialog(

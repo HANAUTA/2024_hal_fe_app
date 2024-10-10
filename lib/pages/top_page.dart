@@ -36,11 +36,11 @@ class _MyHomePageState extends State<MyHomePage> {
     print(dbPath);
     final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
     // 既存のデータベースがあれば削除
-    // final fileExists = await databaseExists(path);
-    // if (fileExists) {
-    //   print('Deleting existing database...');
-    //   await deleteDatabase(path); // データベースを削除
-    // }
+    final fileExists = await databaseExists(path);
+    if (fileExists) {
+      print('Deleting existing database...');
+      await deleteDatabase(path); // データベースを削除
+    }
     return openDatabase(
       path,
       onCreate: (db, version) {
@@ -61,7 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
               'series_document_id TEXT, '
               'series_name TEXT, '
               'stage_document_id TEXT, '
-              'stage_name TEXT'
+              'stage_name TEXT, '
+              'judge INTEGER'
               ')',
         );
       },
@@ -91,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
         'series_name': doc['series_name'],
         'stage_document_id': doc['stage_document_id'],
         'stage_name': doc['stage_name'],
+        'judge': 0,
       });
     }
 
@@ -105,6 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print('comment: ${quizDataList[0]['comment']}');
         print('stage_name: ${quizDataList[0]['stage_name']}');
         print('image: ${quizDataList[0]['image']}');
+        print('judge: ${quizDataList[0]['judge']}');
       } else {
         print('No quiz data found.');
       }

@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -32,7 +31,6 @@ class _QuestionPageState extends State<QuestionPage> {
 
   Future<Database> initializeDb() async {
     final dbPath = await getDatabasesPath();
-    print(dbPath);
     final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
 
     return openDatabase(
@@ -75,8 +73,6 @@ class _QuestionPageState extends State<QuestionPage> {
       quizData['mistake3'].substring(0, 1): quizData['mistake3'].substring(2),
       quizData['answer'].substring(0, 1): quizData['answer'].substring(2),
     };
-    print(quizChoices);
-
 
     return Scaffold(
       appBar: AppBar(
@@ -192,7 +188,6 @@ class _QuestionPageState extends State<QuestionPage> {
           child: _currentTabIndex == 1 // 解説タブの場合
               ? GestureDetector(
             onTap: () async {
-              // 新しいランダムな問題を設定して、問題タブに戻る
               await setRandomIndex();
               setState(() {
                 _currentTabIndex = 0; // 問題タブに切り替え
@@ -211,7 +206,6 @@ class _QuestionPageState extends State<QuestionPage> {
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_right, size: 30),
                     onPressed: () async {
-                      // 右矢印ボタンのタップ時も同じ動作をする
                       await setRandomIndex();
                       setState(() {
                         _currentTabIndex = 0; // 問題タブに切り替え
@@ -223,36 +217,64 @@ class _QuestionPageState extends State<QuestionPage> {
             ),
           )
               : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Spacer(flex: 1), // デバイスサイズに応じた余白を追加
               Expanded(
-                child: buildAnswerButton("ア", buttonSize, () {
-                  setState(() {
-                    _currentTabIndex = 1; // "解説"タブに切り替え
-                  });
-                }),
+                flex: 2,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _checkAnswer(quizChoices['ア'] ?? "選択肢が見つかりませんでした。", context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                  child: const Text("ア", style: TextStyle(fontSize: 16)),
+                ),
               ),
+              const Spacer(flex: 1),
               Expanded(
-                child: buildAnswerButton("イ", buttonSize, () {
-                  setState(() {
-                    _currentTabIndex = 1; // "解説"タブに切り替え
-                  });
-                }),
+                flex: 2,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _checkAnswer(quizChoices['イ'] ?? "選択肢が見つかりませんでした。", context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                  child: const Text("イ", style: TextStyle(fontSize: 16)),
+                ),
               ),
+              const Spacer(flex: 1),
               Expanded(
-                child: buildAnswerButton("ウ", buttonSize, () {
-                  setState(() {
-                    _currentTabIndex = 1; // "解説"タブに切り替え
-                  });
-                }),
+                flex: 2,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _checkAnswer(quizChoices['ウ'] ?? "選択肢が見つかりませんでした。", context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                  child: const Text("ウ", style: TextStyle(fontSize: 16)),
+                ),
               ),
+              const Spacer(flex: 1),
               Expanded(
-                child: buildAnswerButton("エ", buttonSize, () {
-                  setState(() {
-                    _currentTabIndex = 1; // "解説"タブに切り替え
-                  });
-                }),
+                flex: 2,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _checkAnswer(quizChoices['エ'] ?? "答えが見つかりませんでした。", context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                  child: const Text("エ", style: TextStyle(fontSize: 16)),
+                ),
               ),
+              const Spacer(flex: 1),
             ],
           ),
         ),
@@ -260,32 +282,75 @@ class _QuestionPageState extends State<QuestionPage> {
     );
   }
 
-  // 選択肢ボタンを生成するウィジェット
-  Widget buildAnswerButton(String label, double size, VoidCallback onPressed) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.all(size * 0.2),
+  // 選択肢ボタンにボーダーを追加するためのウィジェット
+  Widget buildOptionWithBorder(String optionLabel, String optionText) {
+    return GestureDetector(
+      onTap: () {
+        _checkAnswer(optionText, context); // 選択肢がタップされたときに回答をチェック
+      },
+      child: Container(
+        decoration: const BoxDecoration(
+          //下線部にボーダーを追加
+          border: Border(
+            bottom: BorderSide(color: Colors.black, width: 1),
+          ),
         ),
-        child: Text(label, style: const TextStyle(fontSize: 18)),
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Text(optionLabel, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 8),
+            Expanded(child: Text(optionText, style: const TextStyle(fontSize: 16))),
+          ],
+        ),
       ),
     );
   }
 
-  // 選択肢のウィジェット（枠付き）
-  Widget buildOptionWithBorder(String label, String text) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      padding: const EdgeInsets.all(8),
-      child: Text(
-        "$label. $text",
-        style: const TextStyle(fontSize: 16),
-      ),
-    );
+  void _checkAnswer(String selectedChoice, context) {
+    final correctAnswer = quizDataList[_randomIndex]['answer'].substring(2).trim(); // 正解を取得してトリム
+    selectedChoice = selectedChoice.trim(); // 選択肢もトリムして比較
+    if (selectedChoice == correctAnswer) {
+      // 正解の処理
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("正解！"),
+            content: const Text("おめでとうございます！正しい答えです。"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    _currentTabIndex = 1; // 解説タブに切り替え
+                  });
+                },
+                child: const Text("解説を見る"),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // 不正解の処理
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("不正解"),
+            content: const Text("残念！もう一度考えてみてください。"),
+          );
+        },
+      );
+
+      // 1秒後に自動でダイアログを閉じて解説タブに移動
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.of(context).pop(); // ダイアログを閉じる
+        setState(() {
+          _currentTabIndex = 1; // 解説タブに切り替え
+        });
+      });
+    }
   }
 }

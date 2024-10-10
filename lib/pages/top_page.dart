@@ -1,5 +1,8 @@
-import 'package:fe_project/pages/category_page.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestoreをインポート
+import 'package:fe_project/pages/category_page.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -14,6 +17,99 @@ class _MyHomePageState extends State<MyHomePage> {
   final int correctAnswers = 250; // 正解数
   final int totalQuestions = 500; // 総問題数
   List<bool> _isTappedList = List.generate(4, (index) => false); // リスト要素の状態を管理
+  Database? _database; // データベースのインスタンス
+  List<Map<String, dynamic>> quizDataList = []; // ローカルDBから取得したクイズデータ
+
+  @override
+  void initState() {
+    super.initState();
+    _initDbAndFetchData(); // DBの初期化とデータ取得を実行
+  }
+
+  Future<void> _initDbAndFetchData() async {
+    _database = await initializeDb(); // ローカルデータベースの初期化
+    await loadQuizData(); // ローカルDBからデータを読み込み
+  }
+
+  Future<Database> initializeDb() async {
+    final dbPath = await getDatabasesPath();
+    print(dbPath);
+    final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
+    // 既存のデータベースがあれば削除
+    // final fileExists = await databaseExists(path);
+    // if (fileExists) {
+    //   print('Deleting existing database...');
+    //   await deleteDatabase(path); // データベースを削除
+    // }
+    return openDatabase(
+      path,
+      onCreate: (db, version) {
+        print('Creating table...');
+        // テーブルの作成
+        return db.execute(
+          'CREATE TABLE quizData('
+              'id INTEGER PRIMARY KEY, '
+              'answer TEXT, '
+              'comment TEXT, '
+              'image TEXT, '
+              'link TEXT, '
+              'mistake1 TEXT, '
+              'mistake2 TEXT, '
+              'mistake3 TEXT, '
+              'question TEXT, '
+              'quiz_id INTEGER, '
+              'series_document_id TEXT, '
+              'series_name TEXT, '
+              'stage_document_id TEXT, '
+              'stage_name TEXT'
+              ')',
+        );
+      },
+      version: 1,
+    );
+  }
+
+  Future<void> loadQuizData() async {
+    // Firestoreからデータを取得
+    final snapshot = await FirebaseFirestore.instance.collection('contents').doc('data').collection('quizzes').doc('data1').get();
+
+    // データをSQLiteに保存
+    for (var doc in snapshot.data()!['quizDataList']) {
+
+      await _database!.insert('quizData', {
+        'id': doc['id'], // Firestoreのデータを使用
+        'answer': doc['answer'],
+        'comment': doc['comment'],
+        'image': doc['image_url'],
+        'link': doc['link'],
+        'mistake1': doc['mistake_list'][0],
+        'mistake2': doc['mistake_list'][1],
+        'mistake3': doc['mistake_list'][2],
+        'question': doc['question'],
+        'quiz_id': doc['quiz_id'],
+        'series_document_id': doc['series_document_id'],
+        'series_name': doc['series_name'],
+        'stage_document_id': doc['stage_document_id'],
+        'stage_name': doc['stage_name'],
+      });
+    }
+
+    // DBからクイズデータを取得
+    final List<Map<String, dynamic>> maps = await _database!.query('quizData');
+    setState(() {
+      quizDataList = maps; // 取得したデータを設定
+      print(_database);
+      if (quizDataList.isNotEmpty) {
+        // データがある場合のみprint文を実行
+        print('answer: ${quizDataList[0]['answer']}');
+        print('comment: ${quizDataList[0]['comment']}');
+        print('stage_name: ${quizDataList[0]['stage_name']}');
+        print('image: ${quizDataList[0]['image']}');
+      } else {
+        print('No quiz data found.');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +166,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                 borderRadius: BorderRadius.circular(10),
                                 color: const Color(0xFF30E3CA),
                               ),
-                              // 正解の進捗部分の色
                             ),
                           ),
                         ],
@@ -98,10 +193,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildCategoryTile(screenWidth, screenHeight, "テクノロジー", 0),
-                    _buildCategoryTile(screenWidth, screenHeight, "マネジメント", 1),
-                    _buildCategoryTile(screenWidth, screenHeight, "ストラテジ", 2),
-                    _buildCategoryTile(screenWidth, screenHeight, "全範囲から出題", 3),
+                    _buildCategoryTile(screenWidth, screenHeight, "テクノロジー", 0, context),
+                    _buildCategoryTile(screenWidth, screenHeight, "マネジメント", 1, context),
+                    _buildCategoryTile(screenWidth, screenHeight, "ストラテジ", 2, context),
+                    _buildCategoryTile(screenWidth, screenHeight, "全範囲から出題", 3, context),
                   ],
                 ),
               ),
@@ -112,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildCategoryTile(double screenWidth, double screenHeight, String category, int index) {
+  Widget _buildCategoryTile(double screenWidth, double screenHeight, String category, int index, BuildContext context) {
     return GestureDetector(
       onTapDown: (_) {
         // タップしたらスケールを1.05倍に拡大

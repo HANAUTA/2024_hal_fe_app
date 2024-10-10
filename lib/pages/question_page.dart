@@ -16,6 +16,8 @@ class _QuestionPageState extends State<QuestionPage> {
   Database? _database; // データベースのインスタンス
   List<Map<String, dynamic>> quizDataList = [];
   int _randomIndex = 0; // ランダムな問題のインデックスを保持
+  bool _isLoading = true;
+  Map quizChoices = {};
 
   @override
   void initState() {
@@ -24,9 +26,15 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   Future<void> _initDbAndFetchData() async {
+    setState(() {
+      _isLoading = true; // データが読み込まれたらローディング状態を更新
+    });
     _database = await initializeDb(); // ローカルデータベースの初期化
     await loadQuizData(); // ローカルDBからデータを読み込み
     await setRandomIndex(); // クイズデータを設定
+    setState(() {
+      _isLoading = false; // データが読み込まれたらローディング状態を更新
+    });
   }
 
   Future<Database> initializeDb() async {
@@ -67,12 +75,17 @@ class _QuestionPageState extends State<QuestionPage> {
     final screenWidth = MediaQuery.of(context).size.width; // 画面の幅を取得
     final buttonSize = screenWidth * 0.15; // ボタンのサイズを画面幅の15%に設定
     final quizData = quizDataList.isNotEmpty ? quizDataList[_randomIndex] : {}; // ランダムに選ばれたクイズデータ
-    final quizChoices = {
-      quizData['mistake1'].substring(0, 1): quizData['mistake1'].substring(2),
-      quizData['mistake2'].substring(0, 1): quizData['mistake2'].substring(2),
-      quizData['mistake3'].substring(0, 1): quizData['mistake3'].substring(2),
-      quizData['answer'].substring(0, 1): quizData['answer'].substring(2),
-    };
+
+    if (quizData.length != 0){
+      quizChoices = {
+        quizData['mistake1'].substring(0, 1): quizData['mistake1'].substring(2),
+        quizData['mistake2'].substring(0, 1): quizData['mistake2'].substring(2),
+        quizData['mistake3'].substring(0, 1): quizData['mistake3'].substring(2),
+        quizData['answer'].substring(0, 1): quizData['answer'].substring(2),
+      };
+    }
+
+
 
     return Scaffold(
       appBar: AppBar(
@@ -86,98 +99,105 @@ class _QuestionPageState extends State<QuestionPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Question Page'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Score and percentage row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text("正解数3 / 4問中"),
-                Text("正答率75.0%"),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // Header with two tabs (問題 and 解説)
-            Row(
-              children: [
+      body: Container(
+        color: const Color(0xFFE4F9F5),
+          child: _isLoading
+              ? Center(
+            child: CircularProgressIndicator(), // ローディングインジケーターを表示
+          )
+        : Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Score and percentage row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text("正解数3 / 4問中"),
+                  Text("正答率75.0%"),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Header with two tabs (問題 and 解説)
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _currentTabIndex = 0; // "問題"タブがタップされたとき
+                        });
+                      },
+                      child: Container(
+                        color: _currentTabIndex == 0 ? Colors.pink[200] : Colors.grey[300],
+                        padding: const EdgeInsets.all(8),
+                        child: const Center(child: Text("問題")),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _currentTabIndex = 1; // "解説"タブがタップされたとき
+                        });
+                      },
+                      child: Container(
+                        color: _currentTabIndex == 1 ? Colors.pink[200] : Colors.grey[300],
+                        padding: const EdgeInsets.all(8),
+                        child: const Center(child: Text("解説")),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Question or Explanation content based on the selected tab
+              if (_currentTabIndex == 0 && quizData.isNotEmpty) ...[
+                Text(
+                  quizData['question'] ?? "問題が見つかりませんでした。",
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                // Scrollable area for question options
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _currentTabIndex = 0; // "問題"タブがタップされたとき
-                      });
-                    },
-                    child: Container(
-                      color: _currentTabIndex == 0 ? Colors.pink[200] : Colors.grey[300],
-                      padding: const EdgeInsets.all(8),
-                      child: const Center(child: Text("問題")),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        buildOptionWithBorder("ア", quizChoices['ア'] ?? "選択肢が見つかりませんでした。"),
+                        const SizedBox(height: 10),
+                        buildOptionWithBorder("イ", quizChoices['イ'] ?? "選択肢が見つかりませんでした。"),
+                        const SizedBox(height: 10),
+                        buildOptionWithBorder("ウ", quizChoices['ウ'] ?? "選択肢が見つかりませんでした。"),
+                        const SizedBox(height: 10),
+                        buildOptionWithBorder("エ", quizChoices['エ'] ?? "答えが見つかりませんでした。"),
+                      ],
                     ),
                   ),
                 ),
+              ] else if (_currentTabIndex == 1 && quizData.isNotEmpty) ...[
+                // 解説タブが選択されたときの内容（スクロール可能に）
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _currentTabIndex = 1; // "解説"タブがタップされたとき
-                      });
-                    },
+                  child: SingleChildScrollView(
                     child: Container(
-                      color: _currentTabIndex == 1 ? Colors.pink[200] : Colors.grey[300],
-                      padding: const EdgeInsets.all(8),
-                      child: const Center(child: Text("解説")),
+                      margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
+                      padding: const EdgeInsets.all(16.0), // 内側にパディングを追加
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200], // 背景色を淡いグレーに変更
+                        borderRadius: BorderRadius.circular(10), // 角を丸くする
+                      ),
+                      child: Text(
+                        quizData['comment'] ?? "解説が見つかりませんでした。",
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     ),
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 10),
-            // Question or Explanation content based on the selected tab
-            if (_currentTabIndex == 0 && quizData.isNotEmpty) ...[
-              Text(
-                quizData['question'] ?? "問題が見つかりませんでした。",
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 20),
-              // Scrollable area for question options
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      buildOptionWithBorder("ア", quizChoices['ア'] ?? "選択肢が見つかりませんでした。"),
-                      const SizedBox(height: 10),
-                      buildOptionWithBorder("イ", quizChoices['イ'] ?? "選択肢が見つかりませんでした。"),
-                      const SizedBox(height: 10),
-                      buildOptionWithBorder("ウ", quizChoices['ウ'] ?? "選択肢が見つかりませんでした。"),
-                      const SizedBox(height: 10),
-                      buildOptionWithBorder("エ", quizChoices['エ'] ?? "答えが見つかりませんでした。"),
-                    ],
-                  ),
-                ),
-              ),
-            ] else if (_currentTabIndex == 1 && quizData.isNotEmpty) ...[
-              // 解説タブが選択されたときの内容（スクロール可能に）
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Container(
-                    margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
-                    padding: const EdgeInsets.all(16.0), // 内側にパディングを追加
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200], // 背景色を淡いグレーに変更
-                      borderRadius: BorderRadius.circular(10), // 角を丸くする
-                    ),
-                    child: Text(
-                      quizData['comment'] ?? "解説が見つかりませんでした。",
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-              ),
             ],
-          ],
+          ),
         ),
       ),
       // Fixed BottomAppBar

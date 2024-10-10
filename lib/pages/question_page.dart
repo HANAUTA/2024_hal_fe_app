@@ -1,4 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class QuestionPage extends StatefulWidget {
   const QuestionPage({super.key});
@@ -9,11 +14,69 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   int _currentTabIndex = 0; // 現在のタブのインデックスを保持
+  Database? _database; // データベースのインスタンス
+  List<Map<String, dynamic>> quizDataList = [];
+  int _randomIndex = 0; // ランダムな問題のインデックスを保持
+
+  @override
+  void initState() {
+    super.initState();
+    _initDbAndFetchData(); // DBの初期化とデータ取得を実行
+  }
+
+  Future<void> _initDbAndFetchData() async {
+    _database = await initializeDb(); // ローカルデータベースの初期化
+    await loadQuizData(); // ローカルDBからデータを読み込み
+    await setRandomIndex(); // クイズデータを設定
+  }
+
+  Future<Database> initializeDb() async {
+    final dbPath = await getDatabasesPath();
+    print(dbPath);
+    final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
+
+    return openDatabase(
+      path,
+      version: 1,
+    );
+  }
+
+  Future<void> loadQuizData() async {
+    // DBからクイズデータを取得
+    final List<Map<String, dynamic>> maps = await _database!.query('quizData');
+    setState(() {
+      quizDataList = maps; // 取得したデータを設定
+      if (quizDataList.isNotEmpty) {
+        print('Loaded ${quizDataList.length} quizzes.');
+      } else {
+        print('No quiz data found.');
+      }
+    });
+  }
+
+  Future<void> setRandomIndex() async {
+    final quizLength = quizDataList.length;
+    if (quizLength > 0) {
+      final random = Random();
+      setState(() {
+        _randomIndex = random.nextInt(quizLength); // 0からquizLengthの範囲でランダムなインデックスを選ぶ
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width; // 画面の幅を取得
     final buttonSize = screenWidth * 0.15; // ボタンのサイズを画面幅の15%に設定
+    final quizData = quizDataList.isNotEmpty ? quizDataList[_randomIndex] : {}; // ランダムに選ばれたクイズデータ
+    final quizChoices = {
+      quizData['mistake1'].substring(0, 1): quizData['mistake1'].substring(2),
+      quizData['mistake2'].substring(0, 1): quizData['mistake2'].substring(2),
+      quizData['mistake3'].substring(0, 1): quizData['mistake3'].substring(2),
+      quizData['answer'].substring(0, 1): quizData['answer'].substring(2),
+    };
+    print(quizChoices);
+
 
     return Scaffold(
       appBar: AppBar(
@@ -76,10 +139,10 @@ class _QuestionPageState extends State<QuestionPage> {
             ),
             const SizedBox(height: 10),
             // Question or Explanation content based on the selected tab
-            if (_currentTabIndex == 0) ...[
-              const Text(
-                "インターネットVPNのセキュリティに関する記述のうち、適切なものはどれか。",
-                style: TextStyle(fontSize: 16),
+            if (_currentTabIndex == 0 && quizData.isNotEmpty) ...[
+              Text(
+                quizData['question'] ?? "問題が見つかりませんでした。",
+                style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 20),
               // Scrollable area for question options
@@ -88,26 +151,35 @@ class _QuestionPageState extends State<QuestionPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // First description (ア)
-                      buildOptionWithBorder("ア",
-                          "IPアドレスを悪用した不正アクセスや侵入の危険性はないので、IPアドレスも含めたパケット全体の暗号化は必要ない。"),
+                      buildOptionWithBorder("ア", quizChoices['ア'] ?? "選択肢が見つかりませんでした。"),
                       const SizedBox(height: 10),
-                      buildOptionWithBorder("イ", "iii"),
+                      buildOptionWithBorder("イ", quizChoices['イ'] ?? "選択肢が見つかりませんでした。"),
                       const SizedBox(height: 10),
-                      buildOptionWithBorder("ウ", "uuu"),
+                      buildOptionWithBorder("ウ", quizChoices['ウ'] ?? "選択肢が見つかりませんでした。"),
                       const SizedBox(height: 10),
-                      buildOptionWithBorder("エ", "eee"),
+                      buildOptionWithBorder("エ", quizChoices['エ'] ?? "答えが見つかりませんでした。"),
                     ],
                   ),
                 ),
               ),
-            ] else if (_currentTabIndex == 1) ...[
-              // 解説タブが選択されたときの内容
-              const Text(
-                "購買，生産，販売及び物流の一連の業務を，企業間で全体最適の視点から見直し，納期短縮や在庫削減を図る。 SCM(Supply Chain Management)の説明です。   資材の調達から生産，保管，販売に至るまでの物流全体を，費用対効果が最適になるように総合的に管理し，合理化する。 物流管理システムの説明です。   電子・電機メーカーから，製品の設計や資材の調達，生産，物流，修理を一括して受託する。 EMS(Electronics Manufacturing Service)の説明です。   物流業務に加え，流通加工なども含めたアウトソーシングサービスを行い，また荷主企業の物流企画も代行する。 正しい。3PLの説明です。",
-                style: TextStyle(fontSize: 16),
+            ] else if (_currentTabIndex == 1 && quizData.isNotEmpty) ...[
+              // 解説タブが選択されたときの内容（スクロール可能に）
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
+                    padding: const EdgeInsets.all(16.0), // 内側にパディングを追加
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200], // 背景色を淡いグレーに変更
+                      borderRadius: BorderRadius.circular(10), // 角を丸くする
+                    ),
+                    child: Text(
+                      quizData['comment'] ?? "解説が見つかりませんでした。",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
               ),
-              // ここに解説の詳細を追加
             ],
           ],
         ),
@@ -119,13 +191,12 @@ class _QuestionPageState extends State<QuestionPage> {
           height: 56, // ボトムバーの高さを指定
           child: _currentTabIndex == 1 // 解説タブの場合
               ? GestureDetector(
-            onTap: () {
-              // 次のページに遷移
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const QuestionPage()),
-              );
+            onTap: () async {
+              // 新しいランダムな問題を設定して、問題タブに戻る
+              await setRandomIndex();
+              setState(() {
+                _currentTabIndex = 0; // 問題タブに切り替え
+              });
             },
             child: Container(
               color: const Color(0xFFE4F9F5),
@@ -139,13 +210,12 @@ class _QuestionPageState extends State<QuestionPage> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_right, size: 30),
-                    onPressed: () {
-                      // 右矢印ボタンのタップ時の動作
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const QuestionPage()),
-                      );
+                    onPressed: () async {
+                      // 右矢印ボタンのタップ時も同じ動作をする
+                      await setRandomIndex();
+                      setState(() {
+                        _currentTabIndex = 0; // 問題タブに切り替え
+                      });
                     },
                   ),
                 ],
@@ -183,16 +253,6 @@ class _QuestionPageState extends State<QuestionPage> {
                   });
                 }),
               ),
-              IconButton(
-                icon: const Icon(Icons.keyboard_arrow_right, size: 30),
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const QuestionPage()),
-                  );
-                },
-              ),
             ],
           ),
         ),
@@ -200,46 +260,31 @@ class _QuestionPageState extends State<QuestionPage> {
     );
   }
 
-  // Helper method to build options with bottom border only
-  Widget buildOptionWithBorder(String label, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10), // 上下にパディングを追加
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey), // 下部にボーダーを追加
+  // 選択肢ボタンを生成するウィジェット
+  Widget buildAnswerButton(String label, double size, VoidCallback onPressed) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.all(size * 0.2),
         ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("$label : ", style: const TextStyle(fontSize: 16)),
-          Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 16)),
-          ),
-        ],
+        child: Text(label, style: const TextStyle(fontSize: 18)),
       ),
     );
   }
 
-  // Helper method to build answer buttons with dynamic size
-  Widget buildAnswerButton(String label, double buttonSize, VoidCallback onPressed) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: SizedBox(
-        width: buttonSize, // 動的なボタンサイズ
-        height: buttonSize, // 動的なボタンサイズ
-        child: FittedBox(
-          fit: BoxFit.scaleDown, // コンテンツが収まるようにスケーリング
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              minimumSize: Size(buttonSize, buttonSize),
-              shape: const CircleBorder(), // ボタンを円形に
-              alignment: Alignment.center, // 中央揃え
-            ),
-            onPressed: onPressed,
-            child: Text(label, textAlign: TextAlign.center), // テキストも中央揃え
-          ),
-        ),
+  // 選択肢のウィジェット（枠付き）
+  Widget buildOptionWithBorder(String label, String text) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.all(8),
+      child: Text(
+        "$label. $text",
+        style: const TextStyle(fontSize: 16),
       ),
     );
   }

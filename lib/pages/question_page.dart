@@ -69,6 +69,14 @@ class _QuestionPageState extends State<QuestionPage> {
     final screenWidth = MediaQuery.of(context).size.width; // 画面の幅を取得
     final buttonSize = screenWidth * 0.15; // ボタンのサイズを画面幅の15%に設定
     final quizData = quizDataList.isNotEmpty ? quizDataList[_randomIndex] : {}; // ランダムに選ばれたクイズデータ
+    final quizChoices = {
+      quizData['mistake1'].substring(0, 1): quizData['mistake1'].substring(2),
+      quizData['mistake2'].substring(0, 1): quizData['mistake2'].substring(2),
+      quizData['mistake3'].substring(0, 1): quizData['mistake3'].substring(2),
+      quizData['answer'].substring(0, 1): quizData['answer'].substring(2),
+    };
+    print(quizChoices);
+
 
     return Scaffold(
       appBar: AppBar(
@@ -143,13 +151,13 @@ class _QuestionPageState extends State<QuestionPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      buildOptionWithBorder("ア", quizData['mistake1'] ?? "選択肢が見つかりませんでした。"),
+                      buildOptionWithBorder("ア", quizChoices['ア'] ?? "選択肢が見つかりませんでした。"),
                       const SizedBox(height: 10),
-                      buildOptionWithBorder("イ", quizData['mistake2'] ?? "選択肢が見つかりませんでした。"),
+                      buildOptionWithBorder("イ", quizChoices['イ'] ?? "選択肢が見つかりませんでした。"),
                       const SizedBox(height: 10),
-                      buildOptionWithBorder("ウ", quizData['mistake3'] ?? "選択肢が見つかりませんでした。"),
+                      buildOptionWithBorder("ウ", quizChoices['ウ'] ?? "選択肢が見つかりませんでした。"),
                       const SizedBox(height: 10),
-                      buildOptionWithBorder("エ", quizData['answer'] ?? "答えが見つかりませんでした。"),
+                      buildOptionWithBorder("エ", quizChoices['エ'] ?? "答えが見つかりませんでした。"),
                     ],
                   ),
                 ),

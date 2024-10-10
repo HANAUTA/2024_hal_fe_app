@@ -17,7 +17,39 @@ mondai_datas = []
 category_name = {"ストラテジ系": "strategyStage", "テクノロジ系": "technologyStage", "マネジメント系": "managementStage"}
 kotae_dict = {"ア": "lia", "イ": "lii", "ウ": "liu", "エ": "lie"}
 kotae_dict_sentakusi = {"ア": "select_a", "イ": "select_i", "ウ": "select_u", "エ": "select_e"}
-TARGET_NENDO = "31_haru"
+kotae_dict_sentakusi_r = {"select_a": "ア", "select_i": "イ", "select_u": "ウ", "select_e": "エ"}
+# 年度 候補
+"""
+05_menjo
+04_menjo
+03_menjo
+02_menjo
+01_aki
+31_haru
+30_aki
+30_haru
+29_aki
+29_haru
+28_aki
+28_haru
+27_aki
+27_haru
+26_aki
+26_haru
+25_aki
+25_haru
+24_aki
+24_haru
+23_aki
+23_haru
+22_aki
+22_haru
+21_aki
+21_haru
+20_aki
+20_haru
+"""
+TARGET_NENDO = "05_menjo"
 LOOP_TIMES = 60
 
 """
@@ -345,7 +377,7 @@ def get_mondai_answer(mondai_main, answer):
 
     # 正解を取得
     mondai_kotae_elem = mondai_main.find_element(By.ID, kotae_dict_sentakusi[answer])
-    kotae_text = mondai_kotae_elem.text
+    kotae_text = f"{answer},{mondai_kotae_elem.text}"
 
     return kotae_text
 
@@ -355,7 +387,8 @@ def get_mondai_failure(mondai_main, answer):
     matigai_texts = []
     for matigai in matigai_ls:
         matigai_elem = mondai_main.find_element(By.ID, matigai)
-        matigai_texts.append(matigai_elem.text)
+        matigai_text = f"{kotae_dict_sentakusi_r[matigai]},{matigai_elem.text}"
+        matigai_texts.append(matigai_text)
 
     return matigai_texts
 

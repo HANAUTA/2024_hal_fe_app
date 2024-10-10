@@ -16,15 +16,16 @@ class _CategoryPageState extends State<CategoryPage> {
   Database? _database; // データベースのインスタンス
   List<Map<String, dynamic>> quizDataList = [];
 
+
   // `categoryName`をクラスのメンバーとして定義
   String? categoryName;
-
+  List<dynamic> erroList = [];
   Map<String, List<dynamic>> seriesMap = {
     "テクノロジー系まとめ": [],
     "基礎理論": [],
     "アルゴリズムとプログラミング": [],
-    "コンピュータの構成要素": [],
-    "システムの構成要素": [],
+    "コンピュータ構成要素": [],
+    "システム構成要素": [],
     "ソフトウェア": [],
     "ハードウェア": [],
     "ヒューマンインターフェイス": [],
@@ -56,8 +57,8 @@ class _CategoryPageState extends State<CategoryPage> {
       "テクノロジー系まとめ",
       "基礎理論",
       "アルゴリズムとプログラミング",
-      "コンピュータの構成要素",
-      "システムの構成要素",
+      "コンピュータ構成要素",
+      "システム構成要素",
       "ソフトウェア",
       "ハードウェア",
       "ヒューマンインターフェイス",
@@ -86,10 +87,18 @@ class _CategoryPageState extends State<CategoryPage> {
     ],
   };
 
+  bool _isLoading = false; // ローディングフラグ
+
   // ローカルデータベースを初期化し、クイズデータを取得
   Future<void> _initDbAndFetchData() async {
+    setState(() {
+      _isLoading = true; // データ取得開始時にローディングを開始
+    });
     _database = await initializeDb(); // ローカルデータベースの初期化
     await loadQuizData(); // ローカルDBからデータを読み込み
+    setState(() {
+      _isLoading = false; // データ取得終了時にローディングを終了
+    });
   }
 
   // ローカルDBの初期化
@@ -150,6 +159,7 @@ class _CategoryPageState extends State<CategoryPage> {
   // クイズデータを `series_name` ごとに分類
   void classifyQuizDataBySeries() {
     Map<String, List<dynamic>> tempSeriesMap = {...seriesMap}; // 初期値をコピーして保持
+    List<dynamic> tempErroList = [];
     for (var quizData in quizDataList) {
       String seriesName = quizData['series_name'];
 
@@ -163,10 +173,13 @@ class _CategoryPageState extends State<CategoryPage> {
         } else if (quizData["series_document_id"][0] == "2") {
           tempSeriesMap["マネジメント系まとめ"]!.add(quizData);
         }
+      } else {
+        tempErroList.add(quizData);
       }
 
       setState(() {
         seriesMap = tempSeriesMap; // series_nameごとのリストをセット
+        erroList = tempErroList;
       });
     }
   }
@@ -197,20 +210,23 @@ class _CategoryPageState extends State<CategoryPage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final int correctAnswers = 20; // 正解数
-    if (categoryName == null) {
-      return const Center(child: CircularProgressIndicator());
+    final int correctAnswers = 5; // 正解数
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator()); // ローディング中はインジケーターを表示
     }
 
     // カテゴリーごとに総問題数を計算
     int totalQuestions = 0;
     if (categoryName == "テクノロジー系") {
       totalQuestions = seriesMap["テクノロジー系まとめ"]!.length; // 総問題数
+      print(seriesMap["テクノロジー系まとめ"]!.length);
     } else if (categoryName == "ストラテジ系") {
       totalQuestions = seriesMap["ストラテジ系まとめ"]!.length; // 総問題数
     } else if (categoryName == "マネジメント系") {
       totalQuestions = seriesMap["マネジメント系まとめ"]!.length; // 総問題数
     }
+    print(erroList.length);
+    print(erroList);
 
     double progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
     return Scaffold(

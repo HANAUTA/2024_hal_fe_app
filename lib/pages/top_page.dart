@@ -36,11 +36,12 @@ class _MyHomePageState extends State<MyHomePage> {
     print(dbPath);
     final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
     // 既存のデータベースがあれば削除
-    // final fileExists = await databaseExists(path);
-    // if (fileExists) {
-    //   print('Deleting existing database...');
-    //   await deleteDatabase(path); // データベースを削除
-    // }
+    final fileExists = await databaseExists(path);
+    if (fileExists) {
+      print('Deleting existing database...');
+      await deleteDatabase(path); // データベースを削除
+    }
+
     return openDatabase(
       path,
       onCreate: (db, version) {
@@ -196,10 +197,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildCategoryTile(screenWidth, screenHeight, "テクノロジー", 0, context),
-                    _buildCategoryTile(screenWidth, screenHeight, "マネジメント", 1, context),
-                    _buildCategoryTile(screenWidth, screenHeight, "ストラテジ", 2, context),
-                    _buildCategoryTile(screenWidth, screenHeight, "全範囲から出題", 3, context),
+                    _buildCategoryTile(screenWidth, screenHeight, "テクノロジー", 0, context, "technologyStage"),
+                    _buildCategoryTile(screenWidth, screenHeight, "マネジメント", 1, context, "managementStage"),
+                    _buildCategoryTile(screenWidth, screenHeight, "ストラテジ", 2, context, "strategyStage"),
+                    _buildCategoryTile(screenWidth, screenHeight, "全範囲から出題", 3, context, "allStage"),
                   ],
                 ),
               ),
@@ -210,7 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildCategoryTile(double screenWidth, double screenHeight, String category, int index, BuildContext context) {
+  Widget _buildCategoryTile(double screenWidth, double screenHeight, String category, int index, BuildContext context, String categoryName) {
     return GestureDetector(
       onTapDown: (_) {
         // タップしたらスケールを1.05倍に拡大
@@ -227,7 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const CategoryPage(), // カテゴリページに遷移
+            builder: (context) => CategoryPage(categoryName), // カテゴリページに遷移
           ),
         );
       },

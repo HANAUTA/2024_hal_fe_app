@@ -1,3 +1,4 @@
+import 'package:fe_project/pages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -14,11 +15,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final int correctAnswers = 250; // 正解数
-  final int totalQuestions = 500; // 総問題数
   List<bool> _isTappedList = List.generate(4, (index) => false); // リスト要素の状態を管理
   Database? _database; // データベースのインスタンス
   List<Map<String, dynamic>> quizDataList = []; // ローカルDBから取得したクイズデータ
+  int totalQuestions = 1;
+  int correctAnswers = 20;
+  bool isLoading = true; // ローディング状態の管理
 
   @override
   void initState() {
@@ -29,6 +31,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _initDbAndFetchData() async {
     _database = await initializeDb(); // ローカルデータベースの初期化
     await loadQuizData(); // ローカルDBからデータを読み込み
+    setState(() {
+      isLoading = false; // データが読み込まれたらローディング状態を更新
+    });
   }
 
   Future<Database> initializeDb() async {
@@ -77,7 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // データをSQLiteに保存
     for (var doc in snapshot.data()!['quizDataList']) {
-
       await _database!.insert('quizData', {
         'id': doc['id'], // Firestoreのデータを使用
         'answer': doc['answer'],
@@ -101,17 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final List<Map<String, dynamic>> maps = await _database!.query('quizData');
     setState(() {
       quizDataList = maps; // 取得したデータを設定
-      print(_database);
-      if (quizDataList.isNotEmpty) {
-        // データがある場合のみprint文を実行
-        print('answer: ${quizDataList[0]['answer']}');
-        print('comment: ${quizDataList[0]['comment']}');
-        print('stage_name: ${quizDataList[0]['stage_name']}');
-        print('image: ${quizDataList[0]['image']}');
-        print('judge: ${quizDataList[0]['judge']}');
-      } else {
-        print('No quiz data found.');
-      }
+      totalQuestions = quizDataList.length; // クイズの総数を設定
     });
   }
 
@@ -128,11 +122,28 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            // 設定ページへの遷移
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsPage(), // 設定ページに遷移
+              ),
+            );
+          },
+        ),
       ),
+
       body: SafeArea(
         child: Container(
           color: const Color(0xFFE4F9F5), // SafeAreaの背景色を設定
-          child: Column(
+          child: isLoading
+              ? Center(
+            child: CircularProgressIndicator(), // ローディングインジケーターを表示
+          )
+              : Column(
             mainAxisAlignment: MainAxisAlignment.center, // 縦方向に中央揃え
             children: [
               // 正解数と進捗バーを表示

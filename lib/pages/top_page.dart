@@ -36,11 +36,11 @@ class _MyHomePageState extends State<MyHomePage> {
     print(dbPath);
     final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
     // 既存のデータベースがあれば削除
-    final fileExists = await databaseExists(path);
-    if (fileExists) {
-      print('Deleting existing database...');
-      await deleteDatabase(path); // データベースを削除
-    }
+    // final fileExists = await databaseExists(path);
+    // if (fileExists) {
+    //   print('Deleting existing database...');
+    //   await deleteDatabase(path); // データベースを削除
+    // }
     return openDatabase(
       path,
       onCreate: (db, version) {

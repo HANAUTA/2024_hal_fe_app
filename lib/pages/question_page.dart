@@ -297,11 +297,30 @@ class _QuestionPageState extends State<QuestionPage> {
                             color: Colors.grey[200], // 背景色を淡いグレーに変更
                             borderRadius: BorderRadius.circular(10), // 角を丸くする
                           ),
-                          child: Text(
-                            quizData['comment'] ?? "解説が見つかりませんでした。",
-                            style: const TextStyle(fontSize: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                quizData['comment'] ?? "解説が見つかりませんでした。",
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              const SizedBox(height: 15.0), // commentとlinkの間にスペースを追加
+                              if (quizData['link'] != null && quizData['link'].isNotEmpty)
+                                Align(
+                                  alignment: Alignment.centerRight, // 右寄せにする
+                                  child:
+                                    Text(
+                                    "${quizData['link']}", // リンクを表示
+                                    style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black, // リンクテキストの色
+                                  ),
+                                ),
+                                ),
+                            ],
                           ),
                         ),
+
                       ],
                     ),
                   ),

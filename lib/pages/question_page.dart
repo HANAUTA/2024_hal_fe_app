@@ -170,6 +170,15 @@ class _QuestionPageState extends State<QuestionPage> {
           },
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context); // 2回ポップしてホームに戻る
+            },
+          ),
+        ],
         title: Text(widget.category),
       ),
       body: Container(
@@ -195,6 +204,7 @@ class _QuestionPageState extends State<QuestionPage> {
               ),
               const SizedBox(height: 10),
               // Header with two tabs (問題 and 解説)
+
               Row(
                 children: [
                   Expanded(

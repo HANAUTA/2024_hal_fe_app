@@ -122,7 +122,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return openDatabase(path, version: 1);
   }
 
-
   Future<void> loadQuizData() async {
     // Firestoreからデータを取得
     final snapshot = await FirebaseFirestore.instance
@@ -160,6 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
           'judge': 0, // 初期値
         });
       }
+
     }
 
     // DBからクイズデータを取得
@@ -180,7 +180,10 @@ class _MyHomePageState extends State<MyHomePage> {
     final double adjustedScreenHeight = screenHeight < 600 ? 600 : screenHeight;
     final double adjustedScreenWidth = screenWidth < 300 ? 300 : screenWidth;
 
-    double progress = correctAnswers / totalQuestions; // 進捗を計算
+    // 進捗を計算（judgeが2の問題数）
+    int correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
+    double progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+
 
     return Scaffold(
       appBar: AppBar(

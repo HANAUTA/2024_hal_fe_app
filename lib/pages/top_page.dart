@@ -115,6 +115,10 @@ class _MyHomePageState extends State<MyHomePage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // 画面が小さい場合の最低限のサイズを設定
+    final double adjustedScreenHeight = screenHeight < 600 ? 600 : screenHeight;
+    final double adjustedScreenWidth = screenWidth < 300 ? 300 : screenWidth;
+
     double progress = correctAnswers / totalQuestions; // 進捗を計算
 
     return Scaffold(
@@ -257,10 +261,13 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Container(
             margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01), // 上下の余白
             decoration: BoxDecoration(
-              color: Colors.white, // 背景色を白に設定
-              border: Border.all(color: const Color(0xFF11999E), width: 2), // ボーダーの色と幅
-              borderRadius: BorderRadius.circular(20), // 角を丸める
-            ),
+              //下線部にのみborder
+              border: Border.all(
+                  color: Color(0xFF11999E), // 下線の色を指定
+                  width: 2.0,
+                ),
+              borderRadius: BorderRadius.circular(20), // 角丸にする
+              ),
             child: ListTile(
               contentPadding: EdgeInsets.symmetric(
                 vertical: screenHeight * 0.02, // パディングを画面高さに基づいて指定

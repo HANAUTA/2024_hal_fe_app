@@ -4,7 +4,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class QuestionPage extends StatefulWidget {
-  const QuestionPage({super.key});
+  final String category;
+  const QuestionPage(this.category, {super.key});
 
   @override
   _QuestionPageState createState() => _QuestionPageState();
@@ -27,11 +28,46 @@ class _QuestionPageState extends State<QuestionPage> {
   List<int> randomList = [];
   int quizLength = 0;
   bool isNextExist = false;
+  String categoryNum = "";
+  Map<String, String> categoryNumMap = {
+    "テクノロジー系まとめ": "1",
+    "基礎理論": "1001",
+    "アルゴリズムとプログラミング": "1002",
+    "コンピュータ構成要素": "1003",
+    "システム構成要素": "1004",
+    "ソフトウェア": "1005",
+    "ハードウェア": "1006",
+    "ヒューマンインターフェイス": "1007",
+    "マルチメディア": "1008",
+    "データベース": "1009",
+    "ネットワーク": "1010",
+    "セキュリティ": "1011",
+    "システム開発技術": "1012",
+    "ソフトウェア開発管理技術": "1013",
+
+    "ストラテジ系まとめ": "3",
+    "システム戦略": "3001",
+    "システム企画": "3002",
+    "経営戦略マネジメント": "3003",
+    "技術戦略マネジメント": "3004",
+    "ビジネスインダストリ": "3005",
+    "企業活動": "3006",
+    "法務": "3007",
+
+    "マネジメント系まとめ": "2",
+    "プロジェクトマネジメント": "2001",
+    "サービスマネジメント": "2002",
+    "システム監査": "2003",
+  };
+
+
 
   @override
   void initState() {
     super.initState();
+    categoryNum = categoryNumMap[widget.category]!;
     _initDbAndFetchData(); // DBの初期化とデータ取得を実行
+
   }
 
   Future<void> _initDbAndFetchData() async {
@@ -59,7 +95,7 @@ class _QuestionPageState extends State<QuestionPage> {
 
   Future<void> loadQuizData() async {
     // DBからクイズデータを取得
-    final List<Map<String, dynamic>> maps = await _database!.query('quizData');
+    final List<Map<String, dynamic>> maps = await _database!.query('quizData', where: 'series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
     setState(() {
       quizDataList = maps; // 取得したデータを設定
       if (quizDataList.isNotEmpty) {
@@ -80,7 +116,7 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   Future<void>nextQuestion() async {
-    if (nextQuestionIndex < quizLength - 1) {
+    if (nextQuestionIndex < quizLength) {
       setState(() {
 
       _currentTabIndex = 0; // 問題タブに切り替え
@@ -134,7 +170,7 @@ class _QuestionPageState extends State<QuestionPage> {
           },
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Question Page'),
+        title: Text(widget.category),
       ),
       body: Container(
         color: const Color(0xFFE4F9F5),

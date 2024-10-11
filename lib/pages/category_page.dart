@@ -15,6 +15,9 @@ class _CategoryPageState extends State<CategoryPage> {
 
   Database? _database; // データベースのインスタンス
   List<Map<String, dynamic>> quizDataList = [];
+  double progress = 0.0; // 進捗率
+  int correctAnswers = 5; // 正解数
+  int totalQuestions = 0; // 総問題数
 
 
   // `categoryName`をクラスのメンバーとして定義
@@ -96,6 +99,7 @@ class _CategoryPageState extends State<CategoryPage> {
     });
     _database = await initializeDb(); // ローカルデータベースの初期化
     await loadQuizData(); // ローカルDBからデータを読み込み
+    setProgress();
     setState(() {
       _isLoading = false; // データ取得終了時にローディングを終了
     });
@@ -198,6 +202,17 @@ class _CategoryPageState extends State<CategoryPage> {
       });
     }
 
+  Future<void> setProgress() async {
+    // 進捗を計算（judgeが2の問題数）
+    setState(() {
+      correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
+      progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+    });
+    print(correctAnswers);
+    print(progress);
+  }
+
+
     @override
     void initState() {
       super.initState();
@@ -205,18 +220,18 @@ class _CategoryPageState extends State<CategoryPage> {
       setCategoryData();
     }
 
+
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final int correctAnswers = 5; // 正解数
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator()); // ローディング中はインジケーターを表示
     }
 
     // カテゴリーごとに総問題数を計算
-    int totalQuestions = 0;
     if (categoryName == "テクノロジー系") {
       totalQuestions = seriesMap["テクノロジー系まとめ"]!.length; // 総問題数
       print(seriesMap["テクノロジー系まとめ"]!.length);
@@ -225,10 +240,9 @@ class _CategoryPageState extends State<CategoryPage> {
     } else if (categoryName == "マネジメント系") {
       totalQuestions = seriesMap["マネジメント系まとめ"]!.length; // 総問題数
     }
-    print(erroList.length);
-    print(erroList);
 
-    double progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+
+    progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,

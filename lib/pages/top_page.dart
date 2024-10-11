@@ -21,6 +21,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int totalQuestions = 1;
   int correctAnswers = 20;
   bool isLoading = true; // ローディング状態の管理
+  bool _isFirstLaunch = true; // 初回起動のフラグ
 
   @override
   void initState() {
@@ -30,75 +31,119 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _initDbAndFetchData() async {
     _database = await initializeDb(); // ローカルデータベースの初期化
-    await loadQuizData(); // ローカルDBからデータを読み込み
+
+    // 初回起動時のみFirestoreからデータを取得
+    if (_isFirstLaunch) {
+      await loadQuizData(); // ローカルDBにデータを読み込み
+      _isFirstLaunch = false; // フラグを更新
+    }
+
+    // DBからクイズデータを取得
+    final List<Map<String, dynamic>> maps = await _database!.query('quizData');
     setState(() {
+      quizDataList = maps; // 取得したデータを設定
+      totalQuestions = quizDataList.length; // クイズの総数を設定
       isLoading = false; // データが読み込まれたらローディング状態を更新
     });
   }
 
   Future<Database> initializeDb() async {
     final dbPath = await getDatabasesPath();
-    print(dbPath);
     final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
-    // 既存のデータベースがあれば削除
+
+    // 既存のデータベースがあれば削除しない
     final fileExists = await databaseExists(path);
     if (fileExists) {
-      print('Deleting existing database...');
-      await deleteDatabase(path); // データベースを削除
+      print('Using existing database...'); // 既存のデータベースを使用
+    } else {
+      print('Creating a new database...');
+      return openDatabase(
+        path,
+        onCreate: (db, version) {
+          // テーブルの作成
+          return db.execute(
+            'CREATE TABLE quizData('
+                'id INTEGER PRIMARY KEY, '
+                'answer TEXT, '
+                'comment TEXT, '
+                'image TEXT, '
+                'link TEXT, '
+                'mistake1 TEXT, '
+                'mistake2 TEXT, '
+                'mistake3 TEXT, '
+                'question TEXT, '
+                'quiz_id INTEGER, '
+                'series_document_id TEXT, '
+                'series_name TEXT, '
+                'stage_document_id TEXT, '
+                'stage_name TEXT, '
+                'judge INTEGER'
+                ')',
+          );
+        },
+        version: 1,
+      );
     }
 
-    return openDatabase(
-      path,
-      onCreate: (db, version) {
-        print('Creating table...');
-        // テーブルの作成
-        return db.execute(
-          'CREATE TABLE quizData('
-              'id INTEGER PRIMARY KEY, '
-              'answer TEXT, '
-              'comment TEXT, '
-              'image TEXT, '
-              'link TEXT, '
-              'mistake1 TEXT, '
-              'mistake2 TEXT, '
-              'mistake3 TEXT, '
-              'question TEXT, '
-              'quiz_id INTEGER, '
-              'series_document_id TEXT, '
-              'series_name TEXT, '
-              'stage_document_id TEXT, '
-              'stage_name TEXT, '
-              'judge INTEGER'
-              ')',
-        );
-      },
-      version: 1,
-    );
+    return openDatabase(path, version: 1);
   }
+
 
   Future<void> loadQuizData() async {
     // Firestoreからデータを取得
-    final snapshot = await FirebaseFirestore.instance.collection('contents').doc('data').collection('quizzes').doc('data1').get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('contents')
+        .doc('data')
+        .collection('quizzes')
+        .doc('data1')
+        .get();
+
+    // Firestoreから取得したデータのリストを保持
+    List<Map<String, dynamic>> firestoreDataList = List.from(snapshot.data()!['quizDataList']);
 
     // データをSQLiteに保存
-    for (var doc in snapshot.data()!['quizDataList']) {
-      await _database!.insert('quizData', {
-        'id': doc['id'], // Firestoreのデータを使用
-        'answer': doc['answer'],
-        'comment': doc['comment'],
-        'image': doc['image_url'],
-        'link': doc['link'],
-        'mistake1': doc['mistake_list'][0],
-        'mistake2': doc['mistake_list'][1],
-        'mistake3': doc['mistake_list'][2],
-        'question': doc['question'],
-        'quiz_id': doc['quiz_id'],
-        'series_document_id': doc['series_document_id'],
-        'series_name': doc['series_name'],
-        'stage_document_id': doc['stage_document_id'],
-        'stage_name': doc['stage_name'],
-        'judge': 0,
-      });
+    for (var doc in firestoreDataList) {
+      // すでにデータが存在するかを確認
+      final existingData = await _database!.query('quizData', where: 'id = ?', whereArgs: [doc['id']]);
+
+      if (existingData.isEmpty) {
+        // 存在しない場合は新規挿入
+        await _database!.insert('quizData', {
+          'id': doc['id'], // Firestoreのデータを使用
+          'answer': doc['answer'],
+          'comment': doc['comment'],
+          'image': doc['image_url'],
+          'link': doc['link'],
+          'mistake1': doc['mistake_list'][0],
+          'mistake2': doc['mistake_list'][1],
+          'mistake3': doc['mistake_list'][2],
+          'question': doc['question'],
+          'quiz_id': doc['quiz_id'],
+          'series_document_id': doc['series_document_id'],
+          'series_name': doc['series_name'],
+          'stage_document_id': doc['stage_document_id'],
+          'stage_name': doc['stage_name'],
+          'judge': 0, // 初期値
+        });
+      } else {
+        // すでに存在する場合は、judgeの値を保持しつつ他のデータを更新
+        await _database!.update('quizData', {
+          'answer': doc['answer'],
+          'comment': doc['comment'],
+          'image': doc['image_url'],
+          'link': doc['link'],
+          'mistake1': doc['mistake_list'][0],
+          'mistake2': doc['mistake_list'][1],
+          'mistake3': doc['mistake_list'][2],
+          'question': doc['question'],
+          'quiz_id': doc['quiz_id'],
+          'series_document_id': doc['series_document_id'],
+          'series_name': doc['series_name'],
+          'stage_document_id': doc['stage_document_id'],
+          'stage_name': doc['stage_name'],
+          // judgeの値は変更しない
+        }, where: 'id = ?', whereArgs: [doc['id']]);
+      }
     }
 
     // DBからクイズデータを取得
@@ -229,17 +274,16 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildCategoryTile(double screenWidth, double screenHeight, String category, int index, BuildContext context, String categoryName) {
     return GestureDetector(
       onTapDown: (_) {
-        // タップしたらスケールを1.05倍に拡大
+        // タップしたらスワイプのアニメーションを開始
         setState(() {
           _isTappedList[index] = true;
         });
       },
       onTapUp: (_) {
-        // タップを離したら元のスケールに戻す
+        // タップが離れたらスワイプを解除
         setState(() {
           _isTappedList[index] = false;
         });
-        // ページ遷移
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -248,41 +292,27 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       },
       onTapCancel: () {
-        // タップがキャンセルされたら元のスケールに戻す
+        // タップがキャンセルされたらスワイプを解除
         setState(() {
           _isTappedList[index] = false;
         });
       },
-      child: AnimatedScale(
-        scale: _isTappedList[index] ? 1.05 : 1.0, // タップ時に1.05倍、通常時は1.0
-        duration: const Duration(milliseconds: 200), // スケールのアニメーション時間
-        child: FractionallySizedBox(
-          widthFactor: 0.8, // 全体の80%の幅を指定
-          child: Container(
-            margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01), // 上下の余白
-            decoration: BoxDecoration(
-              //下線部にのみborder
-              border: Border.all(
-                  color: Color(0xFF11999E), // 下線の色を指定
-                  width: 2.0,
-                ),
-              borderRadius: BorderRadius.circular(20), // 角丸にする
-              ),
-            child: ListTile(
-              contentPadding: EdgeInsets.symmetric(
-                vertical: screenHeight * 0.02, // パディングを画面高さに基づいて指定
-                horizontal: screenWidth * 0.04, // 横方向のパディングを画面幅に基づいて指定
-              ),
-              title: Center(
-                child: Text(
-                  category,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
-                  ),
-                ),
-              ),
-              trailing: const Icon(Icons.keyboard_arrow_right), // アイコンを追加
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.1, vertical: screenHeight * 0.02), // マージンを設定
+        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.03), // パディングを設定
+        decoration: BoxDecoration(
+          border:
+          Border.all(
+            color:  Color(0xFF11999E), // 枠線の色を設定,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: Text(
+            category,
+            style: TextStyle(
+              fontSize: screenHeight * 0.025, // フォントサイズを画面高さに基づいて指定
             ),
           ),
         ),

@@ -53,6 +53,40 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // 既存のデータベースがあれば削除しない
     final fileExists = await databaseExists(path);
+
+    // 既存のデータベースがあれば削除、作成
+    // if (fileExists) {
+    //   print('Deleting existing database...');
+    //   await deleteDatabase(path); // データベースを削除
+    //   openDatabase(
+    //     path,
+    //     onCreate: (db, version) {
+    //       // テーブルの作成
+    //       return db.execute(
+    //         'CREATE TABLE quizData('
+    //             'id INTEGER PRIMARY KEY, '
+    //             'answer TEXT, '
+    //             'comment TEXT, '
+    //             'image TEXT, '
+    //             'link TEXT, '
+    //             'mistake1 TEXT, '
+    //             'mistake2 TEXT, '
+    //             'mistake3 TEXT, '
+    //             'question TEXT, '
+    //             'quiz_id INTEGER, '
+    //             'series_document_id TEXT, '
+    //             'series_name TEXT, '
+    //             'stage_document_id TEXT, '
+    //             'stage_name TEXT, '
+    //             'judge INTEGER'
+    //             ')',
+    //       );
+    //     },
+    //     version: 1,
+    //   );
+    // }
+
+
     if (fileExists) {
       print('Using existing database...'); // 既存のデータベースを使用
     } else {
@@ -104,12 +138,12 @@ class _MyHomePageState extends State<MyHomePage> {
     // データをSQLiteに保存
     for (var doc in firestoreDataList) {
       // すでにデータが存在するかを確認
-      final existingData = await _database!.query('quizData', where: 'id = ?', whereArgs: [doc['id']]);
+      final existingData = await _database!.query('quizData', where: 'id = ?', whereArgs: [doc['quiz_id']]);
 
       if (existingData.isEmpty) {
         // 存在しない場合は新規挿入
         await _database!.insert('quizData', {
-          'id': doc['id'], // Firestoreのデータを使用
+          'id': doc['quiz_id'], // Firestoreのデータを使用
           'answer': doc['answer'],
           'comment': doc['comment'],
           'image': doc['image_url'],
@@ -125,24 +159,6 @@ class _MyHomePageState extends State<MyHomePage> {
           'stage_name': doc['stage_name'],
           'judge': 0, // 初期値
         });
-      } else {
-        // すでに存在する場合は、judgeの値を保持しつつ他のデータを更新
-        await _database!.update('quizData', {
-          'answer': doc['answer'],
-          'comment': doc['comment'],
-          'image': doc['image_url'],
-          'link': doc['link'],
-          'mistake1': doc['mistake_list'][0],
-          'mistake2': doc['mistake_list'][1],
-          'mistake3': doc['mistake_list'][2],
-          'question': doc['question'],
-          'quiz_id': doc['quiz_id'],
-          'series_document_id': doc['series_document_id'],
-          'series_name': doc['series_name'],
-          'stage_document_id': doc['stage_document_id'],
-          'stage_name': doc['stage_name'],
-          // judgeの値は変更しない
-        }, where: 'id = ?', whereArgs: [doc['id']]);
       }
     }
 

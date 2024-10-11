@@ -4,7 +4,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class QuestionPage extends StatefulWidget {
-  const QuestionPage({super.key});
+  final String category;
+  const QuestionPage(this.category, {super.key});
 
   @override
   _QuestionPageState createState() => _QuestionPageState();
@@ -134,7 +135,7 @@ class _QuestionPageState extends State<QuestionPage> {
           },
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Question Page'),
+        title: Text(widget.category),
       ),
       body: Container(
         color: const Color(0xFFE4F9F5),

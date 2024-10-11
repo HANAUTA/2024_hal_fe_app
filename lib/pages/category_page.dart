@@ -327,7 +327,7 @@ class _CategoryPageState extends State<CategoryPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const QuestionPage(), // 次のページに遷移
+                              builder: (context) => QuestionPage(category), // 次のページに遷移
                             ),
                           );
                         },

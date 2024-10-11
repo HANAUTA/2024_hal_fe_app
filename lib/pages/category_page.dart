@@ -363,13 +363,14 @@ class _CategoryPageState extends State<CategoryPage> {
                       ),
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => QuestionPage(category), // 次のページに遷移
                             ),
                           );
+                          _initDbAndFetchData();
                         },
                         title: Text(category),
                         trailing: Row(

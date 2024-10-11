@@ -85,6 +85,37 @@ class _CategoryPageState extends State<CategoryPage> {
     "システム監査": 0,
   };
 
+  Map<String, int> seriesCorrectCount = {
+    "テクノロジー系まとめ": 0,
+    "基礎理論": 0,
+    "アルゴリズムとプログラミング": 0,
+    "コンピュータ構成要素": 0,
+    "システム構成要素": 0,
+    "ソフトウェア": 0,
+    "ハードウェア": 0,
+    "ヒューマンインターフェイス": 0,
+    "マルチメディア": 0,
+    "データベース": 0,
+    "ネットワーク": 0,
+    "セキュリティ": 0,
+    "システム開発技術": 0,
+    "ソフトウェア開発管理技術": 0,
+
+    "ストラテジ系まとめ": 0,
+    "システム戦略": 0,
+    "システム企画":0,
+    "経営戦略マネジメント": 0,
+    "技術戦略マネジメント": 0,
+    "ビジネスインダストリ": 0,
+    "企業活動": 0,
+    "法務": 0,
+
+    "マネジメント系まとめ": 0,
+    "プロジェクトマネジメント": 0,
+    "サービスマネジメント": 0,
+    "システム監査": 0,
+  };
+
   // カテゴリー名のマップを定義
   final Map<String, List<String>> categoryMap = {
     "テクノロジー系": [
@@ -230,13 +261,34 @@ class _CategoryPageState extends State<CategoryPage> {
     }
 
   Future<void> setProgress() async {
+    List<String> seriesList = [];
+    Map<String, String> categoryKeyMap = {
+      'technologyStage': 'テクノロジー系',
+      'managementStage': 'マネジメント系',
+      'strategyStage': 'ストラテジ系',
+    };
+
+    // categoryId に基づいてシリーズを取得
+    String? categoryKey = categoryKeyMap[widget.categoryId];
     // 進捗を計算（judgeが2の問題数）
     setState(() {
+      if (categoryKey != null) {
+        seriesList = categoryMap[categoryKey]!;
+        for (String series in seriesList) {
+          print(series);
+          int correctCount = quizDataList.where((quiz) => quiz['series_name'] == series && quiz['judge'] == 2).length;
+          seriesCorrectCount[series] = correctCount;
+        }
+      }
+
       correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
+      seriesCorrectCount[seriesList[0]] = correctAnswers;
       progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
     });
-    print(correctAnswers);
-    print(progress);
+    // print(seriesList);
+    // print(correctAnswers);
+    // print(progress);
+    // print(seriesCorrectCount);
   }
 
 
@@ -350,6 +402,7 @@ class _CategoryPageState extends State<CategoryPage> {
                   itemBuilder: (context, index) {
                     String category = categoryMap[categoryName]![index];
                     int itemCount = seriesCount[category] ?? 0;
+                    int correctCount = seriesCorrectCount[category] ?? 0;
 
                     return Container(
                       height: 75.0,
@@ -376,7 +429,7 @@ class _CategoryPageState extends State<CategoryPage> {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('$itemCount 問'), // 各ジャンルの数を表示
+                            Text('($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
                             const SizedBox(width: 8), // アイコンとの間隔
                             const Icon(Icons.keyboard_arrow_right), // 右矢印アイコン
                           ],

@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class QuestionPage extends StatefulWidget {
   const QuestionPage({super.key});
@@ -18,6 +17,8 @@ class _QuestionPageState extends State<QuestionPage> {
   int _randomIndex = 0; // ランダムな問題のインデックスを保持
   bool _isLoading = true;
   Map quizChoices = {};
+  bool _isCorrect = false;
+  String correctAnswer = "";
 
   @override
   void initState() {
@@ -83,6 +84,7 @@ class _QuestionPageState extends State<QuestionPage> {
         quizData['mistake3'].substring(0, 1): quizData['mistake3'].substring(2),
         quizData['answer'].substring(0, 1): quizData['answer'].substring(2),
       };
+      correctAnswer = quizData['answer'][0];
     }
 
 
@@ -181,17 +183,53 @@ class _QuestionPageState extends State<QuestionPage> {
                 // 解説タブが選択されたときの内容（スクロール可能に）
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Container(
-                      margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
-                      padding: const EdgeInsets.all(16.0), // 内側にパディングを追加
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200], // 背景色を淡いグレーに変更
-                        borderRadius: BorderRadius.circular(10), // 角を丸くする
-                      ),
-                      child: Text(
-                        quizData['comment'] ?? "解説が見つかりませんでした。",
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                    child: Column(
+                      children: [
+                        Center( // 中央に寄せる
+                          child: _isCorrect
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center, // 横方向に中央揃え
+                                  children: [
+                                    Icon(Icons.radio_button_unchecked, color: Colors.green, size: 100), // 不正解の場合は赤いクローズアイコンを表示
+                                    const SizedBox(width: 8),
+                                    Column(
+                                      children: [
+                                        const Text("", style: TextStyle(fontSize: 5),), // 空のテキストを追加
+                                        const Text("正解: ", style: TextStyle(fontSize: 30), textAlign: TextAlign.center),
+                                      ],
+                                      ),
+                                    Text(correctAnswer, style: TextStyle(fontSize: 40)),
+                                  ],
+                                )
+                              : Row(
+                            mainAxisAlignment: MainAxisAlignment.center, // 横方向に中央揃え
+                            children: [
+                              Icon(Icons.close, color: Colors.red, size: 100), // 不正解の場合は赤いクローズアイコンを表示
+                              const SizedBox(width: 8),
+                              Column(
+                                children: [
+                                  const Text("", style: TextStyle(fontSize: 5),), // 空のテキストを追加
+                                  const Text("正解: ", style: TextStyle(fontSize: 30), textAlign: TextAlign.center),
+                                ],
+                              ),
+                              Text(correctAnswer, style: TextStyle(fontSize: 40)),
+                            ],
+                          ),
+                        ),
+
+                        Container(
+                          margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
+                          padding: const EdgeInsets.all(16.0), // 内側にパディングを追加
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200], // 背景色を淡いグレーに変更
+                            borderRadius: BorderRadius.circular(10), // 角を丸くする
+                          ),
+                          child: Text(
+                            quizData['comment'] ?? "解説が見つかりませんでした。",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -243,7 +281,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: () {
-                    _checkAnswer(quizChoices['ア'] ?? "選択肢が見つかりませんでした。", context);
+                    _checkAnswer("ア");
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
@@ -257,7 +295,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: () {
-                    _checkAnswer(quizChoices['イ'] ?? "選択肢が見つかりませんでした。", context);
+                    _checkAnswer("イ");
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
@@ -271,7 +309,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: () {
-                    _checkAnswer(quizChoices['ウ'] ?? "選択肢が見つかりませんでした。", context);
+                    _checkAnswer("ウ");
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
@@ -285,7 +323,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: () {
-                    _checkAnswer(quizChoices['エ'] ?? "選択肢が見つかりませんでした。", context);
+                    _checkAnswer("エ");
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
@@ -309,7 +347,6 @@ class _QuestionPageState extends State<QuestionPage> {
         border: Border(
           bottom: BorderSide(color: Colors.grey, width: 1),
         ),
-        borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(8),
       child: Row(
@@ -322,12 +359,23 @@ class _QuestionPageState extends State<QuestionPage> {
     );
   }
 
-  void _checkAnswer(String selectedChoice, context) async {
-    final correctAnswer = quizDataList[_randomIndex]['answer'].substring(2).trim(); // 正解を取得してトリム
-    selectedChoice = selectedChoice.trim(); // 選択肢もトリムして比較
+  void _checkAnswer(String selectedChoice) async {
+    int judgeValue = 0; // 判定値を保持
 
-    // 選択肢の判定に基づいてjudgeの値を設定
-    int judgeValue = selectedChoice == correctAnswer ? 2 : 1;
+    if (selectedChoice == correctAnswer) {
+      // 正解の処理
+      judgeValue = 2;
+      _isCorrect = true;
+    } else {
+      // 不正解の処理
+      judgeValue = 1;
+      _isCorrect = false;
+
+    }
+    setState(() {
+      _currentTabIndex = 1; // 解説タブに切り替え
+    });
+
     // データベースのjudgeフィールドを更新
     await _database!.update(
       'quizData',
@@ -335,48 +383,5 @@ class _QuestionPageState extends State<QuestionPage> {
       where: 'id = ?', // 条件
       whereArgs: [quizDataList[_randomIndex]['id']], // 条件に渡す引数
     );
-
-    if (selectedChoice == correctAnswer) {
-      // 正解の処理
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("正解！"),
-            content: const Text("おめでとうございます！正しい答えです。"),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  setState(() {
-                    _currentTabIndex = 1; // 解説タブに切り替え
-                  });
-                },
-                child: const Text("解説を見る"),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      // 不正解の処理
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("不正解"),
-            content: const Text("残念！もう一度考えてみてください。"),
-          );
-        },
-      );
-
-      // 1秒後に自動でダイアログを閉じて解説タブに移動
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.of(context).pop(); // ダイアログを閉じる
-        setState(() {
-          _currentTabIndex = 1; // 解説タブに切り替え
-        });
-      });
-    }
   }
 }

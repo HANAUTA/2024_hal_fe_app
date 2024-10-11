@@ -19,6 +19,9 @@ class _QuestionPageState extends State<QuestionPage> {
   Map quizChoices = {};
   bool _isCorrect = false;
   String correctAnswer = "";
+  int totalQuestionCount = 0;
+  int correctAnswerCount = 0;
+  double correctPercentage = 0.0;
 
   @override
   void initState() {
@@ -115,9 +118,11 @@ class _QuestionPageState extends State<QuestionPage> {
               // Score and percentage row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text("正解数3 / 4問中"),
-                  Text("正答率75.0%"),
+                children: [
+                  // Text("正解数3 / 4問中"),
+                  // 問中のところを totalQuestions に変更
+                  Text("正解数$correctAnswerCount / $totalQuestionCount問中"),
+                  Text("正答率$correctPercentage%"),
                 ],
               ),
               const SizedBox(height: 10),
@@ -366,16 +371,21 @@ class _QuestionPageState extends State<QuestionPage> {
       // 正解の処理
       judgeValue = 2;
       _isCorrect = true;
+      correctAnswerCount++;
     } else {
       // 不正解の処理
       judgeValue = 1;
       _isCorrect = false;
-
     }
     setState(() {
       _currentTabIndex = 1; // 解説タブに切り替え
+      totalQuestionCount++;
     });
 
+    // 正答率を計算
+    correctPercentage = (correctAnswerCount / totalQuestionCount) * 100;
+    // 小数点第一位まで
+    correctPercentage = (correctPercentage * 10).round() / 10;
     // データベースのjudgeフィールドを更新
     await _database!.update(
       'quizData',

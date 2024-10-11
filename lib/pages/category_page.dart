@@ -23,36 +23,67 @@ class _CategoryPageState extends State<CategoryPage> {
   // `categoryName`をクラスのメンバーとして定義
   String? categoryName;
   List<dynamic> erroList = [];
-  Map<String, List<dynamic>> seriesMap = {
-    "テクノロジー系まとめ": [],
-    "基礎理論": [],
-    "アルゴリズムとプログラミング": [],
-    "コンピュータ構成要素": [],
-    "システム構成要素": [],
-    "ソフトウェア": [],
-    "ハードウェア": [],
-    "ヒューマンインターフェイス": [],
-    "マルチメディア": [],
-    "データベース": [],
-    "ネットワーク": [],
-    "セキュリティ": [],
-    "システム開発技術": [],
-    "ソフトウェア開発管理技術": [],
+  Map<String, String> categoryNumMap = {
+    "テクノロジー系まとめ": "1",
+    "基礎理論": "1001",
+    "アルゴリズムとプログラミング": "1002",
+    "コンピュータ構成要素": "1003",
+    "システム構成要素": "1004",
+    "ソフトウェア": "1005",
+    "ハードウェア": "1006",
+    "ヒューマンインターフェイス": "1007",
+    "マルチメディア": "1008",
+    "データベース": "1009",
+    "ネットワーク": "1010",
+    "セキュリティ": "1011",
+    "システム開発技術": "1012",
+    "ソフトウェア開発管理技術": "1013",
 
-    "ストラテジ系まとめ": [],
-    "システム戦略": [],
-    "システム企画": [],
-    "経営戦略マネジメント": [],
-    "技術戦略マネジメント": [],
-    "ビジネスインダストリ": [],
-    "企業活動": [],
-    "法務": [],
+    "ストラテジ系まとめ": "3",
+    "システム戦略": "3001",
+    "システム企画": "3002",
+    "経営戦略マネジメント": "3003",
+    "技術戦略マネジメント": "3004",
+    "ビジネスインダストリ": "3005",
+    "企業活動": "3006",
+    "法務": "3007",
 
-    "マネジメント系まとめ": [],
-    "プロジェクトマネジメント": [],
-    "サービスマネジメント": [],
-    "システム監査": [],
-  }; // series_nameごとのリストを保存するマップ
+    "マネジメント系まとめ": "2",
+    "プロジェクトマネジメント": "2001",
+    "サービスマネジメント": "2002",
+    "システム監査": "2003",
+  };
+
+  Map<String, int> seriesCount = {
+    "テクノロジー系まとめ": 0,
+    "基礎理論": 0,
+    "アルゴリズムとプログラミング": 0,
+    "コンピュータ構成要素": 0,
+    "システム構成要素": 0,
+    "ソフトウェア": 0,
+    "ハードウェア": 0,
+    "ヒューマンインターフェイス": 0,
+    "マルチメディア": 0,
+    "データベース": 0,
+    "ネットワーク": 0,
+    "セキュリティ": 0,
+    "システム開発技術": 0,
+    "ソフトウェア開発管理技術": 0,
+
+    "ストラテジ系まとめ": 0,
+    "システム戦略": 0,
+    "システム企画":0,
+    "経営戦略マネジメント": 0,
+    "技術戦略マネジメント": 0,
+    "ビジネスインダストリ": 0,
+    "企業活動": 0,
+    "法務": 0,
+
+    "マネジメント系まとめ": 0,
+    "プロジェクトマネジメント": 0,
+    "サービスマネジメント": 0,
+    "システム監査": 0,
+  };
 
   // カテゴリー名のマップを定義
   final Map<String, List<String>> categoryMap = {
@@ -155,40 +186,36 @@ class _CategoryPageState extends State<CategoryPage> {
       }
 
       // クイズデータをシリーズごとに分類
-      classifyQuizDataBySeries();
+      countQuiz();
     });
   }
 
 
   // クイズデータを `series_name` ごとに分類
-  void classifyQuizDataBySeries() {
-    Map<String, List<dynamic>> tempSeriesMap = {...seriesMap}; // 初期値をコピーして保持
-    List<dynamic> tempErroList = [];
-    for (var quizData in quizDataList) {
-      String seriesName = quizData['series_name'];
+  Future<void> countQuiz() async {
+    // カテゴリーと対応するマップの定義
+    Map<String, String> categoryKeyMap = {
+      'technologyStage': 'テクノロジー系',
+      'managementStage': 'マネジメント系',
+      'strategyStage': 'ストラテジ系',
+    };
 
-      // series_nameが既に存在するかを確認し、リストに追加
-      if (tempSeriesMap.containsKey(seriesName)) {
-        tempSeriesMap[seriesName]!.add(quizData);
-        if (quizData["series_document_id"][0] == "1") {
-          tempSeriesMap["テクノロジー系まとめ"]!.add(quizData);
-        } else if (quizData["series_document_id"][0] == "3") {
-          tempSeriesMap["ストラテジ系まとめ"]!.add(quizData);
-        } else if (quizData["series_document_id"][0] == "2") {
-          tempSeriesMap["マネジメント系まとめ"]!.add(quizData);
-        }
-      } else {
-        tempErroList.add(quizData);
+    // categoryId に基づいてシリーズを取得
+    String? categoryKey = categoryKeyMap[widget.categoryId];
+    if (categoryKey != null) {
+      List<String> seriesList = categoryMap[categoryKey]!;
+      for (String series in seriesList) {
+        String seriesNum = categoryNumMap[series]!;
+        int count = quizDataList
+            .where((quiz) => quiz['series_document_id'].startsWith(seriesNum))
+            .length;
+        seriesCount[series] = count;
       }
-
-      setState(() {
-        seriesMap = tempSeriesMap; // series_nameごとのリストをセット
-        erroList = tempErroList;
-      });
     }
   }
 
-    // データを設定
+
+  // データを設定
     Future<void> setCategoryData() async {
       const Map<String, String> categoryNameMap = {
         "technologyStage": "テクノロジー系",
@@ -233,12 +260,11 @@ class _CategoryPageState extends State<CategoryPage> {
 
     // カテゴリーごとに総問題数を計算
     if (categoryName == "テクノロジー系") {
-      totalQuestions = seriesMap["テクノロジー系まとめ"]!.length; // 総問題数
-      print(seriesMap["テクノロジー系まとめ"]!.length);
+      totalQuestions = seriesCount["テクノロジー系まとめ"]!; // 総問題数
     } else if (categoryName == "ストラテジ系") {
-      totalQuestions = seriesMap["ストラテジ系まとめ"]!.length; // 総問題数
+      totalQuestions = seriesCount["ストラテジ系まとめ"]!; // 総問題数
     } else if (categoryName == "マネジメント系") {
-      totalQuestions = seriesMap["マネジメント系まとめ"]!.length; // 総問題数
+      totalQuestions = seriesCount["マネジメント系まとめ"]!; // 総問題数
     }
 
 
@@ -323,7 +349,7 @@ class _CategoryPageState extends State<CategoryPage> {
                   itemCount: categoryMap[categoryName]?.length ?? 0,
                   itemBuilder: (context, index) {
                     String category = categoryMap[categoryName]![index];
-                    int itemCount = seriesMap[category]?.length ?? 0;
+                    int itemCount = seriesCount[category] ?? 0;
 
                     return Container(
                       height: 75.0,

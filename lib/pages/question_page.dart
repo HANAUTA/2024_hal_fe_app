@@ -22,6 +22,11 @@ class _QuestionPageState extends State<QuestionPage> {
   int totalQuestionCount = 0;
   int correctAnswerCount = 0;
   double correctPercentage = 0.0;
+  bool _isAnswered = true;
+  int nextQuestionIndex = 0;
+  List<int> randomList = [];
+  int quizLength = 0;
+  bool isNextExist = false;
 
   @override
   void initState() {
@@ -36,6 +41,7 @@ class _QuestionPageState extends State<QuestionPage> {
     _database = await initializeDb(); // ローカルデータベースの初期化
     await loadQuizData(); // ローカルDBからデータを読み込み
     await setRandomIndex(); // クイズデータを設定
+    nextQuestion();
     setState(() {
       _isLoading = false; // データが読み込まれたらローディング状態を更新
     });
@@ -65,11 +71,37 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   Future<void> setRandomIndex() async {
-    final quizLength = quizDataList.length;
+    quizLength = quizDataList.length;
     if (quizLength > 0) {
-      final random = Random();
+      // 0からquizLengthの範囲のlistを作成
+        randomList = List.generate(quizLength, (index) => index);
+        randomList.shuffle();
+    }
+  }
+
+  Future<void>nextQuestion() async {
+    if (nextQuestionIndex < quizLength - 1) {
       setState(() {
-        _randomIndex = random.nextInt(quizLength); // 0からquizLengthの範囲でランダムなインデックスを選ぶ
+
+      _currentTabIndex = 0; // 問題タブに切り替え
+      _randomIndex = randomList[nextQuestionIndex];
+      nextQuestionIndex++;
+      isNextExist = true;
+    });
+    } else {
+      // CATEGORYページに戻る
+      setState(() {
+        isNextExist = false;
+      });
+
+    }
+    if (_isAnswered) {
+      setState(() {
+        _isAnswered = false;
+      });
+    } else {
+      setState(() {
+        totalQuestionCount++;
       });
     }
   }
@@ -251,10 +283,14 @@ class _QuestionPageState extends State<QuestionPage> {
           child: _currentTabIndex == 1 // 解説タブの場合
               ? GestureDetector(
             onTap: () async {
-              await setRandomIndex();
-              setState(() {
-                _currentTabIndex = 0; // 問題タブに切り替え
-              });
+              await nextQuestion();
+              if (isNextExist) {
+                setState(() {
+                  _currentTabIndex = 0; // 問題タブに切り替え
+                });
+              } else {
+                Navigator.pop(context);
+              }
             },
             child: Container(
               color: const Color(0xFFE4F9F5),
@@ -269,10 +305,15 @@ class _QuestionPageState extends State<QuestionPage> {
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_right, size: 30),
                     onPressed: () async {
-                      await setRandomIndex();
-                      setState(() {
-                        _currentTabIndex = 0; // 問題タブに切り替え
-                      });
+
+                      await nextQuestion();
+                      if (isNextExist) {
+                        setState(() {
+                          _currentTabIndex = 0; // 問題タブに切り替え
+                        });
+                      } else {
+                        Navigator.pop(context);
+                      }
                     },
                   ),
                 ],
@@ -380,6 +421,7 @@ class _QuestionPageState extends State<QuestionPage> {
     setState(() {
       _currentTabIndex = 1; // 解説タブに切り替え
       totalQuestionCount++;
+      _isAnswered = true;
     });
 
     // 正答率を計算

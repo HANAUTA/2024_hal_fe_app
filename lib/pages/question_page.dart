@@ -158,7 +158,10 @@ class _QuestionPageState extends State<QuestionPage> {
       correctAnswer = quizData['answer'][0];
     }
 
-
+    // 問題文の長さをチェックするための変数
+    final isQuestionLong = (quizData['question']?.length ?? 0) > 100; // 適当な長さで判定
+    // 問題文の最大高さを指定
+    final questionHeight = isQuestionLong ? 200.0 : null; // 200.0 は例としての値
 
     return Scaffold(
       appBar: AppBar(
@@ -240,9 +243,21 @@ class _QuestionPageState extends State<QuestionPage> {
               const SizedBox(height: 10),
               // Question or Explanation content based on the selected tab
               if (_currentTabIndex == 0 && quizData.isNotEmpty) ...[
-                Text(
-                  quizData['question'] ?? "問題が見つかりませんでした。",
-                  style: const TextStyle(fontSize: 16),
+                Container(
+                  constraints: BoxConstraints(
+                    maxHeight: 180, // 最大高さを指定
+                  ),
+                  child: isQuestionLong
+                      ? SingleChildScrollView(
+                    child: Text(
+                      quizData['question'] ?? "問題が見つかりませんでした。",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  )
+                      : Text(
+                    quizData['question'] ?? "問題が見つかりませんでした。",
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 // Scrollable area for question options

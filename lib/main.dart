@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF30E3CA)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'カテゴリを選択'),
+      home: const MyHomePage(title: '基本情報!GOLD'),
     );
   }
 }

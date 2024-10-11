@@ -22,6 +22,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int correctAnswers = 20;
   bool isLoading = true; // ローディング状態の管理
   bool _isFirstLaunch = true; // 初回起動のフラグ
+  List<Map<String, dynamic>> maps = [];
+  double progress = 0; // 進捗率
 
   @override
   void initState() {
@@ -39,12 +41,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     // DBからクイズデータを取得
-    final List<Map<String, dynamic>> maps = await _database!.query('quizData');
+    maps = await _database!.query('quizData');
     setState(() {
       quizDataList = maps; // 取得したデータを設定
       totalQuestions = quizDataList.length; // クイズの総数を設定
       isLoading = false; // データが読み込まれたらローディング状態を更新
     });
+    setProgress();
   }
 
   Future<Database> initializeDb() async {
@@ -163,11 +166,22 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     // DBからクイズデータを取得
-    final List<Map<String, dynamic>> maps = await _database!.query('quizData');
+    maps = await _database!.query('quizData');
     setState(() {
       quizDataList = maps; // 取得したデータを設定
       totalQuestions = quizDataList.length; // クイズの総数を設定
     });
+  }
+
+  Future<void> setProgress() async {
+    // _database = await initializeDb(); // ローカルデータベースの初期化
+    // 進捗を計算（judgeが2の問題数）
+    setState(() {
+      correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
+      progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+    });
+    print(correctAnswers);
+    print(progress);
   }
 
   @override
@@ -179,10 +193,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // 画面が小さい場合の最低限のサイズを設定
     final double adjustedScreenHeight = screenHeight < 600 ? 600 : screenHeight;
     final double adjustedScreenWidth = screenWidth < 300 ? 300 : screenWidth;
-
-    // 進捗を計算（judgeが2の問題数）
-    int correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
-    double progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
 
 
     return Scaffold(
@@ -298,18 +308,20 @@ class _MyHomePageState extends State<MyHomePage> {
           _isTappedList[index] = true;
         });
       },
-      onTapUp: (_) {
+      onTapUp: (_) async{
         // タップが離れたらスワイプを解除
         setState(() {
           _isTappedList[index] = false;
         });
-        Navigator.push(
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => CategoryPage(categoryName), // カテゴリページに遷移
           ),
         );
+        _initDbAndFetchData();
       },
+
       onTapCancel: () {
         // タップがキャンセルされたらスワイプを解除
         setState(() {

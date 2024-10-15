@@ -29,6 +29,7 @@ class _QuestionPageState extends State<QuestionPage> {
   int quizLength = 0;
   bool isNextExist = false;
   String categoryNum = "";
+  ScrollController _scrollController = ScrollController(); // ScrollControllerを追加
   Map<String, String> categoryNumMap = {
     "テクノロジー系まとめ": "1",
     "基礎理論": "1001",
@@ -73,6 +74,13 @@ class _QuestionPageState extends State<QuestionPage> {
     _initDbAndFetchData(); // DBの初期化とデータ取得を実行
 
   }
+
+  @override
+  void dispose() {
+    _scrollController.dispose(); // ScrollControllerを破棄
+    super.dispose();
+  }
+
 
   Future<void> _initDbAndFetchData() async {
     setState(() {
@@ -165,7 +173,7 @@ class _QuestionPageState extends State<QuestionPage> {
     // 問題文の長さをチェックするための変数
     final isQuestionLong = (quizData['question']?.length ?? 0) > 100; // 適当な長さで判定
     // 問題文の最大高さを指定
-    final questionHeight = isQuestionLong ? 200.0 : null; // 200.0 は例としての値
+    final questionHeight = isQuestionLong ? 200.0 : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -204,7 +212,6 @@ class _QuestionPageState extends State<QuestionPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Text("正解数3 / 4問中"),
-                  // 問中のところを totalQuestions に変更
                   Text("正解数$correctAnswerCount / $totalQuestionCount問中"),
                   Text("正答率$correctPercentage%"),
                 ],
@@ -232,7 +239,11 @@ class _QuestionPageState extends State<QuestionPage> {
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
-                          _currentTabIndex = 1; // "解説"タブがタップされたとき
+                          _currentTabIndex = 1;// "解説"タブがタップされたとき
+                          _scrollController.animateTo( // スクロール位置をトップに戻す
+                              0.0,
+                              duration: Duration(milliseconds: 300),
+                          curve: Curves.easeOut,);
                         });
                       },
                       child: Container(
@@ -253,6 +264,7 @@ class _QuestionPageState extends State<QuestionPage> {
                   ),
                   child: isQuestionLong
                       ? SingleChildScrollView(
+                    controller: _scrollController, // スクロールコントローラーを追加
                     child: Text(
                       quizData['question'] ?? "問題が見つかりませんでした。",
                       style: const TextStyle(fontSize: 16),
@@ -267,6 +279,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 // Scrollable area for question options
                 Expanded(
                   child: SingleChildScrollView(
+                    controller: _scrollController, // スクロールコントローラーを追加
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -285,6 +298,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 // 解説タブが選択されたときの内容（スクロール可能に）
                 Expanded(
                   child: SingleChildScrollView(
+                    controller: _scrollController, // スクロールコントローラーを追加
                     child: Column(
                       children: [
                         Center( // 中央に寄せる

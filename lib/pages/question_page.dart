@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import 'result_page.dart';
+
 class QuestionPage extends StatefulWidget {
   final String category;
   const QuestionPage(this.category, {super.key});
@@ -29,6 +31,7 @@ class _QuestionPageState extends State<QuestionPage> {
   int quizLength = 0;
   bool isNextExist = false;
   String categoryNum = "";
+  PageController _pageController = PageController();
   ScrollController _scrollController = ScrollController(); // ScrollControllerを追加
   Map<String, String> categoryNumMap = {
     "テクノロジー系まとめ": "1",
@@ -130,7 +133,6 @@ class _QuestionPageState extends State<QuestionPage> {
   Future<void>nextQuestion() async {
     if (nextQuestionIndex < quizLength) {
       setState(() {
-
       _currentTabIndex = 0; // 問題タブに切り替え
       _randomIndex = randomList[nextQuestionIndex];
       nextQuestionIndex++;
@@ -196,6 +198,7 @@ class _QuestionPageState extends State<QuestionPage> {
         ],
         title: Text(widget.category),
       ),
+
       body: Container(
         color: const Color(0xFFE4F9F5),
           child: _isLoading
@@ -227,6 +230,7 @@ class _QuestionPageState extends State<QuestionPage> {
                         setState(() {
                           _currentTabIndex = 0; // "問題"タブがタップされたとき
                         });
+                        _pageController.jumpToPage(0); // PageViewを0ページ目に変更
                       },
                       child: Container(
                         color: _currentTabIndex == 0 ? Colors.pink[200] : Colors.grey[300],
@@ -245,6 +249,7 @@ class _QuestionPageState extends State<QuestionPage> {
                               duration: Duration(milliseconds: 300),
                           curve: Curves.easeOut,);
                         });
+                        _pageController.jumpToPage(1); // PageViewを1ページ目に変更
                       },
                       child: Container(
                         color: _currentTabIndex == 1 ? Colors.pink[200] : Colors.grey[300],
@@ -257,7 +262,9 @@ class _QuestionPageState extends State<QuestionPage> {
               ),
               const SizedBox(height: 10),
               // Question or Explanation content based on the selected tab
+
               if (_currentTabIndex == 0 && quizData.isNotEmpty) ...[
+
                 Container(
                   constraints: BoxConstraints(
                     maxHeight: 180, // 最大高さを指定
@@ -388,6 +395,12 @@ class _QuestionPageState extends State<QuestionPage> {
                 });
               } else {
                 Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                    builder: (context) => const ResultPage(),
+              ),
+              );
               }
             },
             child: Container(

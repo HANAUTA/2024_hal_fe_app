@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart'; // 追加: シェア機能用
 import 'package:vibration/vibration.dart'; // 追加: 振動機能用
 
-class ResultPage extends StatelessWidget {
+class ResultPage extends StatefulWidget {
   final int correctAnswerCount;
   final int totalQuestionCount;
   final String correctPercentage;
@@ -14,6 +14,53 @@ class ResultPage extends StatelessWidget {
     required this.totalQuestionCount,
     required this.correctPercentage,
   });
+
+  @override
+  _ResultPageState createState() => _ResultPageState();
+}
+
+class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  bool _isAnimating = false; // アニメーションの状態を管理するフラグ
+
+  @override
+  void initState() {
+    super.initState();
+
+    // アニメーションコントローラーの初期化
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(_controller); // スケールアニメーション
+
+    // 全問正解の場合にアニメーションを実行
+    if (widget.correctAnswerCount == widget.totalQuestionCount) {
+      _startAnimation();
+      Vibration.vibrate(duration: 1000); // 1秒間振動
+    }
+  }
+
+  void _startAnimation() {
+    _isAnimating = true;
+    _controller.forward().then((_) {
+      _controller.reverse().then((_) {
+        _controller.forward().then((_) {
+          _controller.reverse().then((_) {
+            _isAnimating = false; // アニメーションが完了したらフラグをリセット
+          });
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // コントローラーの破棄
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +76,6 @@ class ResultPage extends StatelessWidget {
         Color(0xFF9400D3), // 紫
       ],
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)); // 幅を調整
-
-    // 全問正解のとき振動を実行
-    if (correctAnswerCount == totalQuestionCount) {
-      Vibration.vibrate(duration: 1000); // 1秒間振動
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -72,7 +114,7 @@ class ResultPage extends StatelessWidget {
                       child: Column(
                         children: [
                           Text(
-                            "正解数 $correctAnswerCount / $totalQuestionCount 問中",
+                            "正解数 ${widget.correctAnswerCount} / ${widget.totalQuestionCount} 問中",
                             style: const TextStyle(
                               fontSize: 24,
                               color: Colors.black87,
@@ -80,24 +122,27 @@ class ResultPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            "正答率 $correctPercentage",
+                            "正答率 ${widget.correctPercentage}",
                             style: const TextStyle(
                               fontSize: 24,
                               color: Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 30),
-                          if (correctAnswerCount == totalQuestionCount) ...[
-                            ShaderMask(
-                              shaderCallback: (bounds) {
-                                return linearGradient;
-                              },
-                              child: const Text(
-                                '全問正解！',
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white, // 白に設定
+                          if (widget.correctAnswerCount == widget.totalQuestionCount) ...[
+                            ScaleTransition(
+                              scale: _scaleAnimation,
+                              child: ShaderMask(
+                                shaderCallback: (bounds) {
+                                  return linearGradient;
+                                },
+                                child: const Text(
+                                  '全問正解！',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white, // 白に設定
+                                  ),
                                 ),
                               ),
                             ),
@@ -156,7 +201,7 @@ class ResultPage extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       Share.share(
-                        '私はクイズで $correctAnswerCount / $totalQuestionCount 問正解しました！正答率: $correctPercentage',
+                        '私はクイズで ${widget.correctAnswerCount} / ${widget.totalQuestionCount} 問正解しました！正答率: ${widget.correctPercentage}',
                       );
                     },
                     style: ElevatedButton.styleFrom(

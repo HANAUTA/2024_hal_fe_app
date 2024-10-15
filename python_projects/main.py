@@ -2,13 +2,20 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import csv
 import gspread
 from google.oauth2.service_account import Credentials
+
 from dotenv import load_dotenv
 import os
+
+# wait系
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 SPREAD_SHEET_ID = os.getenv("SPREAD_SHEET_ID")
@@ -41,7 +48,7 @@ kotae_dict_sentakusi_r = {"select_a": "ア", "select_i": "イ", "select_u": "ウ
 24_aki
 24_haru
 23_aki
-23_haru
+23_toku
 22_aki
 22_haru
 21_aki
@@ -49,8 +56,9 @@ kotae_dict_sentakusi_r = {"select_a": "ア", "select_i": "イ", "select_u": "ウ
 20_aki
 20_haru
 """
-TARGET_NENDO = "05_menjo"
-LOOP_TIMES = 60
+TARGET_NENDO = "20_haru"
+# 02免除より前は80問ある
+LOOP_TIMES = 80
 
 series_num = {
   "基礎理論": "1001",
@@ -99,6 +107,7 @@ stage_num = {
     "プログラミング": "1002003",
     "プログラム言語": "1002004",
     "マークアップ言語など": "1002005",
+    "その他の言語": "1002005",
     
     "プロセッサ": "1003001",
     "メモリ": "1003002",
@@ -154,7 +163,9 @@ stage_num = {
     "ソフトウェア構築": "1012003",
     "結合／テスト": "1012004",
     "ソフトウェア結合・適格性テスト": "1012004",
+    "システム結合・適格性テスト": "1012004",
     "導入／受入支援": "1012005",
+    "受入れ支援": "1012005",
     "保守／廃棄": "1012006",
     "保守・廃棄": "1012006",
     
@@ -162,6 +173,7 @@ stage_num = {
     "知的財産適用管理": "1013002",
     "開発環境管理": "1013003",
     "構成管理／変更管理": "1013004",
+    "構成管理・変更管理": "1013004",
     
     "プロジェクトマネジメント": "2001001",
     "プロジェクトの統合": "2001002",
@@ -232,6 +244,9 @@ stage_num = {
 # for debug
 skip_count = 0
 
+# img_count
+img_count = 0
+
 # オプション設定
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
@@ -241,6 +256,9 @@ service = Service(ChromeDriverManager().install())
 # backgroundで動かす
 # chrome_options.add_argument('--headless')
 driver = webdriver.Chrome(service=service, options=chrome_options)
+
+# 最大の読み込み時間を設定 今回は最大30秒待機できるようにする
+wait = WebDriverWait(driver=driver, timeout=10)
 
 # 対象のURLにアクセス
 driver.get('https://www.fe-siken.com/fekakomon.php')
@@ -259,7 +277,7 @@ for button in buttons:
         break
 
 # 少し待機（次の操作に備えて）
-time.sleep(0.2)
+wait.until(EC.presence_of_all_elements_located)
 
 # --- 2. 'tab1'のidを持つdiv内の、'target_nendo'のvalueを持つinputをクリック ---
 # 'tab1'のidを持つdivを探す
@@ -272,7 +290,8 @@ menjo_input = tab1_div.find_element(By.CSS_SELECTOR, f'input[value="{TARGET_NEND
 menjo_input.click()
 
 # 少し待機（次の操作に備えて）
-time.sleep(0.2)
+wait.until(EC.presence_of_all_elements_located)
+
 
 # --- 3. XPathを使って指定されたボタンをクリック ---
 # 指定されたXPathのボタンをクリック
@@ -282,7 +301,8 @@ submit_button = driver.find_element(By.XPATH, '/html/body/div[1]/div/main/div[2]
 submit_button.click()
 
 # 少し待機して処理が完了するまで待つ
-time.sleep(0.2)
+wait.until(EC.presence_of_all_elements_located)
+
 
 cnt = 0
 
@@ -342,7 +362,7 @@ def get_mondai_kaisetsu(mondai_main):
     return kaisetu_all_text
 
 def tab_check():
-    time.sleep(0.2)
+    wait.until(EC.presence_of_all_elements_located)
     tab_cnt = driver.window_handles
     if len(tab_cnt) > 1:
         driver.switch_to.window(driver.window_handles[-1])
@@ -352,12 +372,21 @@ def tab_check():
     # 現在のURLが問題ページでない場合、問題ページに移動
     if driver.current_url != "https://www.fe-siken.com/fekakomon.php":
         driver.back()
-        time.sleep(0.3)
+        wait.until(EC.presence_of_all_elements_located)
+
+
+def img_check(mondai_main):
+    imgs = mondai_main.find_elements(By.TAG_NAME, 'img')
+    if len(imgs) > 0:
+        return True
+    else:
+        return False
     
 
 while True:
     try:
-        
+        wait.until(EC.presence_of_all_elements_located)
+
         # この問題のデータすべて取得
         mondai_main = driver.find_element(By.CLASS_NAME, 'main')
         mondai_data = []
@@ -366,54 +395,90 @@ while True:
         mondai_bun = get_mondai_bun(mondai_main)
         # 問題文を追加
         mondai_data.append(mondai_bun)
+        print('問題文取得済み')
 
         # 問題年度を取得
         mondai_nendo = get_mondai_nendo(mondai_main)
         # 問題年度を追加
         mondai_data.append(mondai_nendo)       
+        print('問題年度取得済み')
 
 
         # 問題カテゴリを取得
         category, series, stage = get_mondai_category(mondai_main)
         # 問題カテゴリを追加
         mondai_data.append([category, series, stage])
+        print('問題カテゴリ取得済み')
 
-        time.sleep(0.2)
+        wait.until(EC.presence_of_all_elements_located)
+
         # 答えと解説を表示
+        actions = ActionChains(driver)
         answer_button = driver.find_element(By.ID, 'showAnswerBtn')
-        time.sleep(0.3)
-        answer_button.click()
-        time.sleep(0.4)
+        print('答え表示ボタン取得')
+        answer_button_style = answer_button.get_attribute('style')
+        if "display: none;" not in answer_button_style:
+            print('答え表示ボタンクリック1')
+            actions.move_to_element(answer_button).click().perform()
+            print('答え表示ボタンクリック2')
+            wait.until(EC.presence_of_all_elements_located)
+            print('noneだった')
+
         # 答え記号取得
         tab_check()
         answer = driver.find_element(By.ID, 'answerChar').text
+        print('答え取得済み')
+        print(answer)
 
-        if answer == "":
-            answer_button = driver.find_element(By.ID, 'showAnswerBtn')
-            time.sleep(0.3)
-            answer_button.click()
-            time.sleep(0.4)
-            # 答え記号取得
+        is_img_exist = img_check(mondai_main)
+
+        if is_img_exist:
+            img_count += 1
+            print("-------画像があるためスキップ--------")
+            cnt += 1
+            if cnt >= LOOP_TIMES:
+                break
+
+
+            # 次の問題へ
             tab_check()
-            answer = driver.find_element(By.ID, 'answerChar').text
+            next_button = driver.find_element(By.CLASS_NAME, 'submit')
+            next_button.click()
+
+            print('次の問題へ')
+            continue
+
+        # if answer == "":
+        #     answer_button = driver.find_element(By.ID, 'showAnswerBtn')
+        #     wait.until(EC.presence_of_all_elements_located)
+        #     answer_button.click()
+        #     wait.until(EC.presence_of_all_elements_located)
+        #     # 答え記号取得
+        #     tab_check()
+        #     answer = driver.find_element(By.ID, 'answerChar').text
+        #     print('答え取得済み2')
 
         # 正解を取得
         kotae_text = get_mondai_answer(mondai_main, answer)
         # 正解を追加
         mondai_data.append(kotae_text)
+        print('正解取得済み')
 
         # 間違い選択肢を取得,追加
         matigai_texts = get_mondai_failure(mondai_main, answer)
         mondai_data.append(matigai_texts)
+        print('間違い選択肢取得済み')
         
 
         # 解説を取得
         kaisetsu = get_mondai_kaisetsu(mondai_main)
         # 解説を追加
         mondai_data.append(kaisetsu)
+        print('解説取得済み')
 
-        # 問題データを追加
+        
         mondai_datas.append(mondai_data)
+        print('問題データ取得完了')
 
 
         cnt += 1
@@ -421,25 +486,39 @@ while True:
             break
 
         # 次の問題へ
+        tab_check()
         next_button = driver.find_element(By.CLASS_NAME, 'submit')
         next_button.click()
-        time.sleep(0.2)
+
+        print('次の問題へ')
+
+    except KeyboardInterrupt:
+        quit()
+    
     except Exception as e:
         print(e)
+        skip_count += 1
         print("エラーが発生したためスキップ")
         print("スキップした回数" + str(skip_count))
-        skip_count += 1
-        if skip_count >= 10:
+        user_input = input("何も入れずで継続,exitで書き出し,quitで強制終了: ")
+        if user_input == "exit":
+            break
+        elif user_input == "quit":
+            print("スキップした回数" + str(skip_count))
+            print("画像があった問題数" + str(img_count))
+            driver.quit()
+            quit()
+        if skip_count >= 20:
             break
         try:
             next_button = driver.find_element(By.CLASS_NAME, 'submit')
             next_button.click()
-            time.sleep(0.2)
+            wait.until(EC.presence_of_all_elements_located)
+
         except:
             continue
         continue
 
-print(mondai_datas)
 
 
 # google spread関係
@@ -513,10 +592,13 @@ def write_to_sheet(mondai_datas):
         sheet.append_row(row, value_input_option='USER_ENTERED')
 
 # 問題データをGoogleスプレッドシートに書き込む
+print("問題データを書き込み中...")
 write_to_sheet(mondai_datas)
 
 
 # ユーザー操作を待機（無限ループでスクリプトを終了させない）
+print('-' * 20)
 print("スキップした回数" + str(skip_count))
+print("画像があった問題数" + str(img_count))
 input("Enterキーを押すと終了")
 driver.quit()

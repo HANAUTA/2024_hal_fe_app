@@ -32,7 +32,6 @@ class _QuestionPageState extends State<QuestionPage> with SingleTickerProviderSt
   int quizLength = 0;
   bool isNextExist = false;
   String categoryNum = "";
-  PageController _pageController = PageController();
   ScrollController _scrollController = ScrollController(); // ScrollControllerを追加
   Map<String, String> categoryNumMap = {
     "テクノロジー系まとめ": "1",
@@ -96,6 +95,10 @@ class _QuestionPageState extends State<QuestionPage> with SingleTickerProviderSt
     });
     }
 
+  // tabControllerをリセットする 0にする
+  void resetTabController() {
+    _tabController.index = 0;
+  }
 
   Future<void> _initDbAndFetchData() async {
     setState(() {
@@ -292,6 +295,7 @@ class _QuestionPageState extends State<QuestionPage> with SingleTickerProviderSt
                 if (isNextExist) {
                   setState(() {
                     _currentTabIndex = 0; // 問題タブに切り替え
+                    resetTabController();
                   });
                 } else {
                   Navigator.pop(context);
@@ -322,8 +326,15 @@ class _QuestionPageState extends State<QuestionPage> with SingleTickerProviderSt
                           setState(() {
                             _currentTabIndex = 0; // 問題タブに切り替え
                           });
+                          resetTabController();
                         } else {
                           Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ResultPage(correctAnswerCount: correctAnswerCount, totalQuestionCount: totalQuestionCount, correctPercentage: '$correctPercentage%',),
+                            ),
+                          );
                         }
                       },
                     ),
@@ -569,7 +580,7 @@ class _QuestionPageState extends State<QuestionPage> with SingleTickerProviderSt
     );
   }
 
-  void _checkAnswer(String selectedChoice) async {
+  void _checkAnswer(String selectedChoice) {
     int judgeValue = 0; // 判定値を保持
     int nowJudgeValue = 0;
 

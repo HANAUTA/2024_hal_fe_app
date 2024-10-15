@@ -516,6 +516,12 @@ class _QuestionPageState extends State<QuestionPage> {
       judgeValue = 1;
       _isCorrect = false;
     }
+    //スクロール状態をリセット
+    _scrollController.animateTo(
+      0.0,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
     setState(() {
       _currentTabIndex = 1; // 解説タブに切り替え
       totalQuestionCount++;

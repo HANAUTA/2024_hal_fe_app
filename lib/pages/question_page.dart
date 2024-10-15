@@ -13,7 +13,8 @@ class QuestionPage extends StatefulWidget {
   _QuestionPageState createState() => _QuestionPageState();
 }
 
-class _QuestionPageState extends State<QuestionPage> {
+class _QuestionPageState extends State<QuestionPage> with SingleTickerProviderStateMixin{
+  late TabController _tabController;
   int _currentTabIndex = 0; // 現在のタブのインデックスを保持
   Database? _database; // データベースのインスタンス
   List<Map<String, dynamic>> quizDataList = [];
@@ -75,14 +76,25 @@ class _QuestionPageState extends State<QuestionPage> {
       categoryNum = categoryNumMap[widget.category]!;
     }
     _initDbAndFetchData(); // DBの初期化とデータ取得を実行
-
+    setTabController();
   }
 
   @override
   void dispose() {
     _scrollController.dispose(); // ScrollControllerを破棄
+    _tabController.dispose();
+
     super.dispose();
   }
+
+  Future<void> setTabController() async {
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        _currentTabIndex = _tabController.index;
+      });
+    });
+    }
 
 
   Future<void> _initDbAndFetchData() async {
@@ -156,6 +168,7 @@ class _QuestionPageState extends State<QuestionPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width; // 画面の幅を取得
@@ -202,300 +215,340 @@ class _QuestionPageState extends State<QuestionPage> {
       body: Container(
         color: const Color(0xFFE4F9F5),
           child: _isLoading
-              ? Center(
-            child: CircularProgressIndicator(), // ローディングインジケーターを表示
-          )
-        : Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Score and percentage row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ? Center(child: CircularProgressIndicator(),)
+        : DefaultTabController(
+            length: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Text("正解数3 / 4問中"),
-                  Text("正解数$correctAnswerCount / $totalQuestionCount問中"),
-                  Text("正答率$correctPercentage%"),
-                ],
-              ),
-              const SizedBox(height: 10),
-              // Header with two tabs (問題 and 解説)
-
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _currentTabIndex = 0; // "問題"タブがタップされたとき
-                        });
-                        _pageController.jumpToPage(0); // PageViewを0ページ目に変更
-                      },
-                      child: Container(
-                        color: _currentTabIndex == 0 ? Colors.pink[200] : Colors.grey[300],
-                        padding: const EdgeInsets.all(8),
-                        child: const Center(child: Text("問題")),
-                      ),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("正解数$correctAnswerCount / $totalQuestionCount問中"),
+                      Text("正答率$correctPercentage%"),
+                    ],
                   ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _currentTabIndex = 1;// "解説"タブがタップされたとき
-                          _scrollController.animateTo( // スクロール位置をトップに戻す
-                              0.0,
-                              duration: Duration(milliseconds: 300),
-                          curve: Curves.easeOut,);
-                        });
-                        _pageController.jumpToPage(1); // PageViewを1ページ目に変更
-                      },
-                      child: Container(
-                        color: _currentTabIndex == 1 ? Colors.pink[200] : Colors.grey[300],
-                        padding: const EdgeInsets.all(8),
-                        child: const Center(child: Text("解説")),
-                      ),
-                    ),
+                  const SizedBox(height: 10),
+                  TabBar(
+                    tabs: [
+                      Tab(child: const Center(child: Text("問題"))),
+                      Tab(child: const Center(child: Text("解説"))),
+                      // Tab(child: Text("デバッグ用"))  // デバッグ用
+                    ],
+                    controller: _tabController,
                   ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              // Question or Explanation content based on the selected tab
-
-              if (_currentTabIndex == 0 && quizData.isNotEmpty) ...[
-
-                Container(
-                  constraints: BoxConstraints(
-                    maxHeight: 180, // 最大高さを指定
-                  ),
-                  child: isQuestionLong
-                      ? SingleChildScrollView(
-                    controller: _scrollController, // スクロールコントローラーを追加
-                    child: Text(
-                      quizData['question'] ?? "問題が見つかりませんでした。",
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  )
-                      : Text(
-                    quizData['question'] ?? "問題が見つかりませんでした。",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Scrollable area for question options
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: _scrollController, // スクロールコントローラーを追加
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 10),
+                  Expanded(  // ここを追加
+                    child: TabBarView(
+                      controller: _tabController,
                       children: [
-                        buildOptionWithBorder("ア", quizChoices['ア'] ?? "選択肢が見つかりませんでした。"),
-                        const SizedBox(height: 10),
-                        buildOptionWithBorder("イ", quizChoices['イ'] ?? "選択肢が見つかりませんでした。"),
-                        const SizedBox(height: 10),
-                        buildOptionWithBorder("ウ", quizChoices['ウ'] ?? "選択肢が見つかりませんでした。"),
-                        const SizedBox(height: 10),
-                        buildOptionWithBorder("エ", quizChoices['エ'] ?? "答えが見つかりませんでした。"),
+                        _buildQuestionTab(quizData, isQuestionLong),
+                        _buildExplanationTab(quizData, isQuestionLong),
+                        // Builder( // デバッグ用
+                        //   builder: (context) {
+                        //     // 新しいコンテキストを使って DefaultTabController にアクセス
+                        //     final index = DefaultTabController.of(context)?.index ?? 0;
+                        //
+                        //     return Column(
+                        //       children: [
+                        //         Text("Index: $index"),
+                        //         ElevatedButton(
+                        //           onPressed: () {
+                        //             print("Current Tab Index: $index");
+                        //           },
+                        //           child: const Text("タブのインデックスを確認"),
+                        //         ),
+                        //       ],
+                        //     );
+                        //   },
+                        // ),
                       ],
                     ),
-                  ),
-                ),
-              ] else if (_currentTabIndex == 1 && quizData.isNotEmpty) ...[
-                // 解説タブが選択されたときの内容（スクロール可能に）
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: _scrollController, // スクロールコントローラーを追加
-                    child: Column(
-                      children: [
-                        Center( // 中央に寄せる
-                          child: _isCorrect
-                              ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.center, // 横方向に中央揃え
-                                  children: [
-                                    Icon(Icons.radio_button_unchecked, color: Colors.green, size: 100), // 不正解の場合は赤いクローズアイコンを表示
-                                    const SizedBox(width: 8),
-                                    Column(
-                                      children: [
-                                        const Text("", style: TextStyle(fontSize: 5),), // 空のテキストを追加
-                                        const Text("正解: ", style: TextStyle(fontSize: 30), textAlign: TextAlign.center),
-                                      ],
-                                      ),
-                                    Text(correctAnswer, style: TextStyle(fontSize: 40)),
-                                  ],
-                                )
-                              : Row(
-                            mainAxisAlignment: MainAxisAlignment.center, // 横方向に中央揃え
-                            children: [
-                              Icon(Icons.close, color: Colors.red, size: 100), // 不正解の場合は赤いクローズアイコンを表示
-                              const SizedBox(width: 8),
-                              Column(
-                                children: [
-                                  const Text("", style: TextStyle(fontSize: 5),), // 空のテキストを追加
-                                  const Text("正解: ", style: TextStyle(fontSize: 30), textAlign: TextAlign.center),
-                                ],
-                              ),
-                              Text(correctAnswer, style: TextStyle(fontSize: 40)),
-                            ],
-                          ),
-                        ),
-
-                        Container(
-                          margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
-                          padding: const EdgeInsets.all(16.0), // 内側にパディングを追加
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200], // 背景色を淡いグレーに変更
-                            borderRadius: BorderRadius.circular(10), // 角を丸くする
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                quizData['comment'] ?? "解説が見つかりませんでした。",
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                              const SizedBox(height: 15.0), // commentとlinkの間にスペースを追加
-                              if (quizData['link'] != null && quizData['link'].isNotEmpty)
-                                Align(
-                                  alignment: Alignment.centerRight, // 右寄せにする
-                                  child:
-                                    Text(
-                                    "${quizData['link']}", // リンクを表示
-                                    style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black, // リンクテキストの色
-                                  ),
-                                ),
-                                ),
-                            ],
-                          ),
-                        ),
-
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      // Fixed BottomAppBar
-      bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFFE4F9F5),
-        child: SizedBox(
-          height: 56, // ボトムバーの高さを指定
-          child: _currentTabIndex == 1 // 解説タブの場合
-              ? GestureDetector(
-            onTap: () async {
-              await nextQuestion();
-              if (isNextExist) {
-                setState(() {
-                  _currentTabIndex = 0; // 問題タブに切り替え
-                });
-              } else {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                    builder: (context) => const ResultPage(),
-              ),
-              );
-              }
-            },
-            child: Container(
-              color: const Color(0xFFE4F9F5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  const Expanded(
-                    child: Center(
-                      child: Text('次の問題へ', style: TextStyle(fontSize: 16)),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.keyboard_arrow_right, size: 30),
-                    onPressed: () async {
-
-                      await nextQuestion();
-                      if (isNextExist) {
-                        setState(() {
-                          _currentTabIndex = 0; // 問題タブに切り替え
-                        });
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
                   ),
                 ],
               ),
             ),
           )
-              : Row(
-            children: [
-              const Spacer(flex: 1), // デバイスサイズに応じた余白を追加
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _checkAnswer("ア");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(12),
-                  ),
-                  child: const Text("ア", style: TextStyle(fontSize: 16)),
-                ),
-              ),
-              const Spacer(flex: 1),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _checkAnswer("イ");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(12),
-                  ),
-                  child: const Text("イ", style: TextStyle(fontSize: 16)),
-                ),
-              ),
-              const Spacer(flex: 1),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _checkAnswer("ウ");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(12),
-                  ),
-                  child: const Text("ウ", style: TextStyle(fontSize: 16)),
-                ),
-              ),
-              const Spacer(flex: 1),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _checkAnswer("エ");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(12),
-                  ),
-                  child: const Text("エ", style: TextStyle(fontSize: 16)),
-                ),
-              ),
-              const Spacer(flex: 1),
-            ],
-          ),
-        ),
+
       ),
+      // Fixed BottomAppBar
+      bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
+
+
+  Widget _buildBottomNavigationBar(context) {
+    switch (_currentTabIndex) {
+      case 1:
+        return BottomAppBar(
+          color: const Color(0xFFE4F9F5),
+          child: SizedBox(
+            height: 56,
+            child: GestureDetector(
+              onTap: () async {
+                await nextQuestion();
+                if (isNextExist) {
+                  setState(() {
+                    _currentTabIndex = 0; // 問題タブに切り替え
+                  });
+                } else {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ResultPage(correctAnswerCount: correctAnswerCount, totalQuestionCount: totalQuestionCount, correctPercentage: '$correctPercentage%',),
+                    ),
+                  );
+                }
+              },
+              child: Container(
+                color: const Color(0xFFE4F9F5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    const Expanded(
+                      child: Center(
+                        child: Text('次の問題へ', style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.keyboard_arrow_right, size: 30),
+                      onPressed: () async {
+
+                        await nextQuestion();
+                        if (isNextExist) {
+                          setState(() {
+                            _currentTabIndex = 0; // 問題タブに切り替え
+                          });
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+      // case 2: // デバッグ用タブ
+      //   return const BottomAppBar(
+      //     color: Colors.blueAccent,
+      //     child: SizedBox(
+      //       height: 56,
+      //       child: Center(
+      //         child: Text('デバッグモード', style: TextStyle(color: Colors.white)),
+      //       ),
+      //     ),
+      //   );
+
+      default:
+        return BottomAppBar(
+          color: const Color(0xFFE4F9F5),
+          child: SizedBox(
+            height: 56,
+            child: Row(
+                children: [
+                const Spacer(flex: 1), // デバイスサイズに応じた余白を追加
+                Expanded(
+                flex: 2,
+                child: ElevatedButton(
+                onPressed: () {
+                _checkAnswer("ア");
+                _tabController.animateTo(1);
+                },
+                style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+                ),
+                child: const Text("ア", style: TextStyle(fontSize: 16)),
+                ),
+                ),
+                const Spacer(flex: 1),
+                Expanded(
+                flex: 2,
+                child: ElevatedButton(
+                onPressed: () {
+                _checkAnswer("イ");
+                _tabController.animateTo(1);
+                },
+                style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+                ),
+                child: const Text("イ", style: TextStyle(fontSize: 16)),
+                ),
+                ),
+                const Spacer(flex: 1),
+                Expanded(
+                flex: 2,
+                child: ElevatedButton(
+                onPressed: () {
+                _checkAnswer("ウ");
+                _tabController.animateTo(1);
+                },
+                style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+                ),
+                child: const Text("ウ", style: TextStyle(fontSize: 16)),
+                ),
+                ),
+                const Spacer(flex: 1),
+                Expanded(
+                flex: 2,
+                child: ElevatedButton(
+                onPressed: () {
+                _checkAnswer("エ");
+                _tabController.animateTo(1);
+                },
+                style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+                ),
+                child: const Text("エ", style: TextStyle(fontSize: 16)),
+                ),
+                ),
+                const Spacer(flex: 1),
+                ],
+                ),
+          ),
+        );
+    }
+  }
+
+
+  Widget _buildQuestionTab(quizData, isQuestionLong) {
+    return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+          // ページごとに違う内容
+        Container(
+        constraints: BoxConstraints(
+        maxHeight: 180, // 最大高さを指定
+        ),
+        child: isQuestionLong
+        ? SingleChildScrollView(
+        controller: _scrollController, // スクロールコントローラーを追加
+        child: Text(
+        quizData['question'] ?? "問題が見つかりませんでした。",
+        style: const TextStyle(fontSize: 16),
+        ),
+        )
+            : Text(
+        quizData['question'] ?? "問題が見つかりませんでした。",
+        style: const TextStyle(fontSize: 16),
+        ),
+        ),
+        const SizedBox(height: 20),
+        // Scrollable area for question options
+        Expanded(
+        child: SingleChildScrollView(
+        controller: _scrollController, // スクロールコントローラーを追加
+        child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+        buildOptionWithBorder("ア", quizChoices['ア'] ?? "選択肢が見つかりませんでした。"),
+        const SizedBox(height: 10),
+        buildOptionWithBorder("イ", quizChoices['イ'] ?? "選択肢が見つかりませんでした。"),
+        const SizedBox(height: 10),
+        buildOptionWithBorder("ウ", quizChoices['ウ'] ?? "選択肢が見つかりませんでした。"),
+        const SizedBox(height: 10),
+        buildOptionWithBorder("エ", quizChoices['エ'] ?? "答えが見つかりませんでした。"),
+        const SizedBox(height: 10),
+
+        ],
+        ),
+        ),
+        ),
+        ],
+        );
+  }
+
+  Widget _buildExplanationTab(quizData, isQuestionLong) {
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ページごとに違う内容
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scrollController, // スクロールコントローラーを追加
+              child: Column(
+                children: [
+                  Center( // 中央に寄せる
+                    child: _isCorrect
+                        ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // 横方向に中央揃え
+                      children: [
+                        Icon(Icons.radio_button_unchecked, color: Colors.green, size: 100), // 不正解の場合は赤いクローズアイコンを表示
+                        const SizedBox(width: 8),
+                        Column(
+                          children: [
+                            const Text("", style: TextStyle(fontSize: 5),), // 空のテキストを追加
+                            const Text("正解: ", style: TextStyle(fontSize: 30), textAlign: TextAlign.center),
+                          ],
+                        ),
+                        Text(correctAnswer, style: TextStyle(fontSize: 40)),
+                      ],
+                    )
+                        : Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // 横方向に中央揃え
+                      children: [
+                        Icon(Icons.close, color: Colors.red, size: 100), // 不正解の場合は赤いクローズアイコンを表示
+                        const SizedBox(width: 8),
+                        Column(
+                          children: [
+                            const Text("", style: TextStyle(fontSize: 5),), // 空のテキストを追加
+                            const Text("正解: ", style: TextStyle(fontSize: 30), textAlign: TextAlign.center),
+                          ],
+                        ),
+                        Text(correctAnswer, style: TextStyle(fontSize: 40)),
+                      ],
+                    ),
+                  ),
+
+                  Container(
+                    margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
+                    padding: const EdgeInsets.all(16.0), // 内側にパディングを追加
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200], // 背景色を淡いグレーに変更
+                      borderRadius: BorderRadius.circular(10), // 角を丸くする
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          quizData['comment'] ?? "解説が見つかりませんでした。",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 15.0), // commentとlinkの間にスペースを追加
+                        if (quizData['link'] != null && quizData['link'].isNotEmpty)
+                          Align(
+                            alignment: Alignment.centerRight, // 右寄せにする
+                            child:
+                            Text(
+                              "${quizData['link']}", // リンクを表示
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black, // リンクテキストの色
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+  }
+
 
   Widget buildOptionWithBorder(String label, String text) {
     return Container(
@@ -519,10 +572,10 @@ class _QuestionPageState extends State<QuestionPage> {
   void _checkAnswer(String selectedChoice) async {
     int judgeValue = 0; // 判定値を保持
     int nowJudgeValue = 0;
+
     if (quizDataList[_randomIndex]['judge'] != null) {
       nowJudgeValue = quizDataList[_randomIndex]['judge'];
     }
-    print("nowJudgeValue: $nowJudgeValue");
 
     if (selectedChoice == correctAnswer) {
       // 正解の処理
@@ -552,7 +605,7 @@ class _QuestionPageState extends State<QuestionPage> {
     correctPercentage = (correctPercentage * 10).round() / 10;
     // データベースのjudgeフィールドを更新
     if (nowJudgeValue != 2) {
-      await _database!.update(
+      _database!.update(
         'quizData',
         {'judge': judgeValue}, // judgeフィールドを更新
         where: 'id = ?', // 条件

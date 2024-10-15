@@ -65,7 +65,11 @@ class _QuestionPageState extends State<QuestionPage> {
   @override
   void initState() {
     super.initState();
-    categoryNum = categoryNumMap[widget.category]!;
+    if (widget.category == "allStage") {
+      categoryNum = "_";
+    }else {
+      categoryNum = categoryNumMap[widget.category]!;
+    }
     _initDbAndFetchData(); // DBの初期化とデータ取得を実行
 
   }

@@ -5,6 +5,8 @@ import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Firestoreをインポート
 import 'package:fe_project/pages/category_page.dart';
 
+import 'question_page.dart';
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -300,6 +302,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+
   Widget _buildCategoryTile(double screenWidth, double screenHeight, String category, int index, BuildContext context, String categoryName) {
     return GestureDetector(
       onTapDown: (_) {
@@ -308,20 +311,30 @@ class _MyHomePageState extends State<MyHomePage> {
           _isTappedList[index] = true;
         });
       },
-      onTapUp: (_) async{
+      onTapUp: (_) async {
         // タップが離れたらスワイプを解除
         setState(() {
           _isTappedList[index] = false;
         });
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CategoryPage(categoryName), // カテゴリページに遷移
-          ),
-        );
+
+        // "全範囲から出題"が押された場合のみQuestionPageに遷移
+        if (category == "全範囲から出題") {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>  QuestionPage(categoryName), // QuestionPageに遷移
+            ),
+          );
+        } else {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CategoryPage(categoryName), // カテゴリページに遷移
+            ),
+          );
+        }
         _initDbAndFetchData();
       },
-
       onTapCancel: () {
         // タップがキャンセルされたらスワイプを解除
         setState(() {
@@ -334,7 +347,7 @@ class _MyHomePageState extends State<MyHomePage> {
         decoration: BoxDecoration(
           border:
           Border.all(
-            color:  Color(0xFF11999E), // 枠線の色を設定,
+            color: Color(0xFF11999E), // 枠線の色を設定
             width: 2,
           ),
           borderRadius: BorderRadius.circular(10),

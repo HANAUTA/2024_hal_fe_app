@@ -16,6 +16,7 @@ dependencies:
   fl_chart: ^0.69.0  # fl_chartを追加
   firebase_core: ^3.6.0
   cloud_firestore: ^5.4.4
+  share_plus: ^10.0.3
 
 dev_dependencies:
   flutter_test:

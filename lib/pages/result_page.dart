@@ -1,66 +1,183 @@
 import 'package:flutter/material.dart';
-import 'question_page.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart'; // 追加: シェア機能用
+
 class ResultPage extends StatelessWidget {
-  const ResultPage({super.key});
+  final int correctAnswerCount;
+  final int totalQuestionCount;
+  final String correctPercentage;
+
+  const ResultPage({
+    super.key,
+    required this.correctAnswerCount,
+    required this.totalQuestionCount,
+    required this.correctPercentage,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // グラデーションの定義
+    final Shader linearGradient = const LinearGradient(
+      colors: <Color>[
+        Color(0xFFFF0000), // 赤
+        Color(0xFFFF7F00), // 橙
+        Color(0xFFFFFE00), // 黄
+        Color(0xFF00FF00), // 緑
+        Color(0xFF0000FF), // 青
+        Color(0xFF4B0082), // 藍
+        Color(0xFF9400D3), // 紫
+      ],
+    ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)); // 幅を調整
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('結果'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
-      body: Container(
-        color: const Color(0xFFE4F9F5),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'RESULT',
-                  style: TextStyle(
-                    fontSize: 36,
-                    color: Colors.black,
-                  ),
-                ),
-                
-                const SizedBox(height: 20),
-                const SizedBox(height: 40),
-                ElevatedButton(
-                  onPressed: () {
-                    // 再挑戦する処理をここに記述
-                    Navigator.pop(context); // 例として、前の画面に戻る
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  ),
-                  child: const Text(
-                    'カテゴリ選択',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    // ホームに戻る処理をここに記述
-                    Navigator.popUntil(context, (route) => route.isFirst); // ホーム画面に戻る
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFD70000),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  ),
-                  child: const Text(
-                    'ホームに戻る',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ],
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF00BFA6), Color(0xFF005662)],
+              ),
             ),
           ),
-        ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 80),
+                  correctAnswerCount == totalQuestionCount
+                      ? Column(
+                    children: [
+                      ShaderMask(
+                        shaderCallback: (bounds) {
+                          return linearGradient;
+                        },
+                        child: const Text(
+                          '全問正解！',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white, // 白に設定
+                            // グラデーションが適用されるので影は不要
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                    ],
+                  )
+                      : Card(
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    shadowColor: Colors.black26,
+                    child: Padding(
+                      padding: const EdgeInsets.all(30.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            "正解数 $correctAnswerCount / $totalQuestionCount 問中",
+                            style: const TextStyle(
+                              fontSize: 24,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            "正答率 $correctPercentage",
+                            style: const TextStyle(
+                              fontSize: 24,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 50),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.teal,
+                      side: const BorderSide(color: Colors.teal, width: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 5,
+                    ),
+                    child: const Text(
+                      'カテゴリ選択',
+                      style: TextStyle(
+                        fontSize: 18,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFFD70000),
+                      side: const BorderSide(color: Color(0xFFD70000), width: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 5,
+                    ),
+                    child: const Text(
+                      'ホームに戻る',
+                      style: TextStyle(
+                        fontSize: 18,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Share.share(
+                        '私はクイズで $correctAnswerCount / $totalQuestionCount 問正解しました！正答率: $correctPercentage',
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: const Text(
+                      '結果をシェア',
+                      style: TextStyle(
+                        fontSize: 18,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

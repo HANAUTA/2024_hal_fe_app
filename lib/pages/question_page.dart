@@ -518,6 +518,11 @@ class _QuestionPageState extends State<QuestionPage> {
 
   void _checkAnswer(String selectedChoice) async {
     int judgeValue = 0; // 判定値を保持
+    int nowJudgeValue = 0;
+    if (quizDataList[_randomIndex]['judge'] != null) {
+      nowJudgeValue = quizDataList[_randomIndex]['judge'];
+    }
+    print("nowJudgeValue: $nowJudgeValue");
 
     if (selectedChoice == correctAnswer) {
       // 正解の処理
@@ -546,11 +551,13 @@ class _QuestionPageState extends State<QuestionPage> {
     // 小数点第一位まで
     correctPercentage = (correctPercentage * 10).round() / 10;
     // データベースのjudgeフィールドを更新
-    await _database!.update(
-      'quizData',
-      {'judge': judgeValue}, // judgeフィールドを更新
-      where: 'id = ?', // 条件
-      whereArgs: [quizDataList[_randomIndex]['id']], // 条件に渡す引数
-    );
+    if (nowJudgeValue != 2) {
+      await _database!.update(
+        'quizData',
+        {'judge': judgeValue}, // judgeフィールドを更新
+        where: 'id = ?', // 条件
+        whereArgs: [quizDataList[_randomIndex]['id']], // 条件に渡す引数
+      );
+    }
   }
 }

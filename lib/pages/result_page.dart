@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart'; // 追加: シェア機能用
+import 'package:vibration/vibration.dart'; // 追加: 振動機能用
 
 class ResultPage extends StatelessWidget {
   final int correctAnswerCount;
@@ -29,6 +30,11 @@ class ResultPage extends StatelessWidget {
       ],
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)); // 幅を調整
 
+    // 全問正解のとき振動を実行
+    if (correctAnswerCount == totalQuestionCount) {
+      Vibration.vibrate(duration: 1000); // 1秒間振動
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('結果'),
@@ -55,27 +61,7 @@ class ResultPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 80),
-                  correctAnswerCount == totalQuestionCount
-                      ? Column(
-                    children: [
-                      ShaderMask(
-                        shaderCallback: (bounds) {
-                          return linearGradient;
-                        },
-                        child: const Text(
-                          '全問正解！',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white, // 白に設定
-                            // グラデーションが適用されるので影は不要
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                    ],
-                  )
-                      : Card(
+                  Card(
                     elevation: 10,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -100,6 +86,22 @@ class ResultPage extends StatelessWidget {
                               color: Colors.black87,
                             ),
                           ),
+                          const SizedBox(height: 30),
+                          if (correctAnswerCount == totalQuestionCount) ...[
+                            ShaderMask(
+                              shaderCallback: (bounds) {
+                                return linearGradient;
+                              },
+                              child: const Text(
+                                '全問正解！',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white, // 白に設定
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),

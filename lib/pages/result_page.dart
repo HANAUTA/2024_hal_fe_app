@@ -64,13 +64,18 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    // デバイスの画面サイズに基づくレスポンシブ設定
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
+    final padding = screenHeight * 0.03;
+    final buttonHeight = screenHeight * 0.07;
+    final buttonWidth = screenWidth * 0.6;
+    final fontSize = screenHeight * 0.03;
+
     // グラデーションの定義
     final Shader linearGradient = const LinearGradient(
       colors: <Color>[
-        // Color(0xFFFF0000), // 赤
-        // Color(0xFFFF7F00), // 橙
-        // Color(0xFFFFFE00), // 黄
-        // Color(0xFF00FF01), // 緑
         Color(0xFF0000FF), // 青
         Color(0xFF4B0082), // 藍
         Color(0xFF9400D3), // 紫
@@ -80,7 +85,7 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
     return Scaffold(
       appBar: AppBar(
         title: const Text('結果'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
@@ -98,11 +103,11 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
           ),
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(padding),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 80),
+                  SizedBox(height: screenHeight * 0.1),
                   Card(
                     elevation: 10,
                     shape: RoundedRectangleBorder(
@@ -110,25 +115,25 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                     ),
                     shadowColor: Colors.black26,
                     child: Padding(
-                      padding: const EdgeInsets.all(30.0),
+                      padding: EdgeInsets.all(padding * 1.5),
                       child: Column(
                         children: [
                           Text(
                             "正解数 ${widget.correctAnswerCount} / ${widget.totalQuestionCount} 問中",
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: fontSize,
                               color: Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             "正答率 ${widget.correctPercentage}",
-                            style: const TextStyle(
-                              fontSize: 24,
+                            style: TextStyle(
+                              fontSize: fontSize,
                               color: Colors.black87,
                             ),
                           ),
-                          const SizedBox(height: 30),
+                          SizedBox(height: screenHeight * 0.03),
                           if (widget.correctAnswerCount == widget.totalQuestionCount) ...[
                             ScaleTransition(
                               scale: _scaleAnimation,
@@ -136,10 +141,10 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                                 shaderCallback: (bounds) {
                                   return linearGradient;
                                 },
-                                child: const Text(
+                                child: Text(
                                   '全問正解！',
                                   style: TextStyle(
-                                    fontSize: 28,
+                                    fontSize: fontSize * 1.2,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white, // 白に設定
                                   ),
@@ -151,13 +156,13 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                       ),
                     ),
                   ),
-                  const SizedBox(height: 50),
+                  SizedBox(height: screenHeight * 0.07),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                      padding: EdgeInsets.symmetric(horizontal: buttonWidth * 0.15, vertical: buttonHeight * 0.4),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.teal,
                       side: const BorderSide(color: Colors.teal, width: 2),
@@ -174,13 +179,13 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: screenHeight * 0.03),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.popUntil(context, (route) => route.isFirst);
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                      padding: EdgeInsets.symmetric(horizontal: buttonWidth * 0.15, vertical: buttonHeight * 0.4),
                       backgroundColor: Colors.white,
                       foregroundColor: const Color(0xFFD70000),
                       side: const BorderSide(color: Color(0xFFD70000), width: 2),
@@ -197,7 +202,7 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: screenHeight * 0.03),
                   ElevatedButton(
                     onPressed: () {
                       Share.share(
@@ -205,7 +210,7 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                      padding: EdgeInsets.symmetric(horizontal: buttonWidth * 0.15, vertical: buttonHeight * 0.4),
                       backgroundColor: Colors.teal,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(

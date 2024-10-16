@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
 
-    // db削除
+    //db削除
     // if (_isFirstLaunch) {
     // await deleteDatabase(path);
     // }
@@ -196,19 +196,22 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
         centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.settings),
-          onPressed: () {
-            // 設定ページへの遷移
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SettingsPage(), // 設定ページに遷移
-              ),
-            );
-          },
-        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              // 設定ページへの遷移
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsPage(), // 設定ページに遷移
+                ),
+              );
+            },
+          ),
+        ],
       ),
+
       body: SafeArea(
         child: Container(
           color: const Color(0xFFE4F9F5), // SafeAreaの背景色を設定

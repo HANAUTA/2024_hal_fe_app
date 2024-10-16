@@ -19,7 +19,8 @@ class ResultPage extends StatefulWidget {
   _ResultPageState createState() => _ResultPageState();
 }
 
-class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateMixin {
+class _ResultPageState extends State<ResultPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   bool _isAnimating = false; // アニメーションの状態を管理するフラグ
@@ -34,7 +35,8 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(_controller); // スケールアニメーション
+    _scaleAnimation =
+        Tween<double>(begin: 1.0, end: 1.5).animate(_controller); // スケールアニメーション
 
     // 全問正解の場合にアニメーションを実行
     if (widget.correctAnswerCount == widget.totalQuestionCount) {
@@ -134,7 +136,8 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                             ),
                           ),
                           SizedBox(height: screenHeight * 0.03),
-                          if (widget.correctAnswerCount == widget.totalQuestionCount) ...[
+                          if (widget.correctAnswerCount ==
+                              widget.totalQuestionCount) ...[
                             ScaleTransition(
                               scale: _scaleAnimation,
                               child: ShaderMask(
@@ -162,7 +165,9 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: buttonWidth * 0.15, vertical: buttonHeight * 0.4),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: buttonWidth * 0.15,
+                          vertical: buttonHeight * 0.4),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.teal,
                       side: const BorderSide(color: Colors.teal, width: 2),
@@ -185,10 +190,13 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                       Navigator.popUntil(context, (route) => route.isFirst);
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: buttonWidth * 0.15, vertical: buttonHeight * 0.4),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: buttonWidth * 0.15,
+                          vertical: buttonHeight * 0.4),
                       backgroundColor: Colors.white,
                       foregroundColor: const Color(0xFFD70000),
-                      side: const BorderSide(color: Color(0xFFD70000), width: 2),
+                      side:
+                          const BorderSide(color: Color(0xFFD70000), width: 2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -210,7 +218,9 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: buttonWidth * 0.15, vertical: buttonHeight * 0.4),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: buttonWidth * 0.15,
+                          vertical: buttonHeight * 0.4),
                       backgroundColor: Colors.teal,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(

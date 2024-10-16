@@ -24,7 +24,7 @@ class SettingsPage extends StatelessWidget {
                     title: const Text('アプリの説明'),
                     content: const Text(
                       'このアプリは基本情報技術者試験の問題に挑戦できるクイズアプリです。'
-                          '豊富な問題と選択肢で、あなたの知識を試すことができます。',
+                      '豊富な問題と選択肢で、あなたの知識を試すことができます。',
                     ),
                     actions: [
                       TextButton(
@@ -51,7 +51,7 @@ class SettingsPage extends StatelessWidget {
                     title: const Text('お問い合わせ'),
                     content: const Text(
                       'ご質問やご意見がある場合は、以下のメールアドレスにご連絡ください。\n'
-                          'メールアドレス: support@example.com',
+                      'メールアドレス: support@example.com',
                     ),
                     actions: [
                       TextButton(
@@ -66,7 +66,6 @@ class SettingsPage extends StatelessWidget {
               );
             },
           ),
-
         ],
       ),
     );

@@ -211,7 +211,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-
       body: SafeArea(
         child: Container(
           color: const Color(0xFFE4F9F5), // SafeAreaの背景色を設定

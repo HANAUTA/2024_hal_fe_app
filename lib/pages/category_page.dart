@@ -5,6 +5,7 @@ import 'package:path/path.dart';
 
 class CategoryPage extends StatefulWidget {
   final String categoryId;
+
   const CategoryPage(this.categoryId, {super.key});
 
   @override
@@ -12,13 +13,11 @@ class CategoryPage extends StatefulWidget {
 }
 
 class _CategoryPageState extends State<CategoryPage> {
-
   Database? _database; // データベースのインスタンス
   List<Map<String, dynamic>> quizDataList = [];
   double progress = 0.0; // 進捗率
   int correctAnswers = 5; // 正解数
   int totalQuestions = 0; // 総問題数
-
 
   // `categoryName`をクラスのメンバーとして定義
   String? categoryName;
@@ -38,7 +37,6 @@ class _CategoryPageState extends State<CategoryPage> {
     "セキュリティ": "1011",
     "システム開発技術": "1012",
     "ソフトウェア開発管理技術": "1013",
-
     "ストラテジ系まとめ": "3",
     "システム戦略": "3001",
     "システム企画": "3002",
@@ -47,7 +45,6 @@ class _CategoryPageState extends State<CategoryPage> {
     "ビジネスインダストリ": "3005",
     "企業活動": "3006",
     "法務": "3007",
-
     "マネジメント系まとめ": "2",
     "プロジェクトマネジメント": "2001",
     "サービスマネジメント": "2002",
@@ -69,16 +66,14 @@ class _CategoryPageState extends State<CategoryPage> {
     "セキュリティ": 0,
     "システム開発技術": 0,
     "ソフトウェア開発管理技術": 0,
-
     "ストラテジ系まとめ": 0,
     "システム戦略": 0,
-    "システム企画":0,
+    "システム企画": 0,
     "経営戦略マネジメント": 0,
     "技術戦略マネジメント": 0,
     "ビジネスインダストリ": 0,
     "企業活動": 0,
     "法務": 0,
-
     "マネジメント系まとめ": 0,
     "プロジェクトマネジメント": 0,
     "サービスマネジメント": 0,
@@ -100,16 +95,14 @@ class _CategoryPageState extends State<CategoryPage> {
     "セキュリティ": 0,
     "システム開発技術": 0,
     "ソフトウェア開発管理技術": 0,
-
     "ストラテジ系まとめ": 0,
     "システム戦略": 0,
-    "システム企画":0,
+    "システム企画": 0,
     "経営戦略マネジメント": 0,
     "技術戦略マネジメント": 0,
     "ビジネスインダストリ": 0,
     "企業活動": 0,
     "法務": 0,
-
     "マネジメント系まとめ": 0,
     "プロジェクトマネジメント": 0,
     "サービスマネジメント": 0,
@@ -190,14 +183,14 @@ class _CategoryPageState extends State<CategoryPage> {
         where: 'series_document_id LIKE ?',
         whereArgs: ['1%'], // '1'で始まるレコードを取得
       );
-    } else if(widget.categoryId == 'managementStage') {
+    } else if (widget.categoryId == 'managementStage') {
       // series_document_idの1文字目が'2'のものを取得
       maps = await _database!.query(
         'quizData',
         where: 'series_document_id LIKE ?',
         whereArgs: ['2%'], // '2'で始まるレコードを取得
       );
-    } else if(widget.categoryId == 'strategyStage') {
+    } else if (widget.categoryId == 'strategyStage') {
       // series_document_idの1文字目が'3'のものを取得
       maps = await _database!.query(
         'quizData',
@@ -220,7 +213,6 @@ class _CategoryPageState extends State<CategoryPage> {
       countQuiz();
     });
   }
-
 
   // クイズデータを `series_name` ごとに分類
   Future<void> countQuiz() async {
@@ -245,20 +237,19 @@ class _CategoryPageState extends State<CategoryPage> {
     }
   }
 
-
   // データを設定
-    Future<void> setCategoryData() async {
-      const Map<String, String> categoryNameMap = {
-        "technologyStage": "テクノロジー系",
-        "managementStage": "マネジメント系",
-        "strategyStage": "ストラテジ系",
-      };
+  Future<void> setCategoryData() async {
+    const Map<String, String> categoryNameMap = {
+      "technologyStage": "テクノロジー系",
+      "managementStage": "マネジメント系",
+      "strategyStage": "ストラテジ系",
+    };
 
-      // widget.categoryIdを使用してカテゴリ名を取得
-      setState(() {
-        categoryName = categoryNameMap[widget.categoryId]; // クラスの状態に保存
-      });
-    }
+    // widget.categoryIdを使用してカテゴリ名を取得
+    setState(() {
+      categoryName = categoryNameMap[widget.categoryId]; // クラスの状態に保存
+    });
+  }
 
   Future<void> setProgress() async {
     List<String> seriesList = [];
@@ -276,14 +267,18 @@ class _CategoryPageState extends State<CategoryPage> {
         seriesList = categoryMap[categoryKey]!;
         for (String series in seriesList) {
           print(series);
-          int correctCount = quizDataList.where((quiz) => quiz['series_name'] == series && quiz['judge'] == 2).length;
+          int correctCount = quizDataList
+              .where(
+                  (quiz) => quiz['series_name'] == series && quiz['judge'] == 2)
+              .length;
           seriesCorrectCount[series] = correctCount;
         }
       }
 
       correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
       seriesCorrectCount[seriesList[0]] = correctAnswers;
-      progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+      progress =
+          totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
     });
     // print(seriesList);
     // print(correctAnswers);
@@ -291,24 +286,17 @@ class _CategoryPageState extends State<CategoryPage> {
     // print(seriesCorrectCount);
   }
 
-
-    @override
-    void initState() {
-      super.initState();
-      _initDbAndFetchData(); // DBの初期化とデータ取得を実行
-      setCategoryData();
-    }
-
-
+  @override
+  void initState() {
+    super.initState();
+    _initDbAndFetchData(); // DBの初期化とデータ取得を実行
+    setCategoryData();
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator()); // ローディング中はインジケーターを表示
-    }
 
     // カテゴリーごとに総問題数を計算
     if (categoryName == "テクノロジー系") {
@@ -319,8 +307,8 @@ class _CategoryPageState extends State<CategoryPage> {
       totalQuestions = seriesCount["マネジメント系まとめ"]!; // 総問題数
     }
 
-
-    progress = totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+    progress =
+        totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -333,117 +321,126 @@ class _CategoryPageState extends State<CategoryPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(categoryName ?? ''), // カテゴリ名を表示
       ),
-      body: Container(
-        color: const Color(0xFFE4F9F5), // SafeAreaの背景色を設定
-        child: Column(
-          children: [
-            // 正解数と進捗バーを表示
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Container(
+              color: const Color(0xFFE4F9F5), // SafeAreaの背景色を設定
               child: Column(
                 children: [
-                  Text(
-                    '正解数 $correctAnswers / $totalQuestions 問中',
-                    style: TextStyle(
-                      fontSize: screenHeight * 0.03,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                  SizedBox(
-                    width: screenWidth * 0.8, // バーの幅
-                    height: screenHeight * 0.03, // バーの高さ
-                    child: Stack(
+                  // 正解数と進捗バーを表示
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: screenHeight * 0.05),
+                    child: Column(
                       children: [
-                        Container(
-                          width: screenWidth * 0.8,
-                          height: screenHeight * 0.03,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black, width: 0),
-                            borderRadius: BorderRadius.circular(5),
+                        Text(
+                          '正解数 $correctAnswers / $totalQuestions 問中',
+                          style: TextStyle(
+                            fontSize: screenHeight * 0.03,
+                            color: Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+                        SizedBox(
+                          width: screenWidth * 0.8, // バーの幅
+                          height: screenHeight * 0.03, // バーの高さ
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: screenWidth * 0.8,
+                                height: screenHeight * 0.03,
+                                decoration: BoxDecoration(
+                                  border:
+                                      Border.all(color: Colors.black, width: 0),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                              // アニメーション付きのバー
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 500),
+                                // アニメーションの時間
+                                width: screenWidth * 0.8 * progress,
+                                // 進捗率に基づいてバーの幅を調整
+                                height: screenHeight * 0.03,
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 0),
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: const Color(0xFF30E3CA),
+                                ),
+                              ),
+                              // パーセンテージをバーの中に表示
+                              Center(
+                                child: Text(
+                                  '${(progress * 100).toInt()}%', // パーセンテージを表示
+                                  style: TextStyle(
+                                    color: Colors.black, // テキストカラー
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        // アニメーション付きのバー
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 500), // アニメーションの時間
-                          width: screenWidth * 0.8 * progress, // 進捗率に基づいてバーの幅を調整
-                          height: screenHeight * 0.03,
-                          decoration: BoxDecoration(
-                            border: Border.all(width: 0),
-                            borderRadius: BorderRadius.circular(5),
-                            color: const Color(0xFF30E3CA),
-                          ),
-                        ),
-                        // パーセンテージをバーの中に表示
-                        Center(
-                          child: Text(
-                            '${(progress * 100).toInt()}%', // パーセンテージを表示
-                            style: TextStyle(
-                              color: Colors.black, // テキストカラー
-                            ),
-                          ),
-                        ),
+                        SizedBox(height: screenHeight * 0.02),
+// 50%と100%のラベルは削除、必要に応じて保持可能
                       ],
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.02),
-// 50%と100%のラベルは削除、必要に応じて保持可能
+                  // カテゴリーリスト
+                  if (categoryName != null) // categoryNameがnullでないときに表示
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: categoryMap[categoryName]?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          String category = categoryMap[categoryName]![index];
+                          int itemCount = seriesCount[category] ?? 0;
+                          int correctCount = seriesCorrectCount[category] ?? 0;
 
+                          return Container(
+                            height: 75.0,
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Color(0xFFFFFFFF), // 下線の色を設定
+                                  width: 1.0, // 下線の幅を設定
+                                ),
+                              ),
+                            ),
+                            child: ListTile(
+                              contentPadding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              onTap: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        QuestionPage(category), // 次のページに遷移
+                                  ),
+                                );
+                                _initDbAndFetchData();
+                              },
+                              title: Text(category),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                      '($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
+                                  const SizedBox(width: 8), // アイコンとの間隔
+                                  const Icon(
+                                      Icons.keyboard_arrow_right), // 右矢印アイコン
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  else
+                    const Center(child: CircularProgressIndicator()),
+                  // データがないときは読み込み中を表示
                 ],
               ),
             ),
-            // カテゴリーリスト
-            if (categoryName != null) // categoryNameがnullでないときに表示
-              Expanded(
-                child: ListView.builder(
-                  itemCount: categoryMap[categoryName]?.length ?? 0,
-                  itemBuilder: (context, index) {
-                    String category = categoryMap[categoryName]![index];
-                    int itemCount = seriesCount[category] ?? 0;
-                    int correctCount = seriesCorrectCount[category] ?? 0;
-
-                    return Container(
-                      height: 75.0,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Color(0xFFFFFFFF), // 下線の色を設定
-                            width: 1.0, // 下線の幅を設定
-                          ),
-                        ),
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => QuestionPage(category), // 次のページに遷移
-                            ),
-                          );
-                          _initDbAndFetchData();
-                        },
-                        title: Text(category),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
-                            const SizedBox(width: 8), // アイコンとの間隔
-                            const Icon(Icons.keyboard_arrow_right), // 右矢印アイコン
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              )
-            else
-              const Center(child: CircularProgressIndicator()), // データがないときは読み込み中を表示
-          ],
-        ),
-      ),
     );
   }
-
 }

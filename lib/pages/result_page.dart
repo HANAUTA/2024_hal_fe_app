@@ -67,10 +67,10 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
     // グラデーションの定義
     final Shader linearGradient = const LinearGradient(
       colors: <Color>[
-        Color(0xFFFF0000), // 赤
-        Color(0xFFFF7F00), // 橙
-        Color(0xFFFFFE00), // 黄
-        Color(0xFF00FF00), // 緑
+        // Color(0xFFFF0000), // 赤
+        // Color(0xFFFF7F00), // 橙
+        // Color(0xFFFFFE00), // 黄
+        // Color(0xFF00FF01), // 緑
         Color(0xFF0000FF), // 青
         Color(0xFF4B0082), // 藍
         Color(0xFF9400D3), // 紫

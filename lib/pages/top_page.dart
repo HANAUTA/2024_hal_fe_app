@@ -253,21 +253,22 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          FractionallySizedBox(
-                            widthFactor: progress, // 進捗率に基づいてバーの幅を調整
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(width: 0),
-                                borderRadius: BorderRadius.circular(10),
-                                color: const Color(0xFF30E3CA),
-                              ),
+                          // アニメーション付きのバー
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 500), // アニメーションの時間
+                            width: screenWidth * 0.8 * progress, // 進捗率に基づいてバーの幅を調整
+                            height: screenHeight * 0.03,
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 0),
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color(0xFF30E3CA),
                             ),
                           ),
                         ],
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
-                    // 50%と100%のラベル表示
+// 50%と100%のラベル表示
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                       child: const Row(
@@ -280,6 +281,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ],
                       ),
                     ),
+
                   ],
                 ),
               ),

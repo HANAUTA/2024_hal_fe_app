@@ -250,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             height: screenHeight * 0.03,
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.black, width: 0),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                           ),
                           // アニメーション付きのバー
@@ -260,27 +260,24 @@ class _MyHomePageState extends State<MyHomePage> {
                             height: screenHeight * 0.03,
                             decoration: BoxDecoration(
                               border: Border.all(width: 0),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(5),
                               color: const Color(0xFF30E3CA),
+                            ),
+                          ),
+                          // パーセンテージをバーの中に表示
+                          Center(
+                            child: Text(
+                              '${(progress * 100).toInt()}%', // パーセンテージを表示
+                              style: TextStyle(
+                                color: Colors.black, // テキストカラー
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
-// 50%と100%のラベル表示
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Spacer(),
-                          Text('50%'),
-                          Spacer(),
-                          Text('100%'),
-                        ],
-                      ),
-                    ),
+// 50%と100%のラベルは削除、必要に応じて保持可能
 
                   ],
                 ),

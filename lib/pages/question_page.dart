@@ -161,15 +161,18 @@ class _QuestionPageState extends State<QuestionPage>
   }
 
   void nextQuestion() {
+    print(nextQuestionIndex);
     if (nextQuestionIndex + 1 < quizLength) {
-      _randomIndex = randomList[nextQuestionIndex];
-      nextQuestionIndex++;
+      print("next OK");
       isNextExist = true;
-      _isCorrect = false;
     } else {
       // CATEGORYページに戻る
+      print('next NG');
       isNextExist = false;
     }
+    _randomIndex = randomList[nextQuestionIndex];
+    _isCorrect = false;
+    nextQuestionIndex++;
     if (_isAnswered) {
       _isAnswered = false;
     } else {

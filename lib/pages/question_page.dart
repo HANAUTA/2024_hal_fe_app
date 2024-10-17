@@ -218,8 +218,8 @@ class _QuestionPageState extends State<QuestionPage>
           IconButton(
             icon: const Icon(Icons.home),
             onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context); // 2回ポップしてホームに戻る
+              // ホームに戻る
+              Navigator.popUntil(context, (route) => route.isFirst);
             },
           ),
         ],

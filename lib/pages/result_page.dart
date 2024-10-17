@@ -86,6 +86,7 @@ class _ResultPageState extends State<ResultPage>
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text('結果'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         elevation: 0,

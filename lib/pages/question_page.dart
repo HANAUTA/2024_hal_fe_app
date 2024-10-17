@@ -72,6 +72,8 @@ class _QuestionPageState extends State<QuestionPage>
     super.initState();
     if (widget.category == "allStage") {
       categoryNum = "_";
+    } else if(widget.category == "wrongStage") {
+      categoryNum = "";
     } else {
       categoryNum = categoryNumMap[widget.category]!;
     }
@@ -98,20 +100,10 @@ class _QuestionPageState extends State<QuestionPage>
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       int nowIndex = _tabController.index;
-      if (_tabController.indexIsChanging) {
-        updateUIForTabChange(nowIndex);
-        print("changing");
-      }
       setState(() {
         _currentTabIndex = nowIndex;
       });
     });
-  }
-
-  void updateUIForTabChange(int newIndex) {
-    if (newIndex == 1) {
-      print('1111111');
-    }
   }
 
   Future<void> _initDbAndFetchData() async {
@@ -138,9 +130,15 @@ class _QuestionPageState extends State<QuestionPage>
   }
 
   Future<void> loadQuizData() async {
+    final List<Map<String, dynamic>> maps;
     // DBからクイズデータを取得
-    final List<Map<String, dynamic>> maps = await _database!.query('quizData',
+    if (widget.category == "wrongStage") {
+      // judgeが1のデータを取得
+      maps = await _database!.query('quizData', where: 'judge = 1');
+    } else {
+      maps = await _database!.query('quizData',
         where: 'series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
+    }
     setState(() {
       quizDataList = maps; // 取得したデータを設定
       if (quizDataList.isNotEmpty) {

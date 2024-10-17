@@ -23,6 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Map<String, dynamic>> quizDataList = []; // ローカルDBから取得したクイズデータ
   int totalQuestions = 1;
   int correctAnswers = 20;
+  int wrongAnswers = 0;
   bool isLoading = true; // ローディング状態の管理
   bool _isFirstLaunch = true; // 初回起動のフラグ
   List<Map<String, dynamic>> maps = [];
@@ -174,10 +175,12 @@ class _MyHomePageState extends State<MyHomePage> {
     // 進捗を計算（judgeが2の問題数）
     setState(() {
       correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
+      wrongAnswers = quizDataList.where((quiz) => quiz['judge'] == 1).length;
       progress =
           totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
     });
     print(correctAnswers);
+    print(wrongAnswers);
     print(progress);
   }
 
@@ -283,20 +286,26 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     // カテゴリのリスト
                     Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildCategoryTile(screenWidth, screenHeight,
-                              "テクノロジー", 0, context, "technologyStage"),
-                          _buildCategoryTile(screenWidth, screenHeight,
-                              "マネジメント", 1, context, "managementStage"),
-                          _buildCategoryTile(screenWidth, screenHeight, "ストラテジ",
-                              2, context, "strategyStage"),
-                          _buildCategoryTile(screenWidth, screenHeight,
-                              "全範囲から出題", 3, context, "allStage"),
-                        ],
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildCategoryTile(
+                                screenWidth, screenHeight, "テクノロジー", 0, context, "technologyStage"),
+                            _buildCategoryTile(
+                                screenWidth, screenHeight, "マネジメント", 1, context, "managementStage"),
+                            _buildCategoryTile(
+                                screenWidth, screenHeight, "ストラテジ", 2, context, "strategyStage"),
+                            _buildCategoryTile(
+                                screenWidth, screenHeight, "全範囲から出題", 3, context, "allStage"),
+                            if (wrongAnswers > 0)
+                              _buildCategoryTile(
+                                  screenWidth, screenHeight, "間違えた問題から出題", 3, context, "wrongStage"),
+                          ],
+                        ),
                       ),
                     ),
+
                   ],
                 ),
         ),
@@ -320,7 +329,7 @@ class _MyHomePageState extends State<MyHomePage> {
         });
 
         // "全範囲から出題"が押された場合のみQuestionPageに遷移
-        if (category == "全範囲から出題") {
+        if (category == "全範囲から出題" || category == "間違えた問題から出題") {
           await Navigator.push(
             context,
             MaterialPageRoute(

@@ -435,29 +435,31 @@ class _CategoryPageState extends State<CategoryPage> {
                                   ),
                                 ),
                               ),
-                              child: ListTile(
-                                contentPadding:
-                                    const EdgeInsets.symmetric(horizontal: 16.0),
-                                onTap: () async {
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          QuestionPage(category), // 次のページに遷移
-                                    ),
-                                  );
-                                  _initDbAndFetchData();
-                                },
-                                title: Text(category),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                        '($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
-                                    const SizedBox(width: 8), // アイコンとの間隔
-                                    const Icon(
-                                        Icons.keyboard_arrow_right), // 右矢印アイコン
-                                  ],
+                              child: Center(
+                                child: ListTile(
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(horizontal: 16.0),
+                                  onTap: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            QuestionPage(category), // 次のページに遷移
+                                      ),
+                                    );
+                                    _initDbAndFetchData();
+                                  },
+                                  title: Text(category),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                          '($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
+                                      const SizedBox(width: 8), // アイコンとの間隔
+                                      const Icon(
+                                          Icons.keyboard_arrow_right), // 右矢印アイコン
+                                    ],
+                                  ),
                                 ),
                               ),
                             );

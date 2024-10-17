@@ -15,8 +15,11 @@ class CategoryPage extends StatefulWidget {
 class _CategoryPageState extends State<CategoryPage> {
   Database? _database; // データベースのインスタンス
   List<Map<String, dynamic>> quizDataList = [];
-  double progress = 0.0; // 進捗率
+  double correctProgress = 0.0; // 正解進捗率
+  double wrongProgress = 0.0; // 正解進捗率
   int correctAnswers = 5; // 正解数
+  int wrongAnswers = 5; // 不正解数
+  int totalAnswers = 0; // 総回答数
   int totalQuestions = 0; // 総問題数
 
   // `categoryName`をクラスのメンバーとして定義
@@ -276,14 +279,16 @@ class _CategoryPageState extends State<CategoryPage> {
       }
 
       correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
+      wrongAnswers = quizDataList.where((quiz) => quiz['judge'] == 1).length;
       seriesCorrectCount[seriesList[0]] = correctAnswers;
-      progress =
+      correctProgress =
           totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+      wrongProgress =
+          totalQuestions > 0 ? wrongAnswers / totalQuestions : 0; // 進捗を計算
+      totalAnswers = correctAnswers + wrongAnswers;
     });
-    // print(seriesList);
-    // print(correctAnswers);
-    // print(progress);
-    // print(seriesCorrectCount);
+  // print(correctProgress);
+  // print(wrongProgress);
   }
 
   @override
@@ -307,8 +312,8 @@ class _CategoryPageState extends State<CategoryPage> {
       totalQuestions = seriesCount["マネジメント系まとめ"]!; // 総問題数
     }
 
-    progress =
-        totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+    setProgress();
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -330,17 +335,24 @@ class _CategoryPageState extends State<CategoryPage> {
                   // 正解数と進捗バーを表示
                   Padding(
                     padding:
-                        EdgeInsets.symmetric(vertical: screenHeight * 0.05),
+                    EdgeInsets.symmetric(vertical: screenHeight * 0.05),
                     child: Column(
                       children: [
                         Text(
-                          '正解数 $correctAnswers / $totalQuestions 問中',
+                          '学習数 $totalAnswers / $totalQuestions 問中',
                           style: TextStyle(
-                            fontSize: screenHeight * 0.03,
+                            fontSize:
+                            screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
                             color: Colors.black,
                           ),
                           textAlign: TextAlign.center,
                         ),
+                        Text("正解: ${(correctProgress * 100).toInt()}%  不正解: ${(wrongProgress * 100).toInt()}%",
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.025,
+                              color: Colors.black,
+                            ),
+                            textAlign: TextAlign.center),
                         SizedBox(height: screenHeight * 0.02),
                         SizedBox(
                           width: screenWidth * 0.8, // バーの幅
@@ -351,31 +363,45 @@ class _CategoryPageState extends State<CategoryPage> {
                                 width: screenWidth * 0.8,
                                 height: screenHeight * 0.03,
                                 decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: Colors.black, width: 0),
+                                  border: Border.all(
+                                      color: Colors.black, width: 0),
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                               ),
                               // アニメーション付きのバー
+                              Container(
+                                // アニメーションの時間
+                                width: screenWidth * 0.8,
+                                // 進捗率に基づいてバーの幅を調整
+                                height: screenHeight * 0.03,
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 0),
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: const Color(0x6FBDBDBD),
+                                ),
+                              ),
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 500),
                                 // アニメーションの時間
-                                width: screenWidth * 0.8 * progress,
+                                width: screenWidth * 0.8 * (correctProgress + wrongProgress),
+                                // 進捗率に基づいてバーの幅を調整
+                                height: screenHeight * 0.03,
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 0),
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: const Color(0xFFDA3326),
+                                ),
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 500),
+                                // アニメーションの時間
+                                width: screenWidth * 0.8 * correctProgress,
                                 // 進捗率に基づいてバーの幅を調整
                                 height: screenHeight * 0.03,
                                 decoration: BoxDecoration(
                                   border: Border.all(width: 0),
                                   borderRadius: BorderRadius.circular(5),
                                   color: const Color(0xFF30E3CA),
-                                ),
-                              ),
-                              // パーセンテージをバーの中に表示
-                              Center(
-                                child: Text(
-                                  '${(progress * 100).toInt()}%', // パーセンテージを表示
-                                  style: TextStyle(
-                                    color: Colors.black, // テキストカラー
-                                  ),
                                 ),
                               ),
                             ],

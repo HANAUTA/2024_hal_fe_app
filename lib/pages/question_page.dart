@@ -35,6 +35,7 @@ class _QuestionPageState extends State<QuestionPage>
   int quizLength = 0;
   bool isNextExist = false;
   String categoryNum = "";
+  String titleText = "";
   ScrollController _scrollController =
       ScrollController(); // ScrollControllerを追加
   Map<String, String> categoryNumMap = {
@@ -86,6 +87,13 @@ class _QuestionPageState extends State<QuestionPage>
         _pageController.jumpToPage(_tabController.index);
       }
     });
+    if (widget.category == "allStage") {
+      titleText = "全範囲";
+    } else if (widget.category == "wrongStage") {
+      titleText = "間違えた問題";
+    } else {
+      titleText = widget.category;
+    }
   }
 
   @override
@@ -221,9 +229,7 @@ class _QuestionPageState extends State<QuestionPage>
             },
           ),
         ],
-        title: (widget.category == "allStage")
-            ? const Text("全範囲")
-            : Text(widget.category),
+        title: Text(titleText),
       ),
 
       body: Container(

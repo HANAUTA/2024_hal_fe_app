@@ -300,7 +300,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 screenWidth, screenHeight, "全範囲から出題", 3, context, "allStage"),
                             if (wrongAnswers > 0)
                               _buildCategoryTile(
-                                  screenWidth, screenHeight, "間違えた問題から出題", 3, context, "wrongStage"),
+                                  screenWidth, screenHeight, "間違えた問題から出題 ($wrongAnswers問)", 3, context, "wrongStage"),
                           ],
                         ),
                       ),
@@ -329,7 +329,7 @@ class _MyHomePageState extends State<MyHomePage> {
         });
 
         // "全範囲から出題"が押された場合のみQuestionPageに遷移
-        if (category == "全範囲から出題" || category == "間違えた問題から出題") {
+        if (categoryName == "allStage" || categoryName == "wrongStage") {
           await Navigator.push(
             context,
             MaterialPageRoute(

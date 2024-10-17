@@ -493,90 +493,94 @@ class _QuestionPageState extends State<QuestionPage>
       children: [
         // ページごとに違う内容
         Expanded(
-          child: SingleChildScrollView(
-            controller: _scrollController, // スクロールコントローラーを追加
-            child: Column(
-              children: [
-                Center(
-                  // 中央に寄せる
-                  child: _isCorrect
-                      ? Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center, // 横方向に中央揃え
-                          children: [
-                            Icon(Icons.radio_button_unchecked,
-                                color: Colors.green,
-                                size: 100), // 不正解の場合は赤いクローズアイコンを表示
-                            const SizedBox(width: 8),
-                            Column(
-                              children: [
-                                const Text(
-                                  "",
-                                  style: TextStyle(fontSize: 5),
-                                ),
-                                // 空のテキストを追加
-                                const Text("正解: ",
-                                    style: TextStyle(fontSize: 30),
-                                    textAlign: TextAlign.center),
-                              ],
-                            ),
-                            Text(correctAnswer, style: TextStyle(fontSize: 40)),
-                          ],
-                        )
-                      : Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center, // 横方向に中央揃え
-                          children: [
-                            Icon(Icons.close, color: Colors.red, size: 100),
-                            // 不正解の場合は赤いクローズアイコンを表示
-                            const SizedBox(width: 8),
-                            Column(
-                              children: [
-                                const Text(
-                                  "",
-                                  style: TextStyle(fontSize: 5),
-                                ),
-                                // 空のテキストを追加
-                                const Text("正解: ",
-                                    style: TextStyle(fontSize: 30),
-                                    textAlign: TextAlign.center),
-                              ],
-                            ),
-                            Text(correctAnswer, style: TextStyle(fontSize: 40)),
-                          ],
-                        ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
-                  padding: const EdgeInsets.all(16.0), // 内側にパディングを追加
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200], // 背景色を淡いグレーに変更
-                    borderRadius: BorderRadius.circular(10), // 角を丸くする
+          child: Scrollbar(
+            thickness: 8,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: _scrollController, // スクロールコントローラーを追加
+              child: Column(
+                children: [
+                  Center(
+                    // 中央に寄せる
+                    child: _isCorrect
+                        ? Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.center, // 横方向に中央揃え
+                            children: [
+                              Icon(Icons.radio_button_unchecked,
+                                  color: Colors.green,
+                                  size: 100), // 不正解の場合は赤いクローズアイコンを表示
+                              const SizedBox(width: 8),
+                              Column(
+                                children: [
+                                  const Text(
+                                    "",
+                                    style: TextStyle(fontSize: 5),
+                                  ),
+                                  // 空のテキストを追加
+                                  const Text("正解: ",
+                                      style: TextStyle(fontSize: 30),
+                                      textAlign: TextAlign.center),
+                                ],
+                              ),
+                              Text(correctAnswer, style: TextStyle(fontSize: 40)),
+                            ],
+                          )
+                        : Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.center, // 横方向に中央揃え
+                            children: [
+                              Icon(Icons.close, color: Colors.red, size: 100),
+                              // 不正解の場合は赤いクローズアイコンを表示
+                              const SizedBox(width: 8),
+                              Column(
+                                children: [
+                                  const Text(
+                                    "",
+                                    style: TextStyle(fontSize: 5),
+                                  ),
+                                  // 空のテキストを追加
+                                  const Text("正解: ",
+                                      style: TextStyle(fontSize: 30),
+                                      textAlign: TextAlign.center),
+                                ],
+                              ),
+                              Text(correctAnswer, style: TextStyle(fontSize: 40)),
+                            ],
+                          ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        quizData['comment'] ?? "解説が見つかりませんでした。",
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 15.0), // commentとlinkの間にスペースを追加
-                      if (quizData['link'] != null &&
-                          quizData['link'].isNotEmpty)
-                        Align(
-                          alignment: Alignment.centerRight, // 右寄せにする
-                          child: Text(
-                            "${quizData['link']}", // リンクを表示
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black, // リンクテキストの色
+                  Container(
+                    margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
+                    padding: const EdgeInsets.all(16.0), // 内側にパディングを追加
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200], // 背景色を淡いグレーに変更
+                      borderRadius: BorderRadius.circular(10), // 角を丸くする
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          quizData['comment'] ?? "解説が見つかりませんでした。",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 15.0), // commentとlinkの間にスペースを追加
+                        if (quizData['link'] != null &&
+                            quizData['link'].isNotEmpty)
+                          Align(
+                            alignment: Alignment.centerRight, // 右寄せにする
+                            child: Text(
+                              "${quizData['link']}", // リンクを表示
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black, // リンクテキストの色
+                              ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

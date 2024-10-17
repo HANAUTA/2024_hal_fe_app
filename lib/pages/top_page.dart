@@ -311,22 +311,26 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     // カテゴリのリスト
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildCategoryTile(
-                                screenWidth, screenHeight, "テクノロジー系", 0, context, "technologyStage"),
-                            _buildCategoryTile(
-                                screenWidth, screenHeight, "マネジメント系", 1, context, "managementStage"),
-                            _buildCategoryTile(
-                                screenWidth, screenHeight, "ストラテジ系", 2, context, "strategyStage"),
-                            _buildCategoryTile(
-                                screenWidth, screenHeight, "全範囲から出題", 3, context, "allStage"),
-                            if (wrongAnswers > 0)
+                      child: Scrollbar(
+                        thickness: 8,
+                        thumbVisibility: true,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                               _buildCategoryTile(
-                                  screenWidth, screenHeight, "間違えた問題から出題 ($wrongAnswers問)", 3, context, "wrongStage"),
-                          ],
+                                  screenWidth, screenHeight, "テクノロジー系", 0, context, "technologyStage"),
+                              _buildCategoryTile(
+                                  screenWidth, screenHeight, "マネジメント系", 1, context, "managementStage"),
+                              _buildCategoryTile(
+                                  screenWidth, screenHeight, "ストラテジ系", 2, context, "strategyStage"),
+                              _buildCategoryTile(
+                                  screenWidth, screenHeight, "全範囲から出題", 3, context, "allStage"),
+                              if (wrongAnswers > 0)
+                                _buildCategoryTile(
+                                    screenWidth, screenHeight, "間違えた問題から出題 ($wrongAnswers問)", 3, context, "wrongStage"),
+                            ],
+                          ),
                         ),
                       ),
                     ),

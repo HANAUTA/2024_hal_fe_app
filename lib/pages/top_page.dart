@@ -291,11 +291,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             _buildCategoryTile(
-                                screenWidth, screenHeight, "テクノロジー", 0, context, "technologyStage"),
+                                screenWidth, screenHeight, "テクノロジー系", 0, context, "technologyStage"),
                             _buildCategoryTile(
-                                screenWidth, screenHeight, "マネジメント", 1, context, "managementStage"),
+                                screenWidth, screenHeight, "マネジメント系", 1, context, "managementStage"),
                             _buildCategoryTile(
-                                screenWidth, screenHeight, "ストラテジ", 2, context, "strategyStage"),
+                                screenWidth, screenHeight, "ストラテジ系", 2, context, "strategyStage"),
                             _buildCategoryTile(
                                 screenWidth, screenHeight, "全範囲から出題", 3, context, "allStage"),
                             if (wrongAnswers > 0)

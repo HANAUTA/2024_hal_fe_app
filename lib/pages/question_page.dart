@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -7,8 +8,7 @@ import 'result_page.dart';
 
 class QuestionPage extends StatefulWidget {
   final String category;
-
-  const QuestionPage(this.category, {super.key});
+  QuestionPage(this.category, {super.key});
 
   @override
   _QuestionPageState createState() => _QuestionPageState();
@@ -18,10 +18,10 @@ class _QuestionPageState extends State<QuestionPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late PageController _pageController;
-  int _currentTabIndex = 0; // 現在のタブのインデックスを保持
-  Database? _database; // データベースのインスタンス
+  int _currentTabIndex = 0;
+  Database? _database;
   List<Map<String, dynamic>> quizDataList = [];
-  int _randomIndex = 0; // ランダムな問題のインデックスを保持
+  int _randomIndex = 0;
   bool _isLoading = true;
   Map quizChoices = {};
   bool _isCorrect = false;
@@ -36,8 +36,11 @@ class _QuestionPageState extends State<QuestionPage>
   bool isNextExist = false;
   String categoryNum = "";
   String titleText = "";
-  ScrollController _scrollController =
-      ScrollController(); // ScrollControllerを追加
+  ScrollController _scrollController = ScrollController();
+
+  // AudioPlayerのインスタンスを作成
+  final audioPlayer = AudioPlayer();
+
   Map<String, String> categoryNumMap = {
     "テクノロジー系まとめ": "1",
     "基礎理論": "1001",
@@ -66,6 +69,8 @@ class _QuestionPageState extends State<QuestionPage>
     "サービスマネジメント": "2002",
     "システム監査": "2003",
   };
+
+
   bool isQuestionLong = false;
 
   @override
@@ -603,6 +608,7 @@ class _QuestionPageState extends State<QuestionPage>
       judgeValue = 2;
       _isCorrect = true;
       correctAnswerCount++;
+      audioPlayer.play(AssetSource("audios/correct.mp3"));
     } else {
       // 不正解の処理
       judgeValue = 1;

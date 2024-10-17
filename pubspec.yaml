@@ -21,6 +21,10 @@ dependencies:
   firebase_remote_config: ^5.1.3
   flutter_launcher_icons: "^0.14.1"
   audioplayers: ^6.1.0
+  flutter_native_splash: ^2.4.1
+
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -31,9 +35,17 @@ flutter_icons:
   image_path: "assets/icons/fe_icon.png"
   adaptive_icon_background: '#ffffff'
   adaptive_icon_foreground: "assets/icons/fe_icon_foreground.png"
-
-
-
+flutter_native_splash:
+  color: '#add8e6'
+  image: 'assets/icons/fe_splash.png'
+  color_dark: '#262626'
+  image_dark: 'assets/icons/fe_splash.png'
+  fullscreen: true
+  android_12:
+    icon_background_color: '#add8e6'
+    image: 'assets/icons/fe_splash.png'
+    icon_background_color_dark: '#262626'
+    image_dark: 'assets/icons/fe_splash.png'
 flutter:
   uses-material-design: true
   assets:

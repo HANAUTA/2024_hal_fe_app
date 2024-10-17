@@ -389,50 +389,54 @@ class _CategoryPageState extends State<CategoryPage> {
                   // カテゴリーリスト
                   if (categoryName != null) // categoryNameがnullでないときに表示
                     Expanded(
-                      child: ListView.builder(
-                        itemCount: categoryMap[categoryName]?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          String category = categoryMap[categoryName]![index];
-                          int itemCount = seriesCount[category] ?? 0;
-                          int correctCount = seriesCorrectCount[category] ?? 0;
-
-                          return Container(
-                            height: 75.0,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Color(0xFFFFFFFF), // 下線の色を設定
-                                  width: 1.0, // 下線の幅を設定
+                      child: Scrollbar(
+                        thickness: 8,
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                          itemCount: categoryMap[categoryName]?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            String category = categoryMap[categoryName]![index];
+                            int itemCount = seriesCount[category] ?? 0;
+                            int correctCount = seriesCorrectCount[category] ?? 0;
+                        
+                            return Container(
+                              height: 75.0,
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: Color(0xFFFFFFFF), // 下線の色を設定
+                                    width: 1.0, // 下線の幅を設定
+                                  ),
                                 ),
                               ),
-                            ),
-                            child: ListTile(
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              onTap: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        QuestionPage(category), // 次のページに遷移
-                                  ),
-                                );
-                                _initDbAndFetchData();
-                              },
-                              title: Text(category),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                      '($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
-                                  const SizedBox(width: 8), // アイコンとの間隔
-                                  const Icon(
-                                      Icons.keyboard_arrow_right), // 右矢印アイコン
-                                ],
+                              child: ListTile(
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 16.0),
+                                onTap: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          QuestionPage(category), // 次のページに遷移
+                                    ),
+                                  );
+                                  _initDbAndFetchData();
+                                },
+                                title: Text(category),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                        '($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
+                                    const SizedBox(width: 8), // アイコンとの間隔
+                                    const Icon(
+                                        Icons.keyboard_arrow_right), // 右矢印アイコン
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     )
                   else

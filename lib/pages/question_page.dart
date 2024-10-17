@@ -8,6 +8,7 @@ import 'result_page.dart';
 
 class QuestionPage extends StatefulWidget {
   final String category;
+
   QuestionPage(this.category, {super.key});
 
   @override
@@ -70,7 +71,6 @@ class _QuestionPageState extends State<QuestionPage>
     "システム監査": "2003",
   };
 
-
   bool isQuestionLong = false;
 
   @override
@@ -78,7 +78,7 @@ class _QuestionPageState extends State<QuestionPage>
     super.initState();
     if (widget.category == "allStage") {
       categoryNum = "_";
-    } else if(widget.category == "wrongStage") {
+    } else if (widget.category == "wrongStage") {
       categoryNum = "";
     } else {
       categoryNum = categoryNumMap[widget.category]!;
@@ -150,7 +150,7 @@ class _QuestionPageState extends State<QuestionPage>
       maps = await _database!.query('quizData', where: 'judge = 1');
     } else {
       maps = await _database!.query('quizData',
-        where: 'series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
+          where: 'series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
     }
     setState(() {
       quizDataList = maps; // 取得したデータを設定
@@ -439,11 +439,15 @@ class _QuestionPageState extends State<QuestionPage>
             maxHeight: 180, // 最大高さを指定
           ),
           child: isQuestionLong
-              ? SingleChildScrollView(
-                  controller: _scrollController, // スクロールコントローラーを追加
-                  child: Text(
-                    quizData['question'] ?? "問題が見つかりませんでした。",
-                    style: const TextStyle(fontSize: 16),
+              ? Scrollbar(
+                  thickness: 8,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: _scrollController, // スクロールコントローラーを追加
+                    child: Text(
+                      quizData['question'] ?? "問題が見つかりませんでした。",
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ),
                 )
               : Text(
@@ -454,24 +458,28 @@ class _QuestionPageState extends State<QuestionPage>
         const SizedBox(height: 20),
         // Scrollable area for question options
         Expanded(
-          child: SingleChildScrollView(
-            controller: _scrollController, // スクロールコントローラーを追加
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                buildOptionWithBorder(
-                    "ア", quizChoices['ア'] ?? "選択肢が見つかりませんでした。"),
-                const SizedBox(height: 10),
-                buildOptionWithBorder(
-                    "イ", quizChoices['イ'] ?? "選択肢が見つかりませんでした。"),
-                const SizedBox(height: 10),
-                buildOptionWithBorder(
-                    "ウ", quizChoices['ウ'] ?? "選択肢が見つかりませんでした。"),
-                const SizedBox(height: 10),
-                buildOptionWithBorder(
-                    "エ", quizChoices['エ'] ?? "答えが見つかりませんでした。"),
-                const SizedBox(height: 10),
-              ],
+          child: Scrollbar(
+            thickness: 8,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: _scrollController, // スクロールコントローラーを追加
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildOptionWithBorder(
+                      "ア", quizChoices['ア'] ?? "選択肢が見つかりませんでした。"),
+                  const SizedBox(height: 10),
+                  buildOptionWithBorder(
+                      "イ", quizChoices['イ'] ?? "選択肢が見つかりませんでした。"),
+                  const SizedBox(height: 10),
+                  buildOptionWithBorder(
+                      "ウ", quizChoices['ウ'] ?? "選択肢が見つかりませんでした。"),
+                  const SizedBox(height: 10),
+                  buildOptionWithBorder(
+                      "エ", quizChoices['エ'] ?? "答えが見つかりませんでした。"),
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
         ),

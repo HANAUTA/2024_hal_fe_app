@@ -286,7 +286,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   decoration: BoxDecoration(
                                     border: Border.all(width: 0),
                                     borderRadius: BorderRadius.circular(5),
-                                    color: const Color(0xFFDA3326),
+                                    color: const Color(0xFFFF6969),
                                   ),
                                 ),
                                 AnimatedContainer(

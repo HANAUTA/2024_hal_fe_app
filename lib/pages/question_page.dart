@@ -24,7 +24,7 @@ class _QuestionPageState extends State<QuestionPage>
   List<Map<String, dynamic>> quizDataList = [];
   int _randomIndex = 0;
   bool _isLoading = true;
-  Map quizChoices = {};
+  Map quizChoiceMap = {};
   bool _isCorrect = false;
   String correctAnswer = "";
   int totalQuestionCount = 0;
@@ -32,7 +32,7 @@ class _QuestionPageState extends State<QuestionPage>
   double correctPercentage = 0.0;
   bool _isAnswered = true;
   int nextQuestionIndex = 0;
-  List<int> randomList = [];
+  List<int> randomIndexList = [];
   int quizLength = 0;
   bool isNextExist = false;
   String categoryNum = "";
@@ -164,8 +164,8 @@ class _QuestionPageState extends State<QuestionPage>
     quizLength = quizDataList.length;
     if (quizLength > 0) {
       // 0からquizLengthの範囲のlistを作成
-      randomList = List.generate(quizLength, (index) => index);
-      randomList.shuffle();
+      randomIndexList = List.generate(quizLength, (index) => index);
+      randomIndexList.shuffle();
     }
   }
 
@@ -179,7 +179,7 @@ class _QuestionPageState extends State<QuestionPage>
       print('next NG');
       isNextExist = false;
     }
-    _randomIndex = randomList[nextQuestionIndex];
+    _randomIndex = randomIndexList[nextQuestionIndex];
     _isCorrect = false;
     nextQuestionIndex++;
     if (_isAnswered) {
@@ -201,7 +201,7 @@ class _QuestionPageState extends State<QuestionPage>
         : {}; // ランダムに選ばれたクイズデータ
 
     if (quizData.length != 0) {
-      quizChoices = {
+      quizChoiceMap = {
         quizData['mistake1'].substring(0, 1): quizData['mistake1'].substring(2),
         quizData['mistake2'].substring(0, 1): quizData['mistake2'].substring(2),
         quizData['mistake3'].substring(0, 1): quizData['mistake3'].substring(2),
@@ -465,16 +465,16 @@ class _QuestionPageState extends State<QuestionPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   buildOptionWithBorder(
-                      "ア", quizChoices['ア'] ?? "選択肢が見つかりませんでした。"),
+                      "ア", quizChoiceMap['ア'] ?? "選択肢が見つかりませんでした。"),
                   const SizedBox(height: 10),
                   buildOptionWithBorder(
-                      "イ", quizChoices['イ'] ?? "選択肢が見つかりませんでした。"),
+                      "イ", quizChoiceMap['イ'] ?? "選択肢が見つかりませんでした。"),
                   const SizedBox(height: 10),
                   buildOptionWithBorder(
-                      "ウ", quizChoices['ウ'] ?? "選択肢が見つかりませんでした。"),
+                      "ウ", quizChoiceMap['ウ'] ?? "選択肢が見つかりませんでした。"),
                   const SizedBox(height: 10),
                   buildOptionWithBorder(
-                      "エ", quizChoices['エ'] ?? "答えが見つかりませんでした。"),
+                      "エ", quizChoiceMap['エ'] ?? "答えが見つかりませんでした。"),
                   const SizedBox(height: 10),
                 ],
               ),
@@ -506,7 +506,7 @@ class _QuestionPageState extends State<QuestionPage>
                                 MainAxisAlignment.center, // 横方向に中央揃え
                             children: [
                               Icon(Icons.radio_button_unchecked,
-                                  color: Colors.green,
+                                  color: Color(0xFF00704A),
                                   size: 100), // 不正解の場合は赤いクローズアイコンを表示
                               const SizedBox(width: 8),
                               Column(

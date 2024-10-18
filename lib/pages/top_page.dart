@@ -305,7 +305,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           ),
                           SizedBox(height: screenHeight * 0.02),
-// 50%と100%のラベルは削除、必要に応じて保持可能
                         ],
                       ),
                     ),

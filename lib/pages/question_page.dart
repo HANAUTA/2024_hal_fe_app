@@ -38,8 +38,6 @@ class _QuestionPageState extends State<QuestionPage>
   String categoryNum = "";
   String titleText = "";
   ScrollController _scrollController = ScrollController();
-
-  // AudioPlayerのインスタンスを作成
   final audioPlayer = AudioPlayer();
 
   Map<String, String> categoryNumMap = {

@@ -377,7 +377,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                 decoration: BoxDecoration(
                                   border: Border.all(width: 0),
                                   borderRadius: BorderRadius.circular(5),
-                                  color: const Color(0x6FBDBDBD),
+                                  color: const Color(0xB6FFFFFF),
                                 ),
                               ),
                               AnimatedContainer(

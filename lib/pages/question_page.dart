@@ -508,7 +508,7 @@ class _QuestionPageState extends State<QuestionPage>
                                 MainAxisAlignment.center, // 横方向に中央揃え
                             children: [
                               Icon(Icons.radio_button_unchecked,
-                                  color: Colors.green,
+                                  color: Color(0xFF00704A),
                                   size: 100), // 不正解の場合は赤いクローズアイコンを表示
                               const SizedBox(width: 8),
                               Column(

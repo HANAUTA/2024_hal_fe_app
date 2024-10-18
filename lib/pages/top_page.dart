@@ -20,10 +20,10 @@ class _MyHomePageState extends State<MyHomePage> {
   List<bool> _isTappedList = List.generate(4, (index) => false); // リスト要素の状態を管理
   Database? _database; // データベースのインスタンス
   List<Map<String, dynamic>> quizDataList = []; // ローカルDBから取得したクイズデータ
-  int totalQuestions = 1;
-  int correctAnswers = 20;
-  int wrongAnswers = 0;
-  int totalAnswers = 0;
+  int totalQuestionsCount = 1;
+  int correctAnswersCount = 20;
+  int wrongAnswersCount = 0;
+  int totalAnswersCount = 0;
   bool isLoading = true; // ローディング状態の管理
   bool _isFirstLaunch = true; // 初回起動のフラグ
   List<Map<String, dynamic>> maps = [];
@@ -67,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
     maps = await _database!.query('quizData');
     setState(() {
       quizDataList = maps; // 取得したデータを設定
-      totalQuestions = quizDataList.length; // クイズの総数を設定
+      totalQuestionsCount = quizDataList.length; // クイズの総数を設定
       isLoading = false; // データが読み込まれたらローディング状態を更新
     });
     setProgress();
@@ -167,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
     maps = await _database!.query('quizData');
     setState(() {
       quizDataList = maps; // 取得したデータを設定
-      totalQuestions = quizDataList.length; // クイズの総数を設定
+      totalQuestionsCount = quizDataList.length; // クイズの総数を設定
     });
   }
 
@@ -175,16 +175,16 @@ class _MyHomePageState extends State<MyHomePage> {
     // _database = await initializeDb(); // ローカルデータベースの初期化
     // 進捗を計算（judgeが2の問題数）
     setState(() {
-      correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
-      wrongAnswers = quizDataList.where((quiz) => quiz['judge'] == 1).length;
+      correctAnswersCount = quizDataList.where((quiz) => quiz['judge'] == 2).length;
+      wrongAnswersCount = quizDataList.where((quiz) => quiz['judge'] == 1).length;
       correctProgress =
-          totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+          totalQuestionsCount > 0 ? correctAnswersCount / totalQuestionsCount : 0; // 進捗を計算
       wrongProgress =
-          totalQuestions > 0 ? wrongAnswers / totalQuestions : 0; // 進捗を計算
-      totalAnswers = correctAnswers + wrongAnswers;
+          totalQuestionsCount > 0 ? wrongAnswersCount / totalQuestionsCount : 0; // 進捗を計算
+      totalAnswersCount = correctAnswersCount + wrongAnswersCount;
     });
-    print(correctAnswers);
-    print(wrongAnswers);
+    print(correctAnswersCount);
+    print(wrongAnswersCount);
     print(correctProgress);
     print(wrongProgress);
   }
@@ -236,7 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Column(
                         children: [
                           Text(
-                            '学習数 $totalAnswers / $totalQuestions 問中',
+                            '学習数 $totalAnswersCount / $totalQuestionsCount 問中',
                             style: TextStyle(
                               fontSize:
                                   screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
@@ -326,9 +326,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                   screenWidth, screenHeight, "ストラテジ系", 2, context, "strategyStage"),
                               _buildCategoryTile(
                                   screenWidth, screenHeight, "全範囲から出題", 3, context, "allStage"),
-                              if (wrongAnswers > 0)
+                              if (wrongAnswersCount > 0)
                                 _buildCategoryTile(
-                                    screenWidth, screenHeight, "間違えた問題から出題 ($wrongAnswers問)", 3, context, "wrongStage"),
+                                    screenWidth, screenHeight, "間違えた問題から出題 ($wrongAnswersCount問)", 3, context, "wrongStage"),
                             ],
                           ),
                         ),
@@ -343,7 +343,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildCategoryTile(double screenWidth, double screenHeight,
-      String category, int index, BuildContext context, String categoryName) {
+      String displayCategoryName, int index, BuildContext context, String categoryName) {
     return GestureDetector(
       onTapDown: (_) {
         // タップしたらスワイプのアニメーションを開始
@@ -397,7 +397,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         child: Center(
           child: Text(
-            category,
+            displayCategoryName,
             style: TextStyle(
               fontSize: screenHeight * 0.025, // フォントサイズを画面高さに基づいて指定
             ),

@@ -17,10 +17,10 @@ class _CategoryPageState extends State<CategoryPage> {
   List<Map<String, dynamic>> quizDataList = [];
   double correctProgress = 0.0; // 正解進捗率
   double wrongProgress = 0.0; // 正解進捗率
-  int correctAnswers = 5; // 正解数
-  int wrongAnswers = 5; // 不正解数
-  int totalAnswers = 0; // 総回答数
-  int totalQuestions = 0; // 総問題数
+  int correctAnswersCount = 5; // 正解数
+  int wrongAnswersCount = 5; // 不正解数
+  int totalAnswersCount = 0; // 総回答数
+  int totalQuestionsCount = 0; // 総問題数
 
   // `categoryName`をクラスのメンバーとして定義
   String? categoryName;
@@ -278,14 +278,14 @@ class _CategoryPageState extends State<CategoryPage> {
         }
       }
 
-      correctAnswers = quizDataList.where((quiz) => quiz['judge'] == 2).length;
-      wrongAnswers = quizDataList.where((quiz) => quiz['judge'] == 1).length;
-      seriesCorrectCount[seriesList[0]] = correctAnswers;
+      correctAnswersCount = quizDataList.where((quiz) => quiz['judge'] == 2).length;
+      wrongAnswersCount = quizDataList.where((quiz) => quiz['judge'] == 1).length;
+      seriesCorrectCount[seriesList[0]] = correctAnswersCount;
       correctProgress =
-          totalQuestions > 0 ? correctAnswers / totalQuestions : 0; // 進捗を計算
+          totalQuestionsCount > 0 ? correctAnswersCount / totalQuestionsCount : 0; // 進捗を計算
       wrongProgress =
-          totalQuestions > 0 ? wrongAnswers / totalQuestions : 0; // 進捗を計算
-      totalAnswers = correctAnswers + wrongAnswers;
+          totalQuestionsCount > 0 ? wrongAnswersCount / totalQuestionsCount : 0; // 進捗を計算
+      totalAnswersCount = correctAnswersCount + wrongAnswersCount;
     });
   // print(correctProgress);
   // print(wrongProgress);
@@ -305,11 +305,11 @@ class _CategoryPageState extends State<CategoryPage> {
 
     // カテゴリーごとに総問題数を計算
     if (categoryName == "テクノロジー系") {
-      totalQuestions = seriesCount["テクノロジー系まとめ"]!; // 総問題数
+      totalQuestionsCount = seriesCount["テクノロジー系まとめ"]!; // 総問題数
     } else if (categoryName == "ストラテジ系") {
-      totalQuestions = seriesCount["ストラテジ系まとめ"]!; // 総問題数
+      totalQuestionsCount = seriesCount["ストラテジ系まとめ"]!; // 総問題数
     } else if (categoryName == "マネジメント系") {
-      totalQuestions = seriesCount["マネジメント系まとめ"]!; // 総問題数
+      totalQuestionsCount = seriesCount["マネジメント系まとめ"]!; // 総問題数
     }
 
     setProgress();
@@ -339,7 +339,7 @@ class _CategoryPageState extends State<CategoryPage> {
                     child: Column(
                       children: [
                         Text(
-                          '学習数 $totalAnswers / $totalQuestions 問中',
+                          '学習数 $totalAnswersCount / $totalQuestionsCount 問中',
                           style: TextStyle(
                             fontSize:
                             screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定

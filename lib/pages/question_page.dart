@@ -618,7 +618,8 @@ class _QuestionPageState extends State<QuestionPage>
       judgeValue = 2;
       _isCorrect = true;
       correctAnswerCount++;
-      audioPlayer.play(AssetSource("audios/correct.mp3"));
+      audioPlayer.setVolume(1.0);
+      audioPlayer.play(AssetSource("audios/correct.wav"));
     } else {
       // 不正解の処理
       judgeValue = 1;

@@ -128,7 +128,8 @@ class _CategoryPageState extends State<CategoryPage> {
       "ネットワーク",
       "セキュリティ",
       "システム開発技術",
-      "ソフトウェア開発管理技術"
+      "ソフトウェア開発管理技術",
+      "間違えた問題"
     ],
     "ストラテジ系": [
       "ストラテジ系まとめ",
@@ -138,13 +139,15 @@ class _CategoryPageState extends State<CategoryPage> {
       "技術戦略マネジメント",
       "ビジネスインダストリ",
       "企業活動",
-      "法務"
+      "法務",
+      "間違えた問題"
     ],
     "マネジメント系": [
       "マネジメント系まとめ",
       "プロジェクトマネジメント",
       "サービスマネジメント",
       "システム監査",
+      "間違えた問題"
     ],
   };
 
@@ -424,7 +427,8 @@ class _CategoryPageState extends State<CategoryPage> {
                             String category = categoryMap[categoryName]![index];
                             int itemCount = seriesCount[category] ?? 0;
                             int correctCount = seriesCorrectCount[category] ?? 0;
-                        
+                            if (wrongAnswersCount > 0)
+                              ("間違えた問題から出題 ($wrongAnswersCount問)", 3, context, "wrongStage");
                             return Container(
                               height: 75.0,
                               decoration: const BoxDecoration(

@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart'; // 追加: シェア機能用
@@ -24,6 +25,7 @@ class _ResultPageState extends State<ResultPage>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   bool _isAnimating = false; // アニメーションの状態を管理するフラグ
+  final audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -41,6 +43,10 @@ class _ResultPageState extends State<ResultPage>
     // 全問正解の場合にアニメーションを実行
     if (widget.correctAnswerCount == widget.totalQuestionCount) {
       _startAnimation();
+      audioPlayer.setVolume(1.0);
+      audioPlayer.stop();
+      audioPlayer.release();
+      audioPlayer.play(AssetSource("audios/cuin.mp3"));
       Vibration.vibrate(duration: 1000); // 1秒間振動
     }
   }
@@ -78,10 +84,16 @@ class _ResultPageState extends State<ResultPage>
     // グラデーションの定義
     final Shader linearGradient = const LinearGradient(
       colors: <Color>[
-        Color(0xFF0000FF), // 青
-        Color(0xFF4B0082), // 藍
-        Color(0xFF9400D3), // 紫
+        Color(0xFFFF0000), // 明るい赤
+        Color(0xFFFFA500), // 明るい橙
+        Color(0xFFFFFF00), // 明るい黄
+        Color(0xFF00FF00), // 明るい緑
+        Color(0xFF00FFFF), // シアン
+        Color(0xFF0000FF), // 明るい青
+        Color(0xFF8B00FF), // 明るい紫
       ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)); // 幅を調整
 
     return Scaffold(

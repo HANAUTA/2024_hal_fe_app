@@ -123,30 +123,38 @@ class _MyHomePageState extends State<MyHomePage> {
     // ローカルDBのバージョンを設定
     await _database!.update('appConfig', {'db_version': remoteDbVersion});
 
-    // Firestoreからデータを取得
-    final snapshot = await FirebaseFirestore.instance
-        .collection('contents')
-        .doc('data')
-        .collection('quizzes')
-        .doc('data1')
-        .get();
-
-    //     // quizzes コレクション内のすべてのドキュメントを取得
-    //     final snapshot = await FirebaseFirestore.instance
-    //         .collection('contents')
-    //         .doc('data')
-    //         .collection('quizzes')
-    //         .get();
-    //
-    // // ドキュメントデータをリストに格納
-    //     final allData = snapshot.docs.map((doc) => doc.data()).toList();
-    //
-    // // data1のデータを取得する場合
-    //     final data1 = allData.firstWhere((data) => data['id'] == 'data1'); // 'id'は実際のフィールド名に置き換えてください
+    // Firestoreからdata1, data2, data3のデータを同時に取得
+    final snapshots = await Future.wait([
+      FirebaseFirestore.instance
+          .collection('contents')
+          .doc('data')
+          .collection('quizzes')
+          .doc('data1')
+          .get(),
+      FirebaseFirestore.instance
+          .collection('contents')
+          .doc('data')
+          .collection('quizzes')
+          .doc('data2')
+          .get(),
+      FirebaseFirestore.instance
+          .collection('contents')
+          .doc('data')
+          .collection('quizzes')
+          .doc('data3')
+          .get(),
+    ]);
 
     // Firestoreから取得したデータのリストを保持
-    List<Map<String, dynamic>> firestoreDataList =
-        List.from(snapshot.data()!['quizDataList']);
+    List<Map<String, dynamic>> firestoreDataList = [];
+
+    // 各スナップショットからquizDataListを取得し、結合する
+    for (var snapshot in snapshots) {
+      if (snapshot.exists) {
+        // snapshot.data()からquizDataListを取得し、リストに追加
+        firestoreDataList.addAll(List.from(snapshot.data()!['quizDataList']));
+      }
+    }
 
     // データをSQLiteに保存
     for (var doc in firestoreDataList) {

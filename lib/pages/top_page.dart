@@ -131,6 +131,19 @@ class _MyHomePageState extends State<MyHomePage> {
         .doc('data1')
         .get();
 
+    //     // quizzes コレクション内のすべてのドキュメントを取得
+    //     final snapshot = await FirebaseFirestore.instance
+    //         .collection('contents')
+    //         .doc('data')
+    //         .collection('quizzes')
+    //         .get();
+    //
+    // // ドキュメントデータをリストに格納
+    //     final allData = snapshot.docs.map((doc) => doc.data()).toList();
+    //
+    // // data1のデータを取得する場合
+    //     final data1 = allData.firstWhere((data) => data['id'] == 'data1'); // 'id'は実際のフィールド名に置き換えてください
+
     // Firestoreから取得したデータのリストを保持
     List<Map<String, dynamic>> firestoreDataList =
         List.from(snapshot.data()!['quizDataList']);

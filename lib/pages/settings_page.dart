@@ -41,33 +41,6 @@ class SettingsPage extends StatelessWidget {
           ),
           const Divider(),
           ListTile(
-            title: const Text('お問い合わせ'),
-            leading: const Icon(Icons.contact_mail_outlined),
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('お問い合わせ'),
-                    content: const Text(
-                      'ご質問やご意見がある場合は、以下のメールアドレスにご連絡ください。\n'
-                      'メールアドレス: support@example.com',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('閉じる'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
             title: const Text('利用規約'),
             leading: const Icon(Icons.description_outlined),
             onTap: () {

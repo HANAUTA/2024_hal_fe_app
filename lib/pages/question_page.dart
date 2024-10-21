@@ -150,11 +150,13 @@ class _QuestionPageState extends State<QuestionPage>
     if (widget.category == "wrongStage") {
       // judgeが1のデータを取得
       maps = await _database!.query('quizData', where: 'judge = 1');
-
-    } else if(widget.category == "テクノロジー系間違えた問題" || widget.category == "ストラテジ系間違えた問題" || widget.category == "マネジメント系間違えた問題") {
+    } else if (widget.category == "テクノロジー系間違えた問題" ||
+        widget.category == "ストラテジ系間違えた問題" ||
+        widget.category == "マネジメント系間違えた問題") {
       // judgeが1のデータを取得
-      maps = await _database!.query('quizData', where: 'judge = 1 AND series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
-
+      maps = await _database!.query(
+          'quizData', where: 'judge = 1 AND series_document_id LIKE ?',
+          whereArgs: ['$categoryNum%']);
     } else {
       maps = await _database!.query('quizData',
           where: 'series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
@@ -203,7 +205,10 @@ class _QuestionPageState extends State<QuestionPage>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width; // 画面の幅を取得
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width; // 画面の幅を取得
     final buttonSize = screenWidth * 0.15; // ボタンのサイズを画面幅の15%に設定
     final quizData = quizDataList.isNotEmpty
         ? quizDataList[_randomIndex]
@@ -231,7 +236,10 @@ class _QuestionPageState extends State<QuestionPage>
             Navigator.pop(context);
           },
         ),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme
+            .of(context)
+            .colorScheme
+            .inversePrimary,
         actions: [
           IconButton(
             icon: const Icon(Icons.home),
@@ -248,51 +256,51 @@ class _QuestionPageState extends State<QuestionPage>
           color: const Color(0xFFE4F9F5),
           child: _isLoading
               ? Center(
-                  child: CircularProgressIndicator(),
-                )
+            child: CircularProgressIndicator(),
+          )
               : DefaultTabController(
-                  length: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            length: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                          "正解数$correctAnswerCount / $totalQuestionCount問中"),
+                      Text("正答率$correctPercentage%"),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  TabBar(
+                    controller: _tabController,
+                    tabs: [
+                      Tab(child: const Center(child: Text("問題"))),
+                      Tab(child: const Center(child: Text("解説"))),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    // ここを追加
+                    child: PageView(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _tabController.index = index;
+                        });
+                      },
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                                "正解数$correctAnswerCount / $totalQuestionCount問中"),
-                            Text("正答率$correctPercentage%"),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        TabBar(
-                          controller: _tabController,
-                          tabs: [
-                            Tab(child: const Center(child: Text("問題"))),
-                            Tab(child: const Center(child: Text("解説"))),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Expanded(
-                          // ここを追加
-                          child: PageView(
-                            controller: _pageController,
-                            onPageChanged: (index) {
-                              setState(() {
-                                _tabController.index = index;
-                              });
-                            },
-                            children: [
-                              _buildQuestionTab(quizData, isQuestionLong),
-                              _buildExplanationTab(quizData, isQuestionLong),
-                            ],
-                          ),
-                        ),
+                        _buildQuestionTab(quizData, isQuestionLong),
+                        _buildExplanationTab(quizData, isQuestionLong),
                       ],
                     ),
                   ),
-                )),
+                ],
+              ),
+            ),
+          )),
       // Fixed BottomAppBar
       bottomNavigationBar: _buildBottomNavigationBar(context),
     );
@@ -314,11 +322,12 @@ class _QuestionPageState extends State<QuestionPage>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ResultPage(
-                        correctAnswerCount: correctAnswerCount,
-                        totalQuestionCount: totalQuestionCount,
-                        correctPercentage: '$correctPercentage%',
-                      ),
+                      builder: (context) =>
+                          ResultPage(
+                            correctAnswerCount: correctAnswerCount,
+                            totalQuestionCount: totalQuestionCount,
+                            correctPercentage: '$correctPercentage%',
+                          ),
                     ),
                   );
                 }
@@ -330,7 +339,8 @@ class _QuestionPageState extends State<QuestionPage>
                   children: [
                     const Expanded(
                       child: Center(
-                        child: Text('次の問題へ', style: TextStyle(fontSize: 16)),
+                        child: Text(
+                            '次の問題へ', style: TextStyle(fontSize: 16)),
                       ),
                     ),
                     IconButton(
@@ -343,11 +353,12 @@ class _QuestionPageState extends State<QuestionPage>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ResultPage(
-                                correctAnswerCount: correctAnswerCount,
-                                totalQuestionCount: totalQuestionCount,
-                                correctPercentage: '$correctPercentage%',
-                              ),
+                              builder: (context) =>
+                                  ResultPage(
+                                    correctAnswerCount: correctAnswerCount,
+                                    totalQuestionCount: totalQuestionCount,
+                                    correctPercentage: '$correctPercentage%',
+                                  ),
                             ),
                           );
                         }
@@ -447,20 +458,20 @@ class _QuestionPageState extends State<QuestionPage>
           ),
           child: isQuestionLong
               ? Scrollbar(
-                  thickness: 8,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: _scrollController, // スクロールコントローラーを追加
-                    child: Text(
-                      quizData['question'] ?? "問題が見つかりませんでした。",
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ),
-                )
+            thickness: 8,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: _scrollController, // スクロールコントローラーを追加
+              child: Text(
+                quizData['question'] ?? "問題が見つかりませんでした。",
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          )
               : Text(
-                  quizData['question'] ?? "問題が見つかりませんでした。",
-                  style: const TextStyle(fontSize: 16),
-                ),
+            quizData['question'] ?? "問題が見つかりませんでした。",
+            style: const TextStyle(fontSize: 16),
+          ),
         ),
         const SizedBox(height: 20),
         // Scrollable area for question options
@@ -474,16 +485,20 @@ class _QuestionPageState extends State<QuestionPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   buildOptionWithBorder(
-                      "ア", quizChoiceMap['ア'] ?? "選択肢が見つかりませんでした。"),
+                      "ア",
+                      quizChoiceMap['ア'] ?? "選択肢が見つかりませんでした。"),
                   const SizedBox(height: 10),
                   buildOptionWithBorder(
-                      "イ", quizChoiceMap['イ'] ?? "選択肢が見つかりませんでした。"),
+                      "イ",
+                      quizChoiceMap['イ'] ?? "選択肢が見つかりませんでした。"),
                   const SizedBox(height: 10),
                   buildOptionWithBorder(
-                      "ウ", quizChoiceMap['ウ'] ?? "選択肢が見つかりませんでした。"),
+                      "ウ",
+                      quizChoiceMap['ウ'] ?? "選択肢が見つかりませんでした。"),
                   const SizedBox(height: 10),
                   buildOptionWithBorder(
-                      "エ", quizChoiceMap['エ'] ?? "答えが見つかりませんでした。"),
+                      "エ",
+                      quizChoiceMap['エ'] ?? "答えが見つかりませんでした。"),
                   const SizedBox(height: 10),
                 ],
               ),
@@ -511,50 +526,50 @@ class _QuestionPageState extends State<QuestionPage>
                     // 中央に寄せる
                     child: _isCorrect
                         ? Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center, // 横方向に中央揃え
-                            children: [
-                              Icon(Icons.radio_button_unchecked,
-                                  color: Color(0xFF00704A),
-                                  size: 100), // 不正解の場合は赤いクローズアイコンを表示
-                              const SizedBox(width: 8),
-                              Column(
-                                children: [
-                                  const Text(
-                                    "",
-                                    style: TextStyle(fontSize: 5),
-                                  ),
-                                  // 空のテキストを追加
-                                  const Text("正解: ",
-                                      style: TextStyle(fontSize: 30),
-                                      textAlign: TextAlign.center),
-                                ],
-                              ),
-                              Text(correctAnswer, style: TextStyle(fontSize: 40)),
-                            ],
-                          )
+                      mainAxisAlignment:
+                      MainAxisAlignment.center, // 横方向に中央揃え
+                      children: [
+                        Icon(Icons.radio_button_unchecked,
+                            color: Color(0xFF00704A),
+                            size: 100), // 不正解の場合は赤いクローズアイコンを表示
+                        const SizedBox(width: 8),
+                        Column(
+                          children: [
+                            const Text(
+                              "",
+                              style: TextStyle(fontSize: 5),
+                            ),
+                            // 空のテキストを追加
+                            const Text("正解: ",
+                                style: TextStyle(fontSize: 30),
+                                textAlign: TextAlign.center),
+                          ],
+                        ),
+                        Text(correctAnswer, style: TextStyle(fontSize: 40)),
+                      ],
+                    )
                         : Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center, // 横方向に中央揃え
-                            children: [
-                              Icon(Icons.close, color: Colors.red, size: 100),
-                              // 不正解の場合は赤いクローズアイコンを表示
-                              const SizedBox(width: 8),
-                              Column(
-                                children: [
-                                  const Text(
-                                    "",
-                                    style: TextStyle(fontSize: 5),
-                                  ),
-                                  // 空のテキストを追加
-                                  const Text("正解: ",
-                                      style: TextStyle(fontSize: 30),
-                                      textAlign: TextAlign.center),
-                                ],
-                              ),
-                              Text(correctAnswer, style: TextStyle(fontSize: 40)),
-                            ],
-                          ),
+                      mainAxisAlignment:
+                      MainAxisAlignment.center, // 横方向に中央揃え
+                      children: [
+                        Icon(Icons.close, color: Colors.red, size: 100),
+                        // 不正解の場合は赤いクローズアイコンを表示
+                        const SizedBox(width: 8),
+                        Column(
+                          children: [
+                            const Text(
+                              "",
+                              style: TextStyle(fontSize: 5),
+                            ),
+                            // 空のテキストを追加
+                            const Text("正解: ",
+                                style: TextStyle(fontSize: 30),
+                                textAlign: TextAlign.center),
+                          ],
+                        ),
+                        Text(correctAnswer, style: TextStyle(fontSize: 40)),
+                      ],
+                    ),
                   ),
                   Container(
                     margin: const EdgeInsets.all(8.0), // 周りにマージンを追加
@@ -614,35 +629,40 @@ class _QuestionPageState extends State<QuestionPage>
     );
   }
 
+// クラス内でフィールドとして宣言
+  int judgeValue = 0; // クラスのフィールドとして定義し、初期化
+  int nowJudgeValue = 0; // 現在の判定値も同様に
+
   void _checkAnswer(String selectedChoice) {
-    int judgeValue = 0; // 判定値を保持
-    int nowJudgeValue = 0;
-
-    if (quizDataList[_randomIndex]['judge'] != null) {
-      nowJudgeValue = quizDataList[_randomIndex]['judge'];
-    }
-
+    // selectedChoice と correctAnswer の比較と処理
     if (selectedChoice == correctAnswer) {
-      // 正解の処理
+      if (judgeValue != 2) {
+        correctAnswerCount++;
+      }
       judgeValue = 2;
       _isCorrect = true;
-      correctAnswerCount++;
+
+      // オーディオ関連の処理
       audioPlayer.setVolume(1.0);
       audioPlayer.stop();
       audioPlayer.release();
       audioPlayer.play(AssetSource("audios/correct.wav"));
     } else {
-      // 不正解の処理
-      judgeValue = 1;
+      // judgeValueが2でないときのみ不正解の処理を行う
       _isCorrect = false;
+      if (judgeValue != 2) {
+        judgeValue = 1; // 不正解の処理
+      }
     }
-    //スクロール状態をリセット
+
+    // スクロール状態をリセット
     _scrollController.animateTo(
       0.0,
       duration: Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
     _tabController.animateTo(1);
+
     setState(() {
       if (!_isAnswered) {
         totalQuestionCount++;
@@ -652,15 +672,15 @@ class _QuestionPageState extends State<QuestionPage>
 
     // 正答率を計算
     correctPercentage = (correctAnswerCount / totalQuestionCount) * 100;
-    // 小数点第一位まで
     correctPercentage = (correctPercentage * 10).round() / 10;
-    // データベースのjudgeフィールドを更新
+
+    // データベースの judge フィールドを更新
     if (nowJudgeValue != 2) {
       _database!.update(
         'quizData',
-        {'judge': judgeValue}, // judgeフィールドを更新
-        where: 'id = ?', // 条件
-        whereArgs: [quizDataList[_randomIndex]['id']], // 条件に渡す引数
+        {'judge': judgeValue},
+        where: 'id = ?',
+        whereArgs: [quizDataList[_randomIndex]['id']],
       );
     }
   }

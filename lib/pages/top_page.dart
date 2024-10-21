@@ -346,9 +346,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                   screenWidth, screenHeight, "ストラテジ系", 2, context, "strategyStage"),
                               _buildCategoryTile(
                                   screenWidth, screenHeight, "全範囲から出題", 3, context, "allStage"),
-                              if (wrongAnswersCount > 0)
-                                _buildCategoryTile(
-                                    screenWidth, screenHeight, "間違えた問題から出題 ($wrongAnswersCount問)", 3, context, "wrongStage"),
+                              // if (wrongAnswersCount > 0)
+                              //   _buildCategoryTile(
+                              //       screenWidth, screenHeight, "間違えた問題から出題 ($wrongAnswersCount問)", 3, context, "wrongStage"),
                             ],
                           ),
                         ),

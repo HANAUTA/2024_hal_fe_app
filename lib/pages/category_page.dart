@@ -21,6 +21,8 @@ class _CategoryPageState extends State<CategoryPage> {
   int wrongAnswersCount = 5; // 不正解数
   int totalAnswersCount = 0; // 総回答数
   int totalQuestionsCount = 0; // 総問題数
+  int itemCount = 0; // カテゴリーごとの問題数
+  int correctCount = 0; // カテゴリーごとの正解数
 
   // `categoryName`をクラスのメンバーとして定義
   String? categoryName;
@@ -129,7 +131,7 @@ class _CategoryPageState extends State<CategoryPage> {
       "セキュリティ",
       "システム開発技術",
       "ソフトウェア開発管理技術",
-      "間違えた問題"
+      "テクノロジー系間違えた問題"
     ],
     "ストラテジ系": [
       "ストラテジ系まとめ",
@@ -140,14 +142,14 @@ class _CategoryPageState extends State<CategoryPage> {
       "ビジネスインダストリ",
       "企業活動",
       "法務",
-      "間違えた問題"
+      "ストラテジ系間違えた問題"
     ],
     "マネジメント系": [
       "マネジメント系まとめ",
       "プロジェクトマネジメント",
       "サービスマネジメント",
       "システム監査",
-      "間違えた問題"
+      "マネジメント系間違えた問題"
     ],
   };
 
@@ -425,11 +427,13 @@ class _CategoryPageState extends State<CategoryPage> {
                           itemCount: categoryMap[categoryName]?.length ?? 0,
                           itemBuilder: (context, index) {
                             String category = categoryMap[categoryName]![index];
-                            int itemCount = seriesCount[category] ?? 0;
-                            int correctCount = seriesCorrectCount[category] ?? 0;
-                            if (wrongAnswersCount > 0)
-                              ("間違えた問題から出題 ($wrongAnswersCount問)", 3, context, "wrongStage");
-                            return Container(
+                            bool isWrongAnswer = category.contains("間違えた問題");
+                            if (!isWrongAnswer) {
+                              itemCount = seriesCount[category] ?? 0;
+                              correctCount = seriesCorrectCount[category] ?? 0;
+                            }
+                            if(!(wrongAnswersCount == 0 && isWrongAnswer)) {
+                              return Container(
                               height: 75.0,
                               decoration: const BoxDecoration(
                                 border: Border(
@@ -457,8 +461,12 @@ class _CategoryPageState extends State<CategoryPage> {
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
-                                          '($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
+                                      if (!isWrongAnswer)
+                                        Text('($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
+
+                                      if (isWrongAnswer)
+                                        Text('($wrongAnswersCount) 問'), // 間違えた問題の数を表示
+
                                       const SizedBox(width: 8), // アイコンとの間隔
                                       const Icon(
                                           Icons.keyboard_arrow_right), // 右矢印アイコン
@@ -467,6 +475,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                 ),
                               ),
                             );
+                            }
                           },
                         ),
                       ),

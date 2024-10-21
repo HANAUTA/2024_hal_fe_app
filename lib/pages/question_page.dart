@@ -42,6 +42,7 @@ class _QuestionPageState extends State<QuestionPage>
 
   Map<String, String> categoryNumMap = {
     "テクノロジー系まとめ": "1",
+    "テクノロジー系間違えた問題": "1",
     "基礎理論": "1001",
     "アルゴリズムとプログラミング": "1002",
     "コンピュータ構成要素": "1003",
@@ -56,6 +57,7 @@ class _QuestionPageState extends State<QuestionPage>
     "システム開発技術": "1012",
     "ソフトウェア開発管理技術": "1013",
     "ストラテジ系まとめ": "3",
+    "ストラテジ系間違えた問題": "3",
     "システム戦略": "3001",
     "システム企画": "3002",
     "経営戦略マネジメント": "3003",
@@ -64,6 +66,7 @@ class _QuestionPageState extends State<QuestionPage>
     "企業活動": "3006",
     "法務": "3007",
     "マネジメント系まとめ": "2",
+    "マネジメント系間違えた問題": "2",
     "プロジェクトマネジメント": "2001",
     "サービスマネジメント": "2002",
     "システム監査": "2003",
@@ -142,10 +145,16 @@ class _QuestionPageState extends State<QuestionPage>
 
   Future<void> loadQuizData() async {
     final List<Map<String, dynamic>> maps;
+
     // DBからクイズデータを取得
     if (widget.category == "wrongStage") {
       // judgeが1のデータを取得
       maps = await _database!.query('quizData', where: 'judge = 1');
+
+    } else if(widget.category == "テクノロジー系間違えた問題" || widget.category == "ストラテジ系間違えた問題" || widget.category == "マネジメント系間違えた問題") {
+      // judgeが1のデータを取得
+      maps = await _database!.query('quizData', where: 'judge = 1 AND series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
+
     } else {
       maps = await _database!.query('quizData',
           where: 'series_document_id LIKE ?', whereArgs: ['$categoryNum%']);

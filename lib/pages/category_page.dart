@@ -118,6 +118,7 @@ class _CategoryPageState extends State<CategoryPage> {
   final Map<String, List<String>> categoryMap = {
     "テクノロジー系": [
       "テクノロジー系まとめ",
+      "テクノロジー系間違えた問題",
       "基礎理論",
       "アルゴリズムとプログラミング",
       "コンピュータ構成要素",
@@ -131,10 +132,11 @@ class _CategoryPageState extends State<CategoryPage> {
       "セキュリティ",
       "システム開発技術",
       "ソフトウェア開発管理技術",
-      "テクノロジー系間違えた問題"
+
     ],
     "ストラテジ系": [
       "ストラテジ系まとめ",
+      "ストラテジ系間違えた問題",
       "システム戦略",
       "システム企画",
       "経営戦略マネジメント",
@@ -142,14 +144,17 @@ class _CategoryPageState extends State<CategoryPage> {
       "ビジネスインダストリ",
       "企業活動",
       "法務",
-      "ストラテジ系間違えた問題"
+
     ],
     "マネジメント系": [
       "マネジメント系まとめ",
+
       "プロジェクトマネジメント",
+      "マネジメント系間違えた問題",
       "サービスマネジメント",
       "システム監査",
-      "マネジメント系間違えた問題"
+
+
     ],
   };
 
@@ -428,6 +433,9 @@ class _CategoryPageState extends State<CategoryPage> {
                           itemBuilder: (context, index) {
                             String category = categoryMap[categoryName]![index];
                             bool isWrongAnswer = category.contains("間違えた問題");
+                            bool isAll = category.contains("まとめ");
+
+
                             if (!isWrongAnswer) {
                               itemCount = seriesCount[category] ?? 0;
                               correctCount = seriesCorrectCount[category] ?? 0;
@@ -435,13 +443,18 @@ class _CategoryPageState extends State<CategoryPage> {
                             if(!(wrongAnswersCount == 0 && isWrongAnswer)) {
                               return Container(
                               height: 75.0,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 border: Border(
                                   bottom: BorderSide(
-                                    color: Color(0xFFFFFFFF), // 下線の色を設定
+                                    color: isAll
+                                        ? Color(0xFF11999E) // 青
+                                        : isWrongAnswer
+                                        ? Color(0xFFFF6969) // 赤
+                                        : Color(0xFFFFFFFF), // 白
                                     width: 1.0, // 下線の幅を設定
                                   ),
                                 ),
+
                               ),
                               child: Center(
                                 child: ListTile(
@@ -475,6 +488,8 @@ class _CategoryPageState extends State<CategoryPage> {
                                 ),
                               ),
                             );
+                            } else {
+                              return Container();
                             }
                           },
                         ),

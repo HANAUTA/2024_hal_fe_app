@@ -239,8 +239,14 @@ class _CategoryPageState extends State<CategoryPage> {
     String? categoryKey = categoryKeyMap[widget.categoryId];
     if (categoryKey != null) {
       List<String> seriesList = categoryMap[categoryKey]!;
+
       for (String series in seriesList) {
+        if (series.contains("間違えた")) {
+          continue;
+        }
+
         String seriesNum = categoryNumMap[series]!;
+
         int count = quizDataList
             .where((quiz) => quiz['series_document_id'].startsWith(seriesNum))
             .length;
@@ -278,7 +284,7 @@ class _CategoryPageState extends State<CategoryPage> {
       if (categoryKey != null) {
         seriesList = categoryMap[categoryKey]!;
         for (String series in seriesList) {
-          print(series);
+
           int correctCount = quizDataList
               .where(
                   (quiz) => quiz['series_name'] == series && quiz['judge'] == 2)

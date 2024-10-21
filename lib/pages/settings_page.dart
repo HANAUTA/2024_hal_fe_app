@@ -66,6 +66,33 @@ class SettingsPage extends StatelessWidget {
               );
             },
           ),
+          const Divider(),
+          ListTile(
+            title: const Text('利用規約'),
+            leading: const Icon(Icons.description_outlined),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('利用規約'),
+                    content: const Text(
+                      '利用規約はこちら。\n'
+                          '利用規約です',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('閉じる'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
         ],
       ),
     );

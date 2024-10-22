@@ -221,6 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final double adjustedScreenWidth = screenWidth < 300 ? 300 : screenWidth;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFE4F9F5),
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),

@@ -5,13 +5,11 @@ import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends StatelessWidget {
   final Database _database; // データベースを受け取る
   final List<Map<String, dynamic>> quizDataList; // クイズデータリストを受け取る
-  final Function setProgress; // 進捗バーを更新する関数を受け取る
 
   const SettingsPage({
     Key? key,
     required Database database,
     required this.quizDataList,
-    required this.setProgress,
   }) : _database = database, super(key: key); // databaseを初期化
 
   @override
@@ -86,12 +84,36 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             title: const Text('クイズ進捗のリセット'),
             leading: const Icon(Icons.refresh_outlined),
-            onTap: () async {
-              // judgeをリセットする関数を呼び出し
-              await _resetJudgeValues();
-              // 処理完了のメッセージを表示
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('クイズの進捗をリセットしました')),
+            onTap: () {
+              // 確認ダイアログを表示
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('確認'),
+                    content: const Text('データをリセットしますか？'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // ダイアログを閉じる
+                        },
+                        child: const Text('キャンセル'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          // リセットを実行
+                          await _resetJudgeValues();
+                          Navigator.of(context).pop(); // ダイアログを閉じる
+                          // 処理完了のメッセージを表示
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('データをリセットしました')),
+                          );
+                        },
+                        child: const Text('リセット'),
+                      ),
+                    ],
+                  );
+                },
               );
             },
           ),
@@ -104,9 +126,6 @@ class SettingsPage extends StatelessWidget {
     // クイズデータの全てのjudgeフィールドを0にリセット
     await _database.update('quizData', {'judge': 0});
 
-
-    // quizDataListを更新するためのsetState
-    setProgress();
     // その他の必要な処理
   }
 }

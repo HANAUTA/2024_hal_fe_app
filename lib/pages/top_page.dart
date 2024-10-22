@@ -248,18 +248,19 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             icon: Icon(Icons.settings),
-            onPressed: () {
+
+            onPressed: () async{
               // 設定ページへの遷移
-              Navigator.push(
+             await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => SettingsPage(
                     database: _database!, // データベースを渡す
                     quizDataList: quizDataList, // クイズデータリストを渡す
-                    setProgress: setProgress, // 進捗バー更新関数を渡す
                   ), // 設定ページに遷移
                 ),
               );
+              _initDbAndFetchData();
             },
           ),
         ],

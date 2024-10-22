@@ -1,4 +1,4 @@
-package com.example.fe_project
+package work.ass1st.feMaster
 
 import io.flutter.embedding.android.FlutterActivity
 

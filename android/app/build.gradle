@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.fe_project"
+    namespace = "work.ass1st.feMaster"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

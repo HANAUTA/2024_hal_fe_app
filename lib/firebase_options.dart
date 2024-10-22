@@ -63,6 +63,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '854090627865',
     projectId: 'hal-fe',
     storageBucket: 'hal-fe.appspot.com',
-    iosBundleId: 'com.example.feProject',
+    iosBundleId: 'work.ass1st.feMaster',
   );
 }

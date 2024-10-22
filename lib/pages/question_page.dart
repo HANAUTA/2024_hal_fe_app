@@ -460,7 +460,7 @@ class _QuestionPageState extends State<QuestionPage>
           ),
           child: isQuestionLong
               ? Scrollbar(
-            thickness: 8,
+            thickness: 4,
             thumbVisibility: true,
             child: SingleChildScrollView(
               controller: _scrollController, // スクロールコントローラーを追加
@@ -479,7 +479,7 @@ class _QuestionPageState extends State<QuestionPage>
         // Scrollable area for question options
         Expanded(
           child: Scrollbar(
-            thickness: 8,
+            thickness: 4,
             thumbVisibility: true,
             child: SingleChildScrollView(
               controller: _scrollController, // スクロールコントローラーを追加
@@ -518,7 +518,7 @@ class _QuestionPageState extends State<QuestionPage>
         // ページごとに違う内容
         Expanded(
           child: Scrollbar(
-            thickness: 8,
+            thickness: 4,
             thumbVisibility: true,
             child: SingleChildScrollView(
               controller: _scrollController, // スクロールコントローラーを追加

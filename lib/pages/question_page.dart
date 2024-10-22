@@ -39,6 +39,8 @@ class _QuestionPageState extends State<QuestionPage>
   String titleText = "";
   ScrollController _scrollController = ScrollController();
   final audioPlayer = AudioPlayer();
+  int judgeValue = 0; // クラスのフィールドとして定義し、初期化
+  int nowJudgeValue = 0; // 現在の判定値も同様に
 
   Map<String, String> categoryNumMap = {
     "テクノロジー系まとめ": "1",
@@ -181,7 +183,6 @@ class _QuestionPageState extends State<QuestionPage>
   }
 
   void nextQuestion() {
-    print(nextQuestionIndex);
     if (nextQuestionIndex + 1 < quizLength) {
       print("next OK");
       isNextExist = true;
@@ -193,6 +194,7 @@ class _QuestionPageState extends State<QuestionPage>
     _randomIndex = randomIndexList[nextQuestionIndex];
     _isCorrect = false;
     nextQuestionIndex++;
+    judgeValue = 0;
     if (_isAnswered) {
       _isAnswered = false;
     } else {
@@ -629,9 +631,7 @@ class _QuestionPageState extends State<QuestionPage>
     );
   }
 
-// クラス内でフィールドとして宣言
-  int judgeValue = 0; // クラスのフィールドとして定義し、初期化
-  int nowJudgeValue = 0; // 現在の判定値も同様に
+
 
   void _checkAnswer(String selectedChoice) {
     // selectedChoice と correctAnswer の比較と処理

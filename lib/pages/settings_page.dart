@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  final Database _database; // データベースを受け取る
+  final List<Map<String, dynamic>> quizDataList; // クイズデータリストを受け取る
+  final Function setProgress; // 進捗バーを更新する関数を受け取る
+
+  const SettingsPage({
+    Key? key,
+    required Database database,
+    required this.quizDataList,
+    required this.setProgress,
+  }) : _database = database, super(key: key); // databaseを初期化
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +81,32 @@ class SettingsPage extends StatelessWidget {
               }
             },
           ),
+          const Divider(),
+          // ここにリセットのListTileを追加
+          ListTile(
+            title: const Text('クイズ進捗のリセット'),
+            leading: const Icon(Icons.refresh_outlined),
+            onTap: () async {
+              // judgeをリセットする関数を呼び出し
+              await _resetJudgeValues();
+              // 処理完了のメッセージを表示
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('クイズの進捗をリセットしました')),
+              );
+            },
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _resetJudgeValues() async {
+    // クイズデータの全てのjudgeフィールドを0にリセット
+    await _database.update('quizData', {'judge': 0});
+
+
+    // quizDataListを更新するためのsetState
+    setProgress();
+    // その他の必要な処理
   }
 }

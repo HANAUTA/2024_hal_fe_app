@@ -210,6 +210,25 @@ class _MyHomePageState extends State<MyHomePage> {
     print(wrongProgress);
   }
 
+  Future<void> _resetJudgeValues() async {
+    // データベースが初期化されていることを確認
+    if (_database != null) {
+      // 全てのクイズデータのjudgeを0にリセット
+      await _database!.update('quizData', {'judge': 0});
+
+      // DBからクイズデータを再取得して画面を更新
+      maps = await _database!.query('quizData');
+      setState(() {
+        quizDataList = maps; // 取得したデータを設定
+        totalQuestionsCount = quizDataList.length; // クイズの総数を設定
+      });
+
+      // 進捗バーの状態を更新
+      setProgress();
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     // 画面の高さと幅を取得
@@ -234,7 +253,11 @@ class _MyHomePageState extends State<MyHomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SettingsPage(), // 設定ページに遷移
+                  builder: (context) => SettingsPage(
+                    database: _database!, // データベースを渡す
+                    quizDataList: quizDataList, // クイズデータリストを渡す
+                    setProgress: setProgress, // 進捗バー更新関数を渡す
+                  ), // 設定ページに遷移
                 ),
               );
             },

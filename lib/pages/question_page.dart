@@ -37,7 +37,10 @@ class _QuestionPageState extends State<QuestionPage>
   bool isNextExist = false;
   String categoryNum = "";
   String titleText = "";
-  ScrollController _scrollController = ScrollController();
+  ScrollController _questionScrollController = ScrollController();
+  ScrollController _choiceScrollController = ScrollController();
+  ScrollController _explainScrollController = ScrollController();
+  // ScrollController _scrollController = ScrollController();
   final audioPlayer = AudioPlayer();
   int judgeValue = 0; // クラスのフィールドとして定義し、初期化
   int nowJudgeValue = 0; // 現在の判定値も同様に
@@ -106,7 +109,10 @@ class _QuestionPageState extends State<QuestionPage>
 
   @override
   void dispose() {
-    _scrollController.dispose(); // ScrollControllerを破棄
+    // _scrollController.dispose(); // ScrollControllerを破棄
+    _questionScrollController.dispose();
+    _choiceScrollController.dispose();
+    _explainScrollController.dispose();
     _tabController.dispose();
     _pageController.dispose();
     super.dispose();
@@ -203,6 +209,7 @@ class _QuestionPageState extends State<QuestionPage>
     isQuestionLong =
         (quizDataList[_randomIndex]['question']?.length ?? 0) > 100; // 適当な長さで判定
     _tabController.animateTo(0);
+
   }
 
   @override
@@ -462,8 +469,9 @@ class _QuestionPageState extends State<QuestionPage>
               ? Scrollbar(
             thickness: 4,
             thumbVisibility: true,
+            controller: _questionScrollController,
             child: SingleChildScrollView(
-              controller: _scrollController, // スクロールコントローラーを追加
+              controller: _questionScrollController, // スクロールコントローラーを追加
               child: Text(
                 quizData['question'] ?? "問題が見つかりませんでした。",
                 style: const TextStyle(fontSize: 16),
@@ -481,8 +489,9 @@ class _QuestionPageState extends State<QuestionPage>
           child: Scrollbar(
             thickness: 4,
             thumbVisibility: true,
+            controller: _choiceScrollController,
             child: SingleChildScrollView(
-              controller: _scrollController, // スクロールコントローラーを追加
+              controller: _choiceScrollController, // スクロールコントローラーを追加
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -518,10 +527,11 @@ class _QuestionPageState extends State<QuestionPage>
         // ページごとに違う内容
         Expanded(
           child: Scrollbar(
+            controller: _explainScrollController,
             thickness: 4,
             thumbVisibility: true,
             child: SingleChildScrollView(
-              controller: _scrollController, // スクロールコントローラーを追加
+              controller: _explainScrollController, // スクロールコントローラーを追加
               child: Column(
                 children: [
                   Center(
@@ -656,11 +666,28 @@ class _QuestionPageState extends State<QuestionPage>
     }
 
     // スクロール状態をリセット
-    _scrollController.animateTo(
-      0.0,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
+    // _scrollController.animateTo(
+    //   0.0,
+    //   duration: Duration(milliseconds: 300),
+    //   curve: Curves.easeOut,
+    // );
+    // _choiceScrollController.animateTo(
+    //   0.0,
+    //   duration: Duration(milliseconds: 300),
+    //   curve: Curves.easeOut,
+    // );
+    // _questionScrollController.animateTo(
+    //   0.0,
+    //   duration: Duration(milliseconds: 300),
+    //   curve: Curves.easeOut,
+    // );
+    //
+    // _explainScrollController.animateTo(
+    //   0.0,
+    //   duration: Duration(milliseconds: 300),
+    //   curve: Curves.easeOut,
+    // );
+
     _tabController.animateTo(1);
 
     setState(() {

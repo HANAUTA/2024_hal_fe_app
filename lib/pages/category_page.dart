@@ -456,7 +456,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                         : isWrongAnswer
                                         ? Color(0xFFFF6969) // 赤
                                         : Color(0xFFFFFFFF), // 白
-                                    width: 1.0, // 下線の幅を設定
+                                    width: 2.0, // 下線の幅を設定
                                   ),
                                 ),
 

@@ -1,17 +1,10 @@
+import 'package:fe_project/services/database/quiz_data.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatelessWidget {
-  final Database _database; // データベースを受け取る
-  final List<Map<String, dynamic>> quizDataList; // クイズデータリストを受け取る
 
-  const SettingsPage({
-    Key? key,
-    required Database database,
-    required this.quizDataList,
-  }) : _database = database, super(key: key); // databaseを初期化
-
+  SettingsPage({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,7 +95,7 @@ class SettingsPage extends StatelessWidget {
                       TextButton(
                         onPressed: () async {
                           // リセットを実行
-                          await _resetJudgeValues();
+                          await reset();
                           Navigator.of(context).pop(); // ダイアログを閉じる
                           // 処理完了のメッセージを表示
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -122,10 +115,9 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Future<void> _resetJudgeValues() async {
-    // クイズデータの全てのjudgeフィールドを0にリセット
-    await _database.update('quizData', {'judge': 0});
-
-    // その他の必要な処理
+  Future<void> reset() async {
+    var quizDataInstance = QuizData();
+    await quizDataInstance.initDb();
+    await quizDataInstance.resetProgress();
   }
 }

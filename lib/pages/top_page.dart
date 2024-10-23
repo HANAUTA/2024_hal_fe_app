@@ -1,4 +1,5 @@
 import 'package:fe_project/pages/settings_page.dart';
+import 'package:fe_project/services/database/quiz_data.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
@@ -24,208 +25,42 @@ class _MyHomePageState extends State<MyHomePage> {
   int correctAnswersCount = 20;
   int wrongAnswersCount = 0;
   int totalAnswersCount = 0;
-  bool isLoading = true; // ローディング状態の管理
-  bool _isFirstLaunch = true; // 初回起動のフラグ
-  List<Map<String, dynamic>> maps = [];
   double correctProgress = 0; // 正解進捗率
   double wrongProgress = 0; // 不正解進捗率
-  final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+  bool isLoading = true; // ローディング状態の管理
+  bool _isFirstLaunch = true; // 初回起動のフラグ
+  var quizDataInstance = QuizData();
 
   @override
   void initState() {
     super.initState();
-    _initDbAndFetchData(); // DBの初期化とデータ取得を実行
+    _initQuizData(); // DBの初期化とデータ取得を実行
   }
 
-  Future<void> _initDbAndFetchData() async {
-    _database = await initializeDb(); // ローカルデータベースの初期化
-    await remoteConfig.setConfigSettings(RemoteConfigSettings(
-      fetchTimeout: const Duration(seconds: 10),
-      minimumFetchInterval: Duration.zero,
-    ));
+  Future<void> _initQuizData() async {
+    await quizDataInstance.initDb();
+    List<Map<String, dynamic>> maps = await quizDataInstance.getQuizData(isFirstLaunch: _isFirstLaunch);
+    _isFirstLaunch = false;
 
-    await remoteConfig.setDefaults(<String, dynamic>{
-      "db_version": 0,
-    });
-
-    await remoteConfig.fetchAndActivate();
-    int remoteDbVersion = remoteConfig.getInt("db_version");
-    print("remote DBバージョン: $remoteDbVersion");
-
-    // ローカルdbからバージョンを取得
-    final appConfig = await _database!.query('appConfig');
-    Object? localDbVersion = appConfig[0]['db_version'];
-    print("ローカルDBバージョン: $localDbVersion");
-
-    // remote configのバージョンと違ったらfirebaseから取得
-    if (_isFirstLaunch && remoteDbVersion != localDbVersion) {
-      await loadQuizData(remoteDbVersion); // ローカルDBにデータを読み込み
-      _isFirstLaunch = false; // フラグを更新
-    }
-
-    // DBからクイズデータを取得
-    maps = await _database!.query('quizData');
     setState(() {
       quizDataList = maps; // 取得したデータを設定
-      totalQuestionsCount = quizDataList.length; // クイズの総数を設定
+      totalQuestionsCount = maps.length; // クイズの総数を設定
       isLoading = false; // データが読み込まれたらローディング状態を更新
     });
     setProgress();
   }
 
-  Future<Database> initializeDb() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
-
-    //db削除
-    // if (_isFirstLaunch) {
-    // await deleteDatabase(path);
-    // }
-
-    return openDatabase(
-      path,
-      onCreate: (db, version) async {
-        // quizDataテーブルの作成
-        await db.execute(
-          'CREATE TABLE quizData('
-          'id INTEGER PRIMARY KEY, '
-          'answer TEXT, '
-          'comment TEXT, '
-          'image TEXT, '
-          'link TEXT, '
-          'mistake1 TEXT, '
-          'mistake2 TEXT, '
-          'mistake3 TEXT, '
-          'question TEXT, '
-          'quiz_id INTEGER, '
-          'series_document_id TEXT, '
-          'series_name TEXT, '
-          'stage_document_id TEXT, '
-          'stage_name TEXT, '
-          'judge INTEGER'
-          ')',
-        );
-        // appConfigテーブルの作成
-        await db.execute(
-          'CREATE TABLE appConfig('
-          'id INTEGER PRIMARY KEY, '
-          'db_version INTEGER'
-          ')',
-        );
-        await db.insert('appConfig', {'id': 1, 'db_version': 0});
-      },
-      version: 1,
-    );
-  }
-
-  Future<void> loadQuizData(int remoteDbVersion) async {
-    print("データをロードします");
-    // ローカルDBのバージョンを設定
-    await _database!.update('appConfig', {'db_version': remoteDbVersion});
-
-    // Firestoreからdata1, data2, data3のデータを同時に取得
-    final snapshots = await Future.wait([
-      FirebaseFirestore.instance
-          .collection('contents')
-          .doc('data')
-          .collection('quizzes')
-          .doc('data1')
-          .get(),
-      FirebaseFirestore.instance
-          .collection('contents')
-          .doc('data')
-          .collection('quizzes')
-          .doc('data2')
-          .get(),
-      FirebaseFirestore.instance
-          .collection('contents')
-          .doc('data')
-          .collection('quizzes')
-          .doc('data3')
-          .get(),
-    ]);
-
-    // Firestoreから取得したデータのリストを保持
-    List<Map<String, dynamic>> firestoreDataList = [];
-
-    // 各スナップショットからquizDataListを取得し、結合する
-    for (var snapshot in snapshots) {
-      if (snapshot.exists) {
-        // snapshot.data()からquizDataListを取得し、リストに追加
-        firestoreDataList.addAll(List.from(snapshot.data()!['quizDataList']));
-      }
-    }
-
-    // データをSQLiteに保存
-    for (var doc in firestoreDataList) {
-      // すでにデータが存在するかを確認
-      final existingData = await _database!
-          .query('quizData', where: 'id = ?', whereArgs: [doc['quiz_id']]);
-
-      if (existingData.isEmpty) {
-        // 存在しない場合は新規挿入
-        await _database!.insert('quizData', {
-          'id': doc['quiz_id'], // Firestoreのデータを使用
-          'answer': doc['answer'],
-          'comment': doc['comment'],
-          'image': doc['image_url'],
-          'link': doc['link'],
-          'mistake1': doc['mistake_list'][0],
-          'mistake2': doc['mistake_list'][1],
-          'mistake3': doc['mistake_list'][2],
-          'question': doc['question'],
-          'quiz_id': doc['quiz_id'],
-          'series_document_id': doc['series_document_id'],
-          'series_name': doc['series_name'],
-          'stage_document_id': doc['stage_document_id'],
-          'stage_name': doc['stage_name'],
-          'judge': 0, // 初期値
-        });
-      }
-    }
-
-    // DBからクイズデータを取得
-    maps = await _database!.query('quizData');
-    setState(() {
-      quizDataList = maps; // 取得したデータを設定
-      totalQuestionsCount = quizDataList.length; // クイズの総数を設定
-    });
-  }
 
   Future<void> setProgress() async {
-    // _database = await initializeDb(); // ローカルデータベースの初期化
+    Map<String, dynamic> progressData = await quizDataInstance.getProgress(quizDataList: quizDataList);
     // 進捗を計算（judgeが2の問題数）
     setState(() {
-      correctAnswersCount = quizDataList.where((quiz) => quiz['judge'] == 2).length;
-      wrongAnswersCount = quizDataList.where((quiz) => quiz['judge'] == 1).length;
-      correctProgress =
-          totalQuestionsCount > 0 ? correctAnswersCount / totalQuestionsCount : 0; // 進捗を計算
-      wrongProgress =
-          totalQuestionsCount > 0 ? wrongAnswersCount / totalQuestionsCount : 0; // 進捗を計算
-      totalAnswersCount = correctAnswersCount + wrongAnswersCount;
+      correctAnswersCount = progressData['correctAnswersCount'];
+      wrongAnswersCount = progressData['wrongAnswersCount'];
+      correctProgress = progressData['correctProgress'];
+      wrongProgress = progressData['wrongProgress'];
+      totalAnswersCount = progressData['totalAnswersCount'];
     });
-    print(correctAnswersCount);
-    print(wrongAnswersCount);
-    print(correctProgress);
-    print(wrongProgress);
-  }
-
-  Future<void> _resetJudgeValues() async {
-    // データベースが初期化されていることを確認
-    if (_database != null) {
-      // 全てのクイズデータのjudgeを0にリセット
-      await _database!.update('quizData', {'judge': 0});
-
-      // DBからクイズデータを再取得して画面を更新
-      maps = await _database!.query('quizData');
-      setState(() {
-        quizDataList = maps; // 取得したデータを設定
-        totalQuestionsCount = quizDataList.length; // クイズの総数を設定
-      });
-
-      // 進捗バーの状態を更新
-      setProgress();
-    }
   }
 
 
@@ -254,13 +89,10 @@ class _MyHomePageState extends State<MyHomePage> {
              await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SettingsPage(
-                    database: _database!, // データベースを渡す
-                    quizDataList: quizDataList, // クイズデータリストを渡す
-                  ), // 設定ページに遷移
+                  builder: (context) => SettingsPage(), // 設定ページに遷移
                 ),
               );
-              _initDbAndFetchData();
+              _initQuizData();
             },
           ),
         ],
@@ -419,7 +251,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           );
         }
-        _initDbAndFetchData();
+        _initQuizData();
       },
       onTapCancel: () {
         // タップがキャンセルされたらスワイプを解除

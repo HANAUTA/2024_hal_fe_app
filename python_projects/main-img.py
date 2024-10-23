@@ -364,33 +364,39 @@ def get_mondai_kaisetsu(mondai_main):
     soup = BeautifulSoup(html_content, 'html.parser')
 
     # 文章を取得
-    result_texts = []
+    result_texts = ""
 
-    # <ul>以外のテキストを取得し、<br>を改行に変更
+    text_list = []
+    tmp_text = ""
+    tmp_li_text = ""
+    
     for elem in soup.contents:
-        if elem.name != 'ul':
-            text_with_breaks = elem.get_text(separator='\n', strip=True)
-            result_texts.append(text_with_breaks)
-
-    # <ul>の内容を取得
-    for ul in soup.find_all('ul'):
-        result_texts.append("")  # 空白行1
-        result_texts.append("")  # 空白行2
-        
-        for li in ul.find_all('li'):
-            # li要素内のテキストを取得し、<br>を改行に変換
-            text_with_breaks = li.get_text(separator='', strip=True)
-            for br in li.find_all('br'):
-                text_with_breaks = text_with_breaks.replace(br.string, '\n')
-            result_texts.append(text_with_breaks)
-            result_texts.append("")  # liごとの間に空白行1つ
-
-        result_texts.append("")  # ulの後の空白行1つ
-
-    # 最終的な結果を連結
-    final_result = "\n".join(result_texts).strip()
-
-    return final_result
+        if elem.name == "ul":
+            text_list.append("")
+            text_list.append("")
+            for li in elem.contents:
+                for li_elem in li.contents:
+                    tmp_li_text += li_elem.text
+                    if li_elem.name == "em":
+                        continue
+                    if li_elem.name == "br":
+                        continue
+                    text_list.append(str(tmp_li_text))
+                    tmp_li_text = ""
+                text_list.append("")
+        else:
+            tmp_text += str(elem.text)
+            if elem.name == "br":
+                continue
+            if elem.name == "strong" or elem.name == "em":
+                continue
+            else:
+                text_list.append(str(tmp_text))
+                tmp_text = ""
+    
+    print("--------------------")
+    print('\n'.join(text_list))
+    return result_texts
 
 def tab_check():
     wait.until(EC.presence_of_all_elements_located)

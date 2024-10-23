@@ -2,10 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fe_project/services/database/remote_config.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+
 class QuizData {
   Database? _database;
+  String wrongStage = "wrongStage";
+  String technologyWrongStage = "テクノロジー系間違えた問題";
+  String strategyWrongStage = "ストラテジ系間違えた問題";
+  String managementWrongStage = "マネジメント系間違えた問題";
 
-  Future<void> initDb() async{
+  Future<void> initDb() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
 
@@ -19,29 +24,29 @@ class QuizData {
         // quizDataテーブルの作成
         await db.execute(
           'CREATE TABLE quizData('
-              'id INTEGER PRIMARY KEY, '
-              'answer TEXT, '
-              'comment TEXT, '
-              'image TEXT, '
-              'link TEXT, '
-              'mistake1 TEXT, '
-              'mistake2 TEXT, '
-              'mistake3 TEXT, '
-              'question TEXT, '
-              'quiz_id INTEGER, '
-              'series_document_id TEXT, '
-              'series_name TEXT, '
-              'stage_document_id TEXT, '
-              'stage_name TEXT, '
-              'judge INTEGER'
-              ')',
+          'id INTEGER PRIMARY KEY, '
+          'answer TEXT, '
+          'comment TEXT, '
+          'image TEXT, '
+          'link TEXT, '
+          'mistake1 TEXT, '
+          'mistake2 TEXT, '
+          'mistake3 TEXT, '
+          'question TEXT, '
+          'quiz_id INTEGER, '
+          'series_document_id TEXT, '
+          'series_name TEXT, '
+          'stage_document_id TEXT, '
+          'stage_name TEXT, '
+          'judge INTEGER'
+          ')',
         );
         // appConfigテーブルの作成
         await db.execute(
           'CREATE TABLE appConfig('
-              'id INTEGER PRIMARY KEY, '
-              'db_version INTEGER'
-              ')',
+          'id INTEGER PRIMARY KEY, '
+          'db_version INTEGER'
+          ')',
         );
         await db.insert('appConfig', {'id': 1, 'db_version': 0});
       },
@@ -112,11 +117,10 @@ class QuizData {
         });
       }
     }
-
   }
 
   // クイズデータを取得
-  Future<List<Map<String, dynamic>>> getQuizData({isFirstLaunch}) async {
+  Future<List<Map<String, dynamic>>> getAllQuizData({isFirstLaunch}) async {
     // remote dbバージョン
     int remoteDbVersion = await RemoteConfig().getDbVersion();
 
@@ -129,18 +133,40 @@ class QuizData {
       await setQuizData(remoteDbVersion: remoteDbVersion); // ローカルDBにデータを読み込み
     }
 
-      // DBからクイズデータを取得
+    // DBからクイズデータを取得
     List<Map<String, dynamic>> maps = await _database!.query('quizData');
-      return maps;
+    return maps;
+  }
 
+  Future<List<Map<String, dynamic>>> getTargetQuizData({required targetCategory, int? categoryNum,}) async {
+    final List<Map<String, dynamic>> maps;
+    if (targetCategory == wrongStage) {
+      maps = await _database!.query('quizData', where: 'judge = 1');
+    } else if (targetCategory == technologyWrongStage ||
+        targetCategory == strategyWrongStage ||
+        targetCategory == managementWrongStage) {
+      // judgeが1のデータを取得
+      maps = await _database!.query('quizData',
+          where: 'judge = 1 AND series_document_id LIKE ?',
+          whereArgs: ['$categoryNum%']);
+    } else {
+      maps = await _database!.query('quizData',
+          where: 'series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
+    }
+
+    return maps;
   }
 
   // 進捗取得
   Future<Map<String, dynamic>> getProgress({quizDataList}) async {
-    int correctAnswersCount = quizDataList.where((quiz) => quiz['judge'] == 2).length;
-    int wrongAnswersCount = quizDataList.where((quiz) => quiz['judge'] == 1).length;
-    double correctProgress = quizDataList.length > 0 ? correctAnswersCount / quizDataList.length : 0;
-    double wrongProgress = quizDataList.length > 0 ? wrongAnswersCount / quizDataList.length : 0;
+    int correctAnswersCount =
+        quizDataList.where((quiz) => quiz['judge'] == 2).length;
+    int wrongAnswersCount =
+        quizDataList.where((quiz) => quiz['judge'] == 1).length;
+    double correctProgress =
+        quizDataList.length > 0 ? correctAnswersCount / quizDataList.length : 0;
+    double wrongProgress =
+        quizDataList.length > 0 ? wrongAnswersCount / quizDataList.length : 0;
     int totalAnswersCount = correctAnswersCount + wrongAnswersCount;
 
     return {
@@ -158,5 +184,11 @@ class QuizData {
       print("okasiiyo!!!!!");
     }
     await _database?.update('quizData', {'judge': 0});
+  }
+
+  // 正誤判定更新
+  void updateJudge({required quizId, required judge}) async {
+    await _database!.update('quizData', {'judge': judge},
+        where: 'id = ?', whereArgs: [quizId]);
   }
 }

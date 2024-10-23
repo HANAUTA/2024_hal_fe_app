@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _initQuizData() async {
     await quizDataInstance.initDb();
-    List<Map<String, dynamic>> maps = await quizDataInstance.getQuizData(isFirstLaunch: _isFirstLaunch);
+    List<Map<String, dynamic>> maps = await quizDataInstance.getAllQuizData(isFirstLaunch: _isFirstLaunch);
     _isFirstLaunch = false;
 
     setState(() {

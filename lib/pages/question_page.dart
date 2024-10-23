@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:fe_project/constants/category_data.dart';
+import 'package:fe_project/services/database/quiz_data.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -20,7 +22,6 @@ class _QuestionPageState extends State<QuestionPage>
   late TabController _tabController;
   late PageController _pageController;
   int _currentTabIndex = 0;
-  Database? _database;
   List<Map<String, dynamic>> quizDataList = [];
   int _randomIndex = 0;
   bool _isLoading = true;
@@ -40,44 +41,13 @@ class _QuestionPageState extends State<QuestionPage>
   ScrollController _questionScrollController = ScrollController();
   ScrollController _choiceScrollController = ScrollController();
   ScrollController _explainScrollController = ScrollController();
-  // ScrollController _scrollController = ScrollController();
   final audioPlayer = AudioPlayer();
   int judgeValue = 0; // クラスのフィールドとして定義し、初期化
   int nowJudgeValue = 0; // 現在の判定値も同様に
-
-  Map<String, String> categoryNumMap = {
-    "テクノロジー系まとめ": "1",
-    "テクノロジー系間違えた問題": "1",
-    "基礎理論": "1001",
-    "アルゴリズムとプログラミング": "1002",
-    "コンピュータ構成要素": "1003",
-    "システム構成要素": "1004",
-    "ソフトウェア": "1005",
-    "ハードウェア": "1006",
-    "ヒューマンインターフェイス": "1007",
-    "マルチメディア": "1008",
-    "データベース": "1009",
-    "ネットワーク": "1010",
-    "セキュリティ": "1011",
-    "システム開発技術": "1012",
-    "ソフトウェア開発管理技術": "1013",
-    "ストラテジ系まとめ": "3",
-    "ストラテジ系間違えた問題": "3",
-    "システム戦略": "3001",
-    "システム企画": "3002",
-    "経営戦略マネジメント": "3003",
-    "技術戦略マネジメント": "3004",
-    "ビジネスインダストリ": "3005",
-    "企業活動": "3006",
-    "法務": "3007",
-    "マネジメント系まとめ": "2",
-    "マネジメント系間違えた問題": "2",
-    "プロジェクトマネジメント": "2001",
-    "サービスマネジメント": "2002",
-    "システム監査": "2003",
-  };
-
+  Map<String, String> categoryNumMap = CategoryData.categoryNumMap;
   bool isQuestionLong = false;
+  var quizDataInstance = QuizData();
+
 
   @override
   void initState() {
@@ -107,6 +77,7 @@ class _QuestionPageState extends State<QuestionPage>
     }
   }
 
+
   @override
   void dispose() {
     // _scrollController.dispose(); // ScrollControllerを破棄
@@ -129,10 +100,10 @@ class _QuestionPageState extends State<QuestionPage>
   }
 
   Future<void> _initDbAndFetchData() async {
+    await quizDataInstance.initDb();
     setState(() {
       _isLoading = true; // データが読み込まれたらローディング状態を更新
     });
-    _database = await initializeDb(); // ローカルデータベースの初期化
     await loadQuizData(); // ローカルDBからデータを読み込み
     await setRandomIndex(); // クイズデータを設定
     nextQuestion();
@@ -141,34 +112,15 @@ class _QuestionPageState extends State<QuestionPage>
     });
   }
 
-  Future<Database> initializeDb() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
-
-    return openDatabase(
-      path,
-      version: 1,
-    );
-  }
 
   Future<void> loadQuizData() async {
     final List<Map<String, dynamic>> maps;
+    // クイズデータを取得
+    maps = await quizDataInstance.getTargetQuizData(
+      targetCategory: widget.category,
+      categoryNum: int.parse(categoryNum),
+    );
 
-    // DBからクイズデータを取得
-    if (widget.category == "wrongStage") {
-      // judgeが1のデータを取得
-      maps = await _database!.query('quizData', where: 'judge = 1');
-    } else if (widget.category == "テクノロジー系間違えた問題" ||
-        widget.category == "ストラテジ系間違えた問題" ||
-        widget.category == "マネジメント系間違えた問題") {
-      // judgeが1のデータを取得
-      maps = await _database!.query(
-          'quizData', where: 'judge = 1 AND series_document_id LIKE ?',
-          whereArgs: ['$categoryNum%']);
-    } else {
-      maps = await _database!.query('quizData',
-          where: 'series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
-    }
     setState(() {
       quizDataList = maps; // 取得したデータを設定
       if (quizDataList.isNotEmpty) {
@@ -665,29 +617,6 @@ class _QuestionPageState extends State<QuestionPage>
       }
     }
 
-    // スクロール状態をリセット
-    // _scrollController.animateTo(
-    //   0.0,
-    //   duration: Duration(milliseconds: 300),
-    //   curve: Curves.easeOut,
-    // );
-    // _choiceScrollController.animateTo(
-    //   0.0,
-    //   duration: Duration(milliseconds: 300),
-    //   curve: Curves.easeOut,
-    // );
-    // _questionScrollController.animateTo(
-    //   0.0,
-    //   duration: Duration(milliseconds: 300),
-    //   curve: Curves.easeOut,
-    // );
-    //
-    // _explainScrollController.animateTo(
-    //   0.0,
-    //   duration: Duration(milliseconds: 300),
-    //   curve: Curves.easeOut,
-    // );
-
     _tabController.animateTo(1);
 
     setState(() {
@@ -703,11 +632,9 @@ class _QuestionPageState extends State<QuestionPage>
 
     // データベースの judge フィールドを更新
     if (nowJudgeValue != 2) {
-      _database!.update(
-        'quizData',
-        {'judge': judgeValue},
-        where: 'id = ?',
-        whereArgs: [quizDataList[_randomIndex]['id']],
+      quizDataInstance.updateJudge(
+        quizId: quizDataList[_randomIndex]['id'],
+        judge: judgeValue,
       );
     }
   }

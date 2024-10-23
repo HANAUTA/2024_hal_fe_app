@@ -9,7 +9,13 @@ class QuizData {
   String technologyWrongStage = "テクノロジー系間違えた問題";
   String strategyWrongStage = "ストラテジ系間違えた問題";
   String managementWrongStage = "マネジメント系間違えた問題";
+  Map<String, int> categoryNumMap = {
+    "technologyStage": 1,
+    "managementStage": 2,
+    "strategyStage": 3,
+  };
 
+  // 初期化　毎回やる
   Future<void> initDb() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
@@ -54,6 +60,7 @@ class QuizData {
     );
   }
 
+  // クイズデータを取得
   Future<void> setQuizData({remoteDbVersion}) async {
     await _database!.update('appConfig', {'db_version': remoteDbVersion});
 
@@ -119,7 +126,7 @@ class QuizData {
     }
   }
 
-  // クイズデータを取得
+  // 全てのクイズデータを取得
   Future<List<Map<String, dynamic>>> getAllQuizData({isFirstLaunch}) async {
     // remote dbバージョン
     int remoteDbVersion = await RemoteConfig().getDbVersion();
@@ -138,6 +145,7 @@ class QuizData {
     return maps;
   }
 
+  // 指定のクイズデータを取得
   Future<List<Map<String, dynamic>>> getTargetQuizData({required targetCategory, int? categoryNum,}) async {
     final List<Map<String, dynamic>> maps;
     if (targetCategory == wrongStage) {
@@ -149,7 +157,12 @@ class QuizData {
       maps = await _database!.query('quizData',
           where: 'judge = 1 AND series_document_id LIKE ?',
           whereArgs: ['$categoryNum%']);
-    } else {
+    } else if(targetCategory == "technologyStage" || targetCategory == "strategyStage" || targetCategory == "managementStage"){
+      int _targetCategoryNum = categoryNumMap[targetCategory]!;
+      maps = await _database!.query('quizData',
+          where: 'series_document_id LIKE ?', whereArgs: ['$_targetCategoryNum%']);
+
+    }else {
       maps = await _database!.query('quizData',
           where: 'series_document_id LIKE ?', whereArgs: ['$categoryNum%']);
     }
@@ -191,4 +204,6 @@ class QuizData {
     await _database!.update('quizData', {'judge': judge},
         where: 'id = ?', whereArgs: [quizId]);
   }
+
+
 }

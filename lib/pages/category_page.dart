@@ -1,4 +1,6 @@
+import 'package:fe_project/constants/category_data.dart';
 import 'package:fe_project/pages/question_page.dart';
+import 'package:fe_project/services/database/quiz_data.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -23,38 +25,12 @@ class _CategoryPageState extends State<CategoryPage> {
   int totalQuestionsCount = 0; // 総問題数
   int itemCount = 0; // カテゴリーごとの問題数
   int correctCount = 0; // カテゴリーごとの正解数
+  var quizDataInstance = QuizData(); // クイズデータのインスタンス
 
   // `categoryName`をクラスのメンバーとして定義
   String? categoryName;
   List<dynamic> erroList = [];
-  Map<String, String> categoryNumMap = {
-    "テクノロジー系まとめ": "1",
-    "基礎理論": "1001",
-    "アルゴリズムとプログラミング": "1002",
-    "コンピュータ構成要素": "1003",
-    "システム構成要素": "1004",
-    "ソフトウェア": "1005",
-    "ハードウェア": "1006",
-    "ヒューマンインターフェイス": "1007",
-    "マルチメディア": "1008",
-    "データベース": "1009",
-    "ネットワーク": "1010",
-    "セキュリティ": "1011",
-    "システム開発技術": "1012",
-    "ソフトウェア開発管理技術": "1013",
-    "ストラテジ系まとめ": "3",
-    "システム戦略": "3001",
-    "システム企画": "3002",
-    "経営戦略マネジメント": "3003",
-    "技術戦略マネジメント": "3004",
-    "ビジネスインダストリ": "3005",
-    "企業活動": "3006",
-    "法務": "3007",
-    "マネジメント系まとめ": "2",
-    "プロジェクトマネジメント": "2001",
-    "サービスマネジメント": "2002",
-    "システム監査": "2003",
-  };
+  Map<String, String> categoryNumMap = CategoryData.categoryNumMap;
 
   Map<String, int> seriesCount = {
     "テクノロジー系まとめ": 0,
@@ -115,103 +91,31 @@ class _CategoryPageState extends State<CategoryPage> {
   };
 
   // カテゴリー名のマップを定義
-  final Map<String, List<String>> categoryMap = {
-    "テクノロジー系": [
-      "テクノロジー系まとめ",
-      "テクノロジー系間違えた問題",
-      "基礎理論",
-      "アルゴリズムとプログラミング",
-      "コンピュータ構成要素",
-      "システム構成要素",
-      "ソフトウェア",
-      "ハードウェア",
-      "ヒューマンインターフェイス",
-      "マルチメディア",
-      "データベース",
-      "ネットワーク",
-      "セキュリティ",
-      "システム開発技術",
-      "ソフトウェア開発管理技術",
+  final Map<String, List<String>> categoryMap = CategoryData.categoryMap;
 
-    ],
-    "ストラテジ系": [
-      "ストラテジ系まとめ",
-      "ストラテジ系間違えた問題",
-      "システム戦略",
-      "システム企画",
-      "経営戦略マネジメント",
-      "技術戦略マネジメント",
-      "ビジネスインダストリ",
-      "企業活動",
-      "法務",
-
-    ],
-    "マネジメント系": [
-      "マネジメント系まとめ",
-      "マネジメント系間違えた問題",
-      "プロジェクトマネジメント",
-      "サービスマネジメント",
-      "システム監査",
-
-
-    ],
-  };
-
-  bool _isLoading = false; // ローディングフラグ
+  bool _isLoading = true; // ローディングフラグ
 
   // ローカルデータベースを初期化し、クイズデータを取得
   Future<void> _initDbAndFetchData() async {
     setState(() {
       _isLoading = true; // データ取得開始時にローディングを開始
     });
-    _database = await initializeDb(); // ローカルデータベースの初期化
+    // データベースを初期化
+    await quizDataInstance.initDb();
+    
     await loadQuizData(); // ローカルDBからデータを読み込み
     setProgress();
     setState(() {
       _isLoading = false; // データ取得終了時にローディングを終了
     });
   }
-
-  // ローカルDBの初期化
-  Future<Database> initializeDb() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'quiz_data.db'); // DBのパスを指定
-
-    // データベースを開き、テーブルを作成（存在しない場合）
-    return openDatabase(
-      path,
-      version: 1,
-    );
-  }
+  
 
   // ローカルDBからクイズデータを取得
   Future<void> loadQuizData() async {
     // カテゴリーに応じてクエリを変更
     final List<Map<String, dynamic>> maps;
-    if (widget.categoryId == 'technologyStage') {
-      // series_document_idの1文字目が'1'のものを取得
-      maps = await _database!.query(
-        'quizData',
-        where: 'series_document_id LIKE ?',
-        whereArgs: ['1%'], // '1'で始まるレコードを取得
-      );
-    } else if (widget.categoryId == 'managementStage') {
-      // series_document_idの1文字目が'2'のものを取得
-      maps = await _database!.query(
-        'quizData',
-        where: 'series_document_id LIKE ?',
-        whereArgs: ['2%'], // '2'で始まるレコードを取得
-      );
-    } else if (widget.categoryId == 'strategyStage') {
-      // series_document_idの1文字目が'3'のものを取得
-      maps = await _database!.query(
-        'quizData',
-        where: 'series_document_id LIKE ?',
-        whereArgs: ['3%'], // '3'で始まるレコードを取得
-      );
-    } else {
-      maps = await _database!.query('quizData');
-    }
+    maps = await quizDataInstance.getTargetQuizData(targetCategory: widget.categoryId);
 
     setState(() {
       quizDataList = maps; // 取得したデータを設定

@@ -368,7 +368,9 @@ class _CategoryPageState extends State<CategoryPage> {
                                         style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
+                                          color: Color(0xFF674822),
                                         ),
+
                                       ),
                                       trailing: Row(
                                         mainAxisSize: MainAxisSize.min,

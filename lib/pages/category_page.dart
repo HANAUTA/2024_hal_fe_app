@@ -342,20 +342,16 @@ class _CategoryPageState extends State<CategoryPage> {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12.0),
                                 child: Material(
-                                  elevation: 3,
+                                  elevation: 3, // 影を追加
                                   borderRadius: BorderRadius.circular(12),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Color(0xFFFAEAB1),
-                                          Color(0xFFE5BA73), // 上部の色
-                                          Color(0xFFC58940), // 下部の色
-                                        ],
-                                        begin: Alignment.topLeft, // グラデーションの開始位置
-                                        end: Alignment.bottomRight, // グラデーションの終了位置
-                                      ),
+                                      color: isAll
+                                          ? const Color(0xFF11999E) // 青系統
+                                          : isWrongAnswer
+                                          ? const Color(0xFFFFA8A8) // 柔らかい赤
+                                          : Colors.white, // 白
                                     ),
                                     child: ListTile(
                                       contentPadding: const EdgeInsets.symmetric(
@@ -376,7 +372,6 @@ class _CategoryPageState extends State<CategoryPage> {
                                         style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
                                         ),
                                       ),
                                       trailing: Row(
@@ -385,25 +380,15 @@ class _CategoryPageState extends State<CategoryPage> {
                                           if (!isWrongAnswer)
                                             Text(
                                               '($correctCount/$itemCount) 問',
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black54,
-                                              ),
+                                              style: const TextStyle(fontSize: 16),
                                             ),
                                           if (isWrongAnswer)
                                             Text(
                                               '($wrongAnswersCount) 問',
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black54,
-                                              ),
+                                              style: const TextStyle(fontSize: 16),
                                             ),
                                           const SizedBox(width: 8),
-                                          const Icon(
-                                            Icons.keyboard_arrow_right,
-                                            size: 24,
-                                            color: Colors.black54,
-                                          ),
+                                          const Icon(Icons.keyboard_arrow_right, size: 24),
                                         ],
                                       ),
                                     ),
@@ -411,7 +396,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                 ),
                               );
                             } else {
-                              return const SizedBox.shrink();
+                              return const SizedBox.shrink(); // 空のウィジェットを返す
                             }
                           },
                         ),

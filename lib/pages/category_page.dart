@@ -259,72 +259,55 @@ class _CategoryPageState extends State<CategoryPage> {
                         Text(
                           '学習数 $totalAnswersCount / $totalQuestionsCount 問中',
                           style: TextStyle(
-                            fontSize: screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
-                            color: Colors.black87, // 色を少しソフトに
-                            fontWeight: FontWeight.bold, // フォントを少し太く
+                            fontSize: screenHeight * 0.03,
+                            color: Color(0xFF4A4A4A), // ダークグレー
+                            fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: screenHeight * 0.01), // 少しスペースを追加
+                        SizedBox(height: screenHeight * 0.01),
                         Text(
                           "正解: ${(correctProgress * 100).toInt()}%  不正解: ${(wrongProgress * 100).toInt()}%",
                           style: TextStyle(
                             fontSize: screenHeight * 0.025,
-                            color: Colors.black54, // テキストの色を少し薄く
+                            color: Colors.black54,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: screenHeight * 0.03), // 高さを調整
+                        SizedBox(height: screenHeight * 0.03),
                         SizedBox(
-                          width: screenWidth * 0.85, // バーの幅を少し広げる
-                          height: screenHeight * 0.035, // バーの高さを少し高く
+                          width: screenWidth * 0.85,
+                          height: screenHeight * 0.035,
                           child: Stack(
                             children: [
                               Container(
-                                width: screenWidth * 0.85,
-                                height: screenHeight * 0.035,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8), // 角を丸める
-                                  border: Border.all(
-                                    color: Colors.grey.shade300, // 薄いグレーの枠線
-                                    width: 1,
-                                  ),
-                                ),
-                              ),
-                              // 背景の白いバー
-                              Container(
-                                width: screenWidth * 0.85,
-                                height: screenHeight * 0.035,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  color: const Color(0xFFF0F0F0), // 薄いグレーの背景
+                                  border: Border.all(color: Colors.grey.shade300, width: 1),
+                                  color: const Color(0xFFFAF8F1),
                                 ),
                               ),
-                              // 不正解の赤いバー
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 500),
                                 width: screenWidth * 0.85 * (correctProgress + wrongProgress),
-                                height: screenHeight * 0.035,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  color: const Color(0xFFFF6969), // 赤いバーの色
+                                  color: const Color(0xFFC58940),
                                 ),
                               ),
-                              // 正解の緑色のバー
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 500),
                                 width: screenWidth * 0.85 * correctProgress,
-                                height: screenHeight * 0.035,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
+                                  color: const Color(0xFFE5BA73),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black26, // バーに影を追加
+                                      color: Colors.black26,
                                       offset: Offset(0, 2),
                                       blurRadius: 4,
                                     ),
                                   ],
-                                  color: const Color(0xFF11999E), // 緑のバーの色
                                 ),
                               ),
                             ],
@@ -336,73 +319,99 @@ class _CategoryPageState extends State<CategoryPage> {
                   ),
 
                   // カテゴリーリスト
-                  if (categoryName != null) // categoryNameがnullでないときに表示
+                  if (categoryName != null)
                     Expanded(
                       child: Scrollbar(
                         thickness: 8,
+                        radius: const Radius.circular(10),
                         thumbVisibility: true,
                         child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                           itemCount: categoryMap[categoryName]?.length ?? 0,
                           itemBuilder: (context, index) {
                             String category = categoryMap[categoryName]![index];
                             bool isWrongAnswer = category.contains("間違えた問題");
                             bool isAll = category.contains("まとめ");
 
-
                             if (!isWrongAnswer) {
                               itemCount = seriesCount[category] ?? 0;
                               correctCount = seriesCorrectCount[category] ?? 0;
                             }
-                            if(!(wrongAnswersCount == 0 && isWrongAnswer)) {
-                              return Container(
-                              height: 75.0,
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: isAll
-                                        ? Color(0xFF11999E) // 青
-                                        : isWrongAnswer
-                                        ? Color(0xFFFF6969) // 赤
-                                        : Color(0xFFFFFFFF), // 白
-                                    width: 2.0, // 下線の幅を設定
-                                  ),
-                                ),
 
-                              ),
-                              child: Center(
-                                child: ListTile(
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(horizontal: 16.0),
-                                  onTap: () async {
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            QuestionPage(category), // 次のページに遷移
+                            if (!(wrongAnswersCount == 0 && isWrongAnswer)) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: Material(
+                                  elevation: 3,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Color(0xFFFAEAB1),
+                                          Color(0xFFE5BA73), // 上部の色
+                                          Color(0xFFC58940), // 下部の色
+                                        ],
+                                        begin: Alignment.topLeft, // グラデーションの開始位置
+                                        end: Alignment.bottomRight, // グラデーションの終了位置
                                       ),
-                                    );
-                                    _initDbAndFetchData();
-                                  },
-                                  title: Text(category),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (!isWrongAnswer)
-                                        Text('($correctCount/$itemCount) 問'), // 各ジャンルの数を表示
-
-                                      if (isWrongAnswer)
-                                        Text('($wrongAnswersCount) 問'), // 間違えた問題の数を表示
-
-                                      const SizedBox(width: 8), // アイコンとの間隔
-                                      const Icon(
-                                          Icons.keyboard_arrow_right), // 右矢印アイコン
-                                    ],
+                                    ),
+                                    child: ListTile(
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0,
+                                        vertical: 12.0,
+                                      ),
+                                      onTap: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => QuestionPage(category),
+                                          ),
+                                        );
+                                        _initDbAndFetchData();
+                                      },
+                                      title: Text(
+                                        category,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if (!isWrongAnswer)
+                                            Text(
+                                              '($correctCount/$itemCount) 問',
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                          if (isWrongAnswer)
+                                            Text(
+                                              '($wrongAnswersCount) 問',
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                          const SizedBox(width: 8),
+                                          const Icon(
+                                            Icons.keyboard_arrow_right,
+                                            size: 24,
+                                            color: Colors.black54,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
+                              );
                             } else {
-                              return Container();
+                              return const SizedBox.shrink();
                             }
                           },
                         ),
@@ -410,7 +419,6 @@ class _CategoryPageState extends State<CategoryPage> {
                     )
                   else
                     const Center(child: CircularProgressIndicator()),
-                  // データがないときは読み込み中を表示
                 ],
               ),
             ),

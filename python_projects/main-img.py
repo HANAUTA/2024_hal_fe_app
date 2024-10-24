@@ -57,7 +57,7 @@ kotae_dict_sentakusi_r = {"select_a": "ア", "select_i": "イ", "select_u": "ウ
 20_aki
 20_haru
 """
-TARGET_NENDO = "05_menjo"
+TARGET_NENDO = "04_menjo"
 # 02免除より前は80問ある
 LOOP_TIMES = 80
 BEFORE_IMG = "<IMG>"
@@ -315,12 +315,24 @@ wait.until(EC.presence_of_all_elements_located)
 cnt = 0
 def get_mondai_bun(mondai_main):
     # 問題文を取得
+    mondaibun_text = ""
     if cnt >= 1:
         mondai_bun = driver.find_element(By.XPATH, '/html/body/div[1]/div/main/div[2]/div[2]')
+        # 画像があれば取得
+        img_srcs = mondai_bun.find_elements(By.TAG_NAME, 'img')
+        mondaibun_text += mondai_bun.text
+        for img_src in img_srcs:
+            mondaibun_text += "\n" + BEFORE_IMG + TARGET_NENDO + "/" + img_src.get_attribute("alt") + AFTER_IMG
+
     else:
         mondai_bun = driver.find_element(By.XPATH, '/html/body/div[1]/div/main/div[2]/div[1]')
+        # 画像があれば取得
+        img_srcs = mondai_bun.find_elements(By.TAG_NAME, 'img')
+        mondaibun_text += mondai_bun.text
+        for img_src in img_srcs:
+            mondaibun_text += "\n" + BEFORE_IMG + TARGET_NENDO + "/" + img_src.get_attribute("alt") + AFTER_IMG
 
-    return mondai_bun.text
+    return mondaibun_text
     
 def get_mondai_nendo(mondai_main):
     # 問題年度を取得
@@ -344,8 +356,18 @@ def get_mondai_category(mondai_main):
 def get_mondai_answer(mondai_main, answer):
 
     # 正解を取得
-    mondai_kotae_elem = mondai_main.find_element(By.ID, kotae_dict_sentakusi[answer])
-    kotae_text = f"{answer},{mondai_kotae_elem.text}"
+    # 選択肢がテキストかどうか。
+    if mondai_main.find_elements(By.ID, kotae_dict_sentakusi[answer]) == []:
+        print("選択肢がありません")
+        # 画像を取得
+        img_src = mondai_main.find_element(By.CLASS_NAME, 'selectList').find_element(By.TAG_NAME, 'img').get_attribute('alt')
+        return "null" + BEFORE_IMG + TARGET_NENDO + "/" + img_src + AFTER_IMG
+    else:
+        mondai_kotae_elem = mondai_main.find_element(By.ID, kotae_dict_sentakusi[answer])
+        if mondai_kotae_elem.find_elements(By.TAG_NAME, 'img') != []:
+            img_src = mondai_kotae_elem.find_element(By.TAG_NAME, 'img').get_attribute('alt')
+            return f"{answer},{BEFORE_IMG + TARGET_NENDO + '/' + img_src + AFTER_IMG}"
+        kotae_text = f"{answer},{mondai_kotae_elem.text}"
 
     return kotae_text
 
@@ -355,6 +377,11 @@ def get_mondai_failure(mondai_main, answer):
     matigai_texts = []
     for matigai in matigai_ls:
         matigai_elem = mondai_main.find_element(By.ID, matigai)
+        if matigai_elem.find_elements(By.TAG_NAME, 'img') != []:
+            img_src = matigai_elem.find_element(By.TAG_NAME, 'img').get_attribute('alt')
+            matigai_text = f"{kotae_dict_sentakusi_r[matigai]},{BEFORE_IMG + TARGET_NENDO + '/' + img_src + AFTER_IMG}"
+            matigai_texts.append(matigai_text)
+            continue
         matigai_text = f"{kotae_dict_sentakusi_r[matigai]},{matigai_elem.text}"
         matigai_texts.append(matigai_text)
 
@@ -665,6 +692,9 @@ while True:
         # 問題文を追加
         mondai_data.append(mondai_bun)
         print('問題文取得済み')
+        print("--------------------")
+        print(mondai_bun)
+        print("--------------------")
 
         # 問題年度を取得
         mondai_nendo = get_mondai_nendo(mondai_main)
@@ -710,9 +740,17 @@ while True:
         # 正解を追加
         mondai_data.append(kotae_text)
         print('正解取得済み')
+        print("--------------------")
+        print(kotae_text)
+        print("--------------------")
 
         # 間違い選択肢を取得,追加
-        matigai_texts = get_mondai_failure(mondai_main, answer)
+        if kotae_text[:4] == "null":
+            print("選択肢がテキストではありません")
+            matigai_texts = ["null", "null", "null"]
+        else:
+            matigai_texts = get_mondai_failure(mondai_main, answer)
+
         mondai_data.append(matigai_texts)
         print('間違い選択肢取得済み')
         

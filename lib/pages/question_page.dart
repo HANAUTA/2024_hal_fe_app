@@ -495,7 +495,7 @@ class _QuestionPageState extends State<QuestionPage>
                       MainAxisAlignment.center, // 横方向に中央揃え
                       children: [
                         Icon(Icons.radio_button_unchecked,
-                            color: Color(0xFF00704A),
+                            color: Color(0xFF5EC873),
                             size: 100), // 不正解の場合は赤いクローズアイコンを表示
                         const SizedBox(width: 8),
                         Column(
@@ -517,7 +517,11 @@ class _QuestionPageState extends State<QuestionPage>
                       mainAxisAlignment:
                       MainAxisAlignment.center, // 横方向に中央揃え
                       children: [
-                        Icon(Icons.close, color: Colors.red, size: 100),
+                        Icon(
+                          Icons.close,
+                          color: Color(0xFFC85E5E), // 濃いブラウンカラーを使用
+                          size: 100,
+                        ),
                         // 不正解の場合は赤いクローズアイコンを表示
                         const SizedBox(width: 8),
                         Column(

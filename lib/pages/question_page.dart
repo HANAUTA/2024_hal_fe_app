@@ -214,7 +214,7 @@ class _QuestionPageState extends State<QuestionPage>
       ),
 
       body: Container(
-          color: const Color(0xFFE4F9F5),
+          color: const Color(0xFFFFFFFF),
           child: _isLoading
               ? Center(
             child: CircularProgressIndicator(),
@@ -271,7 +271,7 @@ class _QuestionPageState extends State<QuestionPage>
     switch (_currentTabIndex) {
       case 1:
         return BottomAppBar(
-          color: const Color(0xFFE4F9F5),
+          color: const Color(0xFFE5BA73),
           child: SizedBox(
             height: 56,
             child: GestureDetector(
@@ -294,7 +294,7 @@ class _QuestionPageState extends State<QuestionPage>
                 }
               },
               child: Container(
-                color: const Color(0xFFE4F9F5),
+                color: const Color(0xFFE5BA73),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -334,7 +334,7 @@ class _QuestionPageState extends State<QuestionPage>
 
       default:
         return BottomAppBar(
-          color: const Color(0xFFE4F9F5),
+          color: const Color(0xFFE5BA73),
           child: SizedBox(
             height: 56,
             child: Row(

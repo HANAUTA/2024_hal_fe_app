@@ -248,7 +248,7 @@ class _CategoryPageState extends State<CategoryPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Container(
-              color: const Color(0xFFE4F9F5), // SafeAreaの背景色を設定
+              color: const Color(0xFFFAF8F1), // SafeAreaの背景色を設定
               child: Column(
                 children: [
                   // 正解数と進捗バーを表示
@@ -295,7 +295,6 @@ class _CategoryPageState extends State<CategoryPage> {
                                 height: screenHeight * 0.03,
                                 decoration: BoxDecoration(
                                   border: Border.all(width: 0),
-                                  borderRadius: BorderRadius.circular(5),
                                   color: const Color(0xFFFFFF),
                                 ),
                               ),
@@ -307,7 +306,6 @@ class _CategoryPageState extends State<CategoryPage> {
                                 height: screenHeight * 0.03,
                                 decoration: BoxDecoration(
                                   border: Border.all(width: 0),
-                                  borderRadius: BorderRadius.circular(5),
                                   color: const Color(0xFFFF6969),
                                 ),
                               ),
@@ -319,7 +317,6 @@ class _CategoryPageState extends State<CategoryPage> {
                                 height: screenHeight * 0.03,
                                 decoration: BoxDecoration(
                                   border: Border.all(width: 0),
-                                  borderRadius: BorderRadius.circular(5),
                                   color: const Color(0xFF11999E),
                                 ),
                               ),

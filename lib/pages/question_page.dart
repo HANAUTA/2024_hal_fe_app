@@ -613,7 +613,7 @@ class _QuestionPageState extends State<QuestionPage>
       audioPlayer.setVolume(1.0);
       audioPlayer.stop();
       audioPlayer.release();
-      audioPlayer.play(AssetSource("audios/correct.wav"));
+      audioPlayer.play(AssetSource("audios/correct.mp3"));
     } else {
       // judgeValueが2でないときのみ不正解の処理を行う
       _isCorrect = false;

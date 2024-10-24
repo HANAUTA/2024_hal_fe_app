@@ -51,5 +51,5 @@ flutter_native_splash:
 flutter:
   uses-material-design: true
   assets:
-    - assets/audios/correct.wav
+    - assets/audios/correct.mp3
     - assets/audios/cuin.mp3

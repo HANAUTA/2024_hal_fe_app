@@ -67,6 +67,7 @@ AFTER_SMALL_D_TEXT = "</SMALLD>"
 BEFORE_SMALL_U_TEXT = "<SMALLU>"
 AFTER_SMALL_U_TEXT = "</SMALLU>"
 
+
 series_num = {
   "基礎理論": "1001",
   "アルゴリズムとプログラミング": "1002",
@@ -360,6 +361,136 @@ def get_mondai_failure(mondai_main, answer):
     return matigai_texts
 
 
+def mondai_kaisetsu_li(li):
+    content_list = []
+    lim_flag = False
+    lir_flag = False
+    lis_flag = False
+    lisub_flag = False
+    lisup_flag = False
+    lib_flag = False
+    lifrac_flag = False
+    sentakusi_flag = False
+    br_flag = False
+
+    for li_elem in li.contents:
+        if li_elem.name == "span" and "cite" in (li_elem.get('class') or []):
+            sentakusi_flag = True
+            content_list.append(li_elem.text)
+            continue
+        else:
+            if li_elem.name == "em" and "m" in (li_elem.get('class') or []):
+                lim_flag = True
+                if br_flag:
+                    content_list.append(li_elem.text)
+                else:
+                    content_list[-1] += li_elem.text
+            elif li_elem.name == "em" and "r" in (li_elem.get('class') or []):
+                lir_flag = True
+                if br_flag:
+                    content_list.append(li_elem.text)
+                else:
+                    content_list[-1] += li_elem.text
+            elif li_elem.name == "strong":
+                lis_flag = True
+                if br_flag:
+                    content_list.append(li_elem.text)
+                else:
+                    content_list[-1] += li_elem.text
+            elif isinstance(li_elem, Tag) and "img_margin" in (li_elem.get('class') or []):
+                for img in li_elem.find_all('img'):
+                    content_list.append(BEFORE_IMG +TARGET_NENDO + '/' + img.get('alt') + AFTER_IMG)
+            elif li_elem.name == "sub":
+                lisub_flag = True
+                if br_flag:
+                    content_list.append(BEFORE_SMALL_D_TEXT + li_elem.text + AFTER_SMALL_D_TEXT)
+                else:
+                    content_list[-1] += BEFORE_SMALL_D_TEXT + li_elem.text + AFTER_SMALL_D_TEXT
+            elif li_elem.name == "sup":
+                lisup_flag = True
+                if br_flag:
+                    content_list.append(BEFORE_SMALL_U_TEXT + li_elem.text + AFTER_SMALL_U_TEXT)
+                else:
+                    content_list[-1] += BEFORE_SMALL_U_TEXT + li_elem.text + AFTER_SMALL_U_TEXT
+            elif li_elem.name == "b":
+                lib_flag = True
+                if br_flag:
+                    content_list.append(li_elem.text)
+                else:
+                    content_list[-1] += li_elem.text
+            elif li_elem.name == "span" and "frac" in (li_elem.get('class') or []):
+                lifrac_flag = True
+                for frac in li_elem.contents:
+                    if frac.name == "sub":
+                        content_list[-1] += BEFORE_SMALL_D_TEXT + frac.text + AFTER_SMALL_D_TEXT
+                    elif frac.name == "sup":
+                        content_list[-1] += BEFORE_SMALL_U_TEXT + frac.text + AFTER_SMALL_U_TEXT
+                    elif frac.name == "span":
+                        content_list[-1] += frac.text + "/"
+                    else:
+                        content_list[-1] += frac.text
+            else:
+                if lim_flag:
+                    lim_flag = False
+                    if br_flag:
+                        content_list.append(li_elem.text)
+                    else:
+                        content_list[-1] += li_elem.text
+                elif lir_flag:
+                    lir_flag = False
+                    if br_flag:
+                        content_list.append(li_elem.text)
+                    else:
+                        content_list[-1] += li_elem.text
+                elif lis_flag:
+                    lis_flag = False
+                    if br_flag:
+                        content_list.append(li_elem.text)
+                    else:
+                        content_list[-1] += li_elem.text
+                elif lisub_flag:
+                    lisub_flag = False
+                    if br_flag:
+                        content_list.append(li_elem.text)
+                    else:
+                        content_list[-1] += li_elem.text
+                elif lisup_flag:
+                    lisup_flag = False
+                    if br_flag:
+                        content_list.append(li_elem.text)
+                    else:
+                        content_list[-1] += li_elem.text
+                elif lib_flag:
+                    lib_flag = False
+                    if br_flag:
+                        content_list.append(li_elem.text)
+                    else:
+                        content_list[-1] += li_elem.text
+                elif lifrac_flag:
+                    lifrac_flag = False
+                    if br_flag:
+                        content_list.append(li_elem.text)
+                    else:
+                        content_list[-1] += li_elem.text
+                elif li_elem.name == "br":
+                    br_flag = True
+                    if sentakusi_flag:
+                        sentakusi_flag = False
+                    continue
+                else:
+                    lim_flag = False
+                    lir_flag = False
+                    lis_flag = False
+                    lisub_flag = False
+                    lisup_flag = False
+                    lib_flag = False
+                    lifrac_flag = False
+                    content_list.append(li_elem.text)
+            sentakusi_flag = False
+            br_flag = False
+    content_list.append("")
+    return content_list
+
 def get_mondai_kaisetsu(mondai_main):
     # 解説を含むdivを取得
     kaisetsu_div = mondai_main.find_element(By.ID, 'kaisetsu')
@@ -380,48 +511,21 @@ def get_mondai_kaisetsu(mondai_main):
     b_flag = False
     s_flag = False
     m_flag = False
+    frac_flag = False
 
     for elem in soup.contents:
-        print(elem)
         if elem.name == "ul":
             text_list.append("")
             text_list.append("")
             for li in elem.contents:
                 if li.name == "ul":
                     for li in li.contents:
-                        for li_elem in li.contents:
-                            tmp_text += li_elem.text
-                            if isinstance(li_elem, Tag) and "m" in (li_elem.get('class') or []):
-                                continue
-                            elif li_elem.name == "br":
-                                continue
-                            elif li_elem.name == "strong":
-                                continue
-                            elif li_elem.name == "em":
-                                continue
-                            elif isinstance(li_elem, Tag) and "img_margin" in (li_elem.get('class') or []):
-                                for img in li_elem.find_all('img'):
-                                    text_list.append(BEFORE_IMG +TARGET_NENDO + '/' + img.get('alt') + AFTER_IMG)
-                            text_list.append(str(tmp_text))
-                            tmp_text = ""
-                        text_list.append("")
+                        li_list = mondai_kaisetsu_li(li)
+                        text_list.extend(li_list)
                 else:   
-                    for li_elem in li.contents:
-                        tmp_text += li_elem.text
-                        if isinstance(li_elem, Tag) and "m" in (li_elem.get('class') or []):
-                            continue
-                        elif li_elem.name == "br":
-                            continue
-                        elif li_elem.name == "strong":
-                            continue
-                        elif li_elem.name == "em":
-                            continue
-                        elif isinstance(li_elem, Tag) and "img_margin" in (li_elem.get('class') or []):
-                            for img in li_elem.find_all('img'):
-                                text_list.append(BEFORE_IMG +TARGET_NENDO + '/' + img.get('alt') + AFTER_IMG)
-                        text_list.append(str(tmp_text))
-                        tmp_text = ""
-                    text_list.append("")
+                    li_list = mondai_kaisetsu_li(li)
+                    text_list.extend(li_list)
+            text_list.append("")
         elif elem.name == "ol":
             text_list.append("")
             for i, li in enumerate(elem.contents):
@@ -470,39 +574,41 @@ def get_mondai_kaisetsu(mondai_main):
         elif elem.name == "em" and "r" in (elem.get('class') or []):
             r_flag = True
             text_list[-1] += elem.text
+        elif elem.name == "span" and "frac" in (elem.get('class') or []):
+            frac_flag = True
+            for frac in elem.contents:
+                if frac.name == "sub":
+                    text_list[-1] += BEFORE_SMALL_D_TEXT + frac.text + AFTER_SMALL_D_TEXT
+                elif frac.name == "sup":
+                    text_list[-1] += BEFORE_SMALL_U_TEXT + frac.text + AFTER_SMALL_U_TEXT
+                elif frac.name == "span":
+                    text_list[-1] += frac.text + "/"
+                else:
+                    text_list[-1] += frac.text
         else:
-            tmp_text += str(elem.text)
-            if elem.name == "br":
-                if len(tmp_text) >= 1:
-                    print('added br')
-                    text_list.append(tmp_text)
-                    tmp_text = ""
-                text_list.append("")
-                continue
-            elif r_flag:
-                text_list[-1] += tmp_text
-                tmp_text = ""
+            if r_flag:
+                text_list[-1] += elem.text
                 r_flag = False
             elif sub_flag:
-                text_list[-1] += tmp_text
-                tmp_text = ""
+                text_list[-1] += elem.text
                 sub_flag = False
             elif sup_flag:
-                text_list[-1] += tmp_text
-                tmp_text = ""
+                text_list[-1] += elem.text
                 sup_flag = False
             elif b_flag:
-                text_list[-1] += tmp_text
-                tmp_text = ""
+                text_list[-1] += elem.text
                 b_flag = False
             elif s_flag:
-                text_list[-1] += tmp_text
-                tmp_text = ""
+                text_list[-1] += elem.text
                 s_flag = False
             elif m_flag:
-                text_list[-1] += tmp_text
-                tmp_text = ""
+                text_list[-1] += elem.text
                 m_flag = False
+            elif frac_flag:
+                text_list[-1] += elem.text
+                frac_flag = False
+            elif elem.name == "br":
+                text_list.append("")
             else:
                 r_flag = False
                 sub_flag = False
@@ -510,12 +616,12 @@ def get_mondai_kaisetsu(mondai_main):
                 b_flag = False
                 s_flag = False
                 m_flag = False
-                text_list.append(tmp_text)
-                tmp_text = ""
-        print("--------------------")
-        print(elem)
+                frac_flag = False
+                text_list.append(elem.text)
+
     print("--------------------")
     print('\n'.join(text_list))
+    print("--------------------")
     
     return result_texts
 

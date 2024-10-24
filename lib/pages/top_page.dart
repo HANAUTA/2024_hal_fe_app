@@ -109,79 +109,88 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     // 正解数と進捗バーを表示
                     Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: screenHeight * 0.05),
+                      padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
                       child: Column(
                         children: [
                           Text(
                             '学習数 $totalAnswersCount / $totalQuestionsCount 問中',
                             style: TextStyle(
-                              fontSize:
-                                  screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
-                              color: Colors.black,
+                              fontSize: screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
+                              color: Colors.black87, // 色を少しソフトに
+                              fontWeight: FontWeight.bold, // フォントを少し太く
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          Text("正解: ${(correctProgress * 100).toInt()}%  不正解: ${(wrongProgress * 100).toInt()}%",
-                              style: TextStyle(
-                                fontSize: screenHeight * 0.025,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center),
-                          SizedBox(height: screenHeight * 0.02),
+                          SizedBox(height: screenHeight * 0.01), // 少しスペースを追加
+                          Text(
+                            "正解: ${(correctProgress * 100).toInt()}%  不正解: ${(wrongProgress * 100).toInt()}%",
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.025,
+                              color: Colors.black54, // テキストの色を少し薄く
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: screenHeight * 0.03), // 高さを調整
                           SizedBox(
-                            width: screenWidth * 0.8, // バーの幅
-                            height: screenHeight * 0.03, // バーの高さ
+                            width: screenWidth * 0.85, // バーの幅を少し広げる
+                            height: screenHeight * 0.035, // バーの高さを少し高く
                             child: Stack(
                               children: [
                                 Container(
-                                  width: screenWidth * 0.8,
-                                  height: screenHeight * 0.03,
+                                  width: screenWidth * 0.85,
+                                  height: screenHeight * 0.035,
                                   decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8), // 角を丸める
                                     border: Border.all(
-                                        color: Colors.black, width: 0),
+                                      color: Colors.grey.shade300, // 薄いグレーの枠線
+                                      width: 1,
+                                    ),
                                   ),
                                 ),
-                                // アニメーション付きのバー
+                                // 背景の白いバー
                                 Container(
-                                  // アニメーションの時間
-                                  width: screenWidth * 0.8,
-                                  // 進捗率に基づいてバーの幅を調整
-                                  height: screenHeight * 0.03,
+                                  width: screenWidth * 0.85,
+                                  height: screenHeight * 0.035,
                                   decoration: BoxDecoration(
-                                    border: Border.all(width: 0),
-                                    color: const Color(0xFFFFFFFF),
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: const Color(0xFFF0F0F0), // 薄いグレーの背景
                                   ),
                                 ),
+                                // 不正解の赤いバー
                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 500),
-                                  // アニメーションの時間
-                                  width: screenWidth * 0.8 * (correctProgress + wrongProgress),
-                                  // 進捗率に基づいてバーの幅を調整
-                                  height: screenHeight * 0.03,
+                                  width: screenWidth * 0.85 * (correctProgress + wrongProgress),
+                                  height: screenHeight * 0.035,
                                   decoration: BoxDecoration(
-                                    border: Border.all(width: 0),
-                                    color: const Color(0xFFFF6969),
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: const Color(0xFFFF6969), // 赤いバーの色
                                   ),
                                 ),
+                                // 正解の緑色のバー
                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 500),
-                                  // アニメーションの時間
-                                  width: screenWidth * 0.8 * correctProgress,
-                                  // 進捗率に基づいてバーの幅を調整
-                                  height: screenHeight * 0.03,
+                                  width: screenWidth * 0.85 * correctProgress,
+                                  height: screenHeight * 0.035,
                                   decoration: BoxDecoration(
-                                    border: Border.all(width: 0),
-                                    color: const Color(0xFF11999E),
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26, // バーに影を追加
+                                        offset: Offset(0, 2),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                    color: const Color(0xFF11999E), // 緑のバーの色
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(height: screenHeight * 0.02),
+                          SizedBox(height: screenHeight * 0.03),
                         ],
                       ),
                     ),
+
                     // カテゴリのリスト
                     Expanded(
                       child: Scrollbar(

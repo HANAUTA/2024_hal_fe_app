@@ -5,6 +5,7 @@ import 'package:fe_project/services/database/quiz_data.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:vibration/vibration.dart'; // 追加: 振動機能用
 
 import 'result_page.dart';
 
@@ -603,7 +604,7 @@ class _QuestionPageState extends State<QuestionPage>
       }
       judgeValue = 2;
       _isCorrect = true;
-
+      Vibration.vibrate(duration: 20);
       // オーディオ関連の処理
       audioPlayer.setVolume(1.0);
       audioPlayer.stop();

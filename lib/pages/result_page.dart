@@ -112,9 +112,15 @@ class _ResultPageState extends State<ResultPage>
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF00BFA6), Color(0xFF005662)],
+                colors: [
+                  Color(0xFFFFD700), // ゴールド
+                  Color(0xFFFFE4B5), // 明るい金色
+                  Color(0xFFFFFFFF), // 輝きを表現する白
+                ],
+                stops: [0.0, 0.5, 1.0], // グラデーションの位置を調整
               ),
             ),
+
           ),
           Center(
             child: Padding(

@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: SafeArea(
         child: Container(
-          color: const Color(0xFFE4F9F5), // SafeAreaの背景色を設定
+          color: const Color(0xFFFAF8F1), // SafeAreaの背景色を設定
           child: isLoading
               ? Center(
                   child: CircularProgressIndicator(), // ローディングインジケーターを表示
@@ -140,7 +140,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                         color: Colors.black, width: 0),
-                                    borderRadius: BorderRadius.circular(5),
                                   ),
                                 ),
                                 // アニメーション付きのバー
@@ -151,8 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   height: screenHeight * 0.03,
                                   decoration: BoxDecoration(
                                     border: Border.all(width: 0),
-                                    borderRadius: BorderRadius.circular(5),
-                                    color: const Color(0xFFFFFF),
+                                    color: const Color(0xFFFFFFFF),
                                   ),
                                 ),
                                 AnimatedContainer(
@@ -163,7 +161,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                   height: screenHeight * 0.03,
                                   decoration: BoxDecoration(
                                     border: Border.all(width: 0),
-                                    borderRadius: BorderRadius.circular(5),
                                     color: const Color(0xFFFF6969),
                                   ),
                                 ),
@@ -175,7 +172,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                   height: screenHeight * 0.03,
                                   decoration: BoxDecoration(
                                     border: Border.all(width: 0),
-                                    borderRadius: BorderRadius.circular(5),
                                     color: const Color(0xFF11999E),
                                   ),
                                 ),
@@ -267,10 +263,9 @@ class _MyHomePageState extends State<MyHomePage> {
         // パディングを設定
         decoration: BoxDecoration(
           border: Border.all(
-            color: Color(0xFF11999E), // 枠線の色を設定
+            color: Color(0xFFC58940), // 枠線の色を設定
             width: 2,
           ),
-          borderRadius: BorderRadius.circular(10),
         ),
         child: Center(
           child: Text(

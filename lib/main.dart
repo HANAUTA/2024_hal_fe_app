@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'カテゴリ',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF30E3CA)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE5BA73)),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: '過去問マスター'),

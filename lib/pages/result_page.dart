@@ -1,7 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart'; // 追加: シェア機能用
 import 'package:vibration/vibration.dart'; // 追加: 振動機能用
 
 class ResultPage extends StatefulWidget {
@@ -84,14 +83,15 @@ class _ResultPageState extends State<ResultPage>
     // グラデーションの定義
     final Shader linearGradient = const LinearGradient(
       colors: <Color>[
-        Color(0xFFFF0000), // 明るい赤
+        Color(0xFFFFD700), // ゴールド
+        Color(0xFFFFE135), // 明るいゴールド
+        Color(0xFFFFC300), // 深いゴールド
+        Color(0xFFFFAA00), // オレンジがかったゴールド
         Color(0xFFFFA500), // 明るい橙
-        Color(0xFFFFFF00), // 明るい黄
-        Color(0xFF00FF00), // 明るい緑
-        Color(0xFF00FFFF), // シアン
-        Color(0xFF0000FF), // 明るい青
-        Color(0xFF8B00FF), // 明るい紫
+        Color(0xFFFFD700), // ゴールド
+        Color(0xFFFFE135), // 明るいゴールド
       ],
+
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)); // 幅を調整
@@ -230,30 +230,6 @@ class _ResultPageState extends State<ResultPage>
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.03),
-                  ElevatedButton(
-                    onPressed: () {
-                      Share.share(
-                        '私はクイズで ${widget.correctAnswerCount} / ${widget.totalQuestionCount} 問正解しました！正答率: ${widget.correctPercentage}',
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: buttonWidth * 0.15,
-                          vertical: buttonHeight * 0.4),
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text(
-                      '結果をシェア',
-                      style: TextStyle(
-                        fontSize: 18,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),

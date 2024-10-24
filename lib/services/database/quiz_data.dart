@@ -146,7 +146,7 @@ class QuizData {
   }
 
   // 指定のクイズデータを取得
-  Future<List<Map<String, dynamic>>> getTargetQuizData({required targetCategory, int? categoryNum,}) async {
+  Future<List<Map<String, dynamic>>> getTargetQuizData({required targetCategory, String? categoryNum,}) async {
     final List<Map<String, dynamic>> maps;
     if (targetCategory == wrongStage) {
       maps = await _database!.query('quizData', where: 'judge = 1');

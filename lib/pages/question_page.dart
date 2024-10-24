@@ -118,7 +118,7 @@ class _QuestionPageState extends State<QuestionPage>
     // クイズデータを取得
     maps = await quizDataInstance.getTargetQuizData(
       targetCategory: widget.category,
-      categoryNum: int.parse(categoryNum),
+      categoryNum: categoryNum,
     );
 
     setState(() {

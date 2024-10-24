@@ -4,7 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import time
 import csv
 import gspread
@@ -60,6 +60,10 @@ kotae_dict_sentakusi_r = {"select_a": "ア", "select_i": "イ", "select_u": "ウ
 TARGET_NENDO = "05_menjo"
 # 02免除より前は80問ある
 LOOP_TIMES = 80
+BEFORE_IMG = "<IMG>"
+AFTER_IMG = "</IMG>"
+BEFORE_SMALL_TEXT = "<SMALL>"
+AFTER_SMALL_TEXT = "</SMALL>"
 
 series_num = {
   "基礎理論": "1001",
@@ -368,34 +372,78 @@ def get_mondai_kaisetsu(mondai_main):
 
     text_list = []
     tmp_text = ""
-    tmp_li_text = ""
-    
+    r_flag = False
+
     for elem in soup.contents:
+        print(elem)
         if elem.name == "ul":
             text_list.append("")
             text_list.append("")
             for li in elem.contents:
                 for li_elem in li.contents:
-                    tmp_li_text += li_elem.text
-                    if li_elem.name == "em":
+                    tmp_text += li_elem.text
+                    if isinstance(li_elem, Tag) and "m" in (li_elem.get('class') or []):
                         continue
                     if li_elem.name == "br":
                         continue
-                    text_list.append(str(tmp_li_text))
-                    tmp_li_text = ""
+                    if li_elem.name == "strong":
+                        continue
+                    text_list.append(str(tmp_text))
+                    tmp_text = ""
                 text_list.append("")
+        elif elem.name == "ol":
+            text_list.append("")
+            for i, li in enumerate(elem.contents):
+                tmp_text += str(i + 1) + ". " + li.text
+                if li.name == "em":
+                    continue
+                text_list.append(str(tmp_text))
+                tmp_text = ""
+            text_list.append("")
+        elif elem.name == "dl":
+            text_list.append("")
+            for dt in elem.contents:
+                tmp_text += dt.text
+                    
+                text_list.append(str(tmp_text))
+                tmp_text = ""
+                if dt.name == "dd":
+                    text_list.append("")
+                    continue
+                
+            text_list.append("")
+        elif isinstance(elem, Tag) and "img_margin" in (elem.get('class') or []):
+            for img in elem.find_all('img'):
+                text_list.append(BEFORE_IMG +TARGET_NENDO + '/' + img.get('alt') + AFTER_IMG)
+        elif elem.name == "sub":
+            text_list[-1] += BEFORE_SMALL_TEXT + elem.text + AFTER_SMALL_TEXT
         else:
             tmp_text += str(elem.text)
             if elem.name == "br":
+                if len(tmp_text) >= 1:
+                    print('added br')
+                    text_list.append(tmp_text)
+                    tmp_text = ""
+                text_list.append("")
                 continue
-            if elem.name == "strong" or elem.name == "em":
+            elif elem.name == "strong":
+                continue
+            elif elem.name == "em" and "r" in (elem.get('class') or []):
+                r_flag = True
                 continue
             else:
+                if r_flag:
+                    text_list[-1] += str(tmp_text)
+                    r_flag = False
+                    continue
+
                 text_list.append(str(tmp_text))
                 tmp_text = ""
-    
+        print("--------------------")
+        print(elem)
     print("--------------------")
     print('\n'.join(text_list))
+    
     return result_texts
 
 def tab_check():

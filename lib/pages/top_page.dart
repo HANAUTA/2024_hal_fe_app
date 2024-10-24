@@ -115,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       '学習数 $totalAnswersCount / $totalQuestionsCount 問中',
                       style: TextStyle(
                         fontSize: screenHeight * 0.03, // フォントサイズを画面高さに基づいて指定
-                        color: Colors.black87, // 色を少しソフトに
+                        color: Color(0xFF674822), // 色を少しソフトに
                         fontWeight: FontWeight.bold, // フォントを少し太く
                       ),
                       textAlign: TextAlign.center,
@@ -162,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             height: screenHeight * 0.035,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              color: const Color(0xFFFF6969), // 赤いバーの色
+                              color: const Color(0xFFC58940),
                             ),
                           ),
                           // 正解の緑色のバー
@@ -179,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   blurRadius: 4,
                                 ),
                               ],
-                              color: const Color(0xFF11999E), // 緑のバーの色
+                              color: const Color(0xFFE5BA73),
                             ),
                           ),
                         ],
@@ -219,8 +219,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildCategoryTile(double screenWidth, double screenHeight,
-      String displayCategoryName, int index, BuildContext context, String categoryName) {
+  Widget _buildCategoryTile(
+      double screenWidth,
+      double screenHeight,
+      String displayCategoryName,
+      int index,
+      BuildContext context,
+      String categoryName) {
+
     return AnimationConfiguration.staggeredList(
       position: index,
       duration: const Duration(milliseconds: 375),
@@ -238,45 +244,57 @@ class _MyHomePageState extends State<MyHomePage> {
                 _isTappedList[index] = false;
               });
 
-              // "全範囲から出題"が押された場合のみQuestionPageに遷移
+              // 遷移処理
               if (categoryName == "allStage" || categoryName == "wrongStage") {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QuestionPage(categoryName), // QuestionPageに遷移
+                    builder: (context) => QuestionPage(categoryName),
                   ),
                 );
               } else {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CategoryPage(categoryName), // カテゴリページに遷移
+                    builder: (context) => CategoryPage(categoryName),
                   ),
                 );
               }
               _initQuizData();
             },
             onTapCancel: () {
-              // タップがキャンセルされたらスワイプを解除
               setState(() {
                 _isTappedList[index] = false;
               });
             },
-            child: Container(
-              margin: EdgeInsets.symmetric(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
                   horizontal: screenWidth * 0.1, vertical: screenHeight * 0.02),
-              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.03),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Color(0xFFC58940), // 枠線の色を設定
-                  width: 2,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  displayCategoryName,
-                  style: TextStyle(
-                    fontSize: screenHeight * 0.025, // フォントサイズを画面高さに基づいて指定
+              child: Material(
+                elevation: 3, // 影を追加
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.03),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        offset: Offset(0, 4),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      displayCategoryName,
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.025,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF674822),
+                      ),
+                    ),
                   ),
                 ),
               ),

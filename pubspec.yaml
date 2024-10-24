@@ -34,20 +34,20 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/icons/fe_icon.png"
+  image_path: "assets/icons/fe_icon1.png"
   adaptive_icon_background: '#ffffff'
-  adaptive_icon_foreground: "assets/icons/fe_icon_foreground.png"
+  adaptive_icon_foreground: "assets/icons/fe_icon1.png"
 flutter_native_splash:
   color: '#add8e6'
-  image: 'assets/icons/fe_splash.png'
+  image: 'assets/icons/fe_icon1.png'
   color_dark: '#262626'
-  image_dark: 'assets/icons/fe_splash.png'
+  image_dark: 'assets/icons/fe_icon1.png'
   fullscreen: true
   android_12:
     icon_background_color: '#add8e6'
-    image: 'assets/icons/fe_splash_android12.png'
+    image: 'assets/icons/fe_icon1.png'
     icon_background_color_dark: '#262626'
-    image_dark: 'assets/icons/fe_splash_android12.png'
+    image_dark: 'assets/icons/fe_icon1.png'
 flutter:
   uses-material-design: true
   assets:

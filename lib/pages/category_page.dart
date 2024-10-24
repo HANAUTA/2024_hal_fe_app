@@ -260,7 +260,7 @@ class _CategoryPageState extends State<CategoryPage> {
                           '学習数 $totalAnswersCount / $totalQuestionsCount 問中',
                           style: TextStyle(
                             fontSize: screenHeight * 0.03,
-                            color: Color(0xFF4A4A4A), // ダークグレー
+                            color: Color(0xFF674822), // ダークグレー
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
@@ -347,11 +347,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
-                                      color: isAll
-                                          ? const Color(0xFF11999E) // 青系統
-                                          : isWrongAnswer
-                                          ? const Color(0xFFFFA8A8) // 柔らかい赤
-                                          : Colors.white, // 白
+                                      color: Colors.white,
                                     ),
                                     child: ListTile(
                                       contentPadding: const EdgeInsets.symmetric(

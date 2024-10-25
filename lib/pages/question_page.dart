@@ -610,10 +610,10 @@ class _QuestionPageState extends State<QuestionPage>
       _isCorrect = true;
       Vibration.vibrate(duration: 20);
       // オーディオ関連の処理
-      audioPlayer.setVolume(1.0);
-      audioPlayer.stop();
-      audioPlayer.release();
-      audioPlayer.play(AssetSource("audios/correct.mp3"));
+      // audioPlayer.setVolume(1.0);
+      // audioPlayer.stop();
+      // audioPlayer.release();
+      // audioPlayer.play(AssetSource("audios/correct.mp3"));
     } else {
       // judgeValueが2でないときのみ不正解の処理を行う
       _isCorrect = false;

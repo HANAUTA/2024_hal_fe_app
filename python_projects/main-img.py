@@ -18,6 +18,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
+import time
+
 
 SPREAD_SHEET_ID = os.getenv("SPREAD_SHEET_IMG_ID")
 
@@ -57,7 +59,7 @@ kotae_dict_sentakusi_r = {"select_a": "ア", "select_i": "イ", "select_u": "ウ
 20_aki
 20_haru
 """
-TARGET_NENDO = "04_menjo"
+TARGET_NENDO = "03_menjo"
 # 02免除より前は80問ある
 LOOP_TIMES = 80
 BEFORE_IMG = "<IMG>"
@@ -318,19 +320,22 @@ def get_mondai_bun(mondai_main):
     mondaibun_text = ""
     if cnt >= 1:
         mondai_bun = driver.find_element(By.XPATH, '/html/body/div[1]/div/main/div[2]/div[2]')
-        # 画像があれば取得
-        img_srcs = mondai_bun.find_elements(By.TAG_NAME, 'img')
-        mondaibun_text += mondai_bun.text
-        for img_src in img_srcs:
-            mondaibun_text += "\n" + BEFORE_IMG + TARGET_NENDO + "/" + img_src.get_attribute("alt") + AFTER_IMG
 
     else:
         mondai_bun = driver.find_element(By.XPATH, '/html/body/div[1]/div/main/div[2]/div[1]')
-        # 画像があれば取得
-        img_srcs = mondai_bun.find_elements(By.TAG_NAME, 'img')
-        mondaibun_text += mondai_bun.text
-        for img_src in img_srcs:
-            mondaibun_text += "\n" + BEFORE_IMG + TARGET_NENDO + "/" + img_src.get_attribute("alt") + AFTER_IMG
+
+
+    # liがあればraise
+    if mondai_bun.find_elements(By.TAG_NAME, 'li') != []:
+        raise Exception("この問題は除外します。 (liが含まれているため)")
+    # preがあればraise
+    if mondai_bun.find_elements(By.CLASS_NAME, 'pre') != []:
+        raise Exception("この問題は除外します。 (preが含まれているため)")
+    # 画像があれば取得
+    img_srcs = mondai_bun.find_elements(By.TAG_NAME, 'img')
+    mondaibun_text += mondai_bun.text
+    for img_src in img_srcs:
+        mondaibun_text += "\n" + BEFORE_IMG + TARGET_NENDO + "/" + img_src.get_attribute("src").split("/img/")[1] + AFTER_IMG
 
     return mondaibun_text
     
@@ -354,18 +359,17 @@ def get_mondai_category(mondai_main):
     return [category, series, stage]
 
 def get_mondai_answer(mondai_main, answer):
-
     # 正解を取得
     # 選択肢がテキストかどうか。
     if mondai_main.find_elements(By.ID, kotae_dict_sentakusi[answer]) == []:
         print("選択肢がありません")
         # 画像を取得
-        img_src = mondai_main.find_element(By.CLASS_NAME, 'selectList').find_element(By.TAG_NAME, 'img').get_attribute('alt')
+        img_src = mondai_main.find_element(By.CLASS_NAME, 'selectList').find_element(By.TAG_NAME, 'img').get_attribute('src').split("/img/")[1]
         return "null" + BEFORE_IMG + TARGET_NENDO + "/" + img_src + AFTER_IMG
     else:
         mondai_kotae_elem = mondai_main.find_element(By.ID, kotae_dict_sentakusi[answer])
         if mondai_kotae_elem.find_elements(By.TAG_NAME, 'img') != []:
-            img_src = mondai_kotae_elem.find_element(By.TAG_NAME, 'img').get_attribute('alt')
+            img_src = mondai_kotae_elem.find_element(By.TAG_NAME, 'img').get_attribute('src').split("/img/")[1]
             return f"{answer},{BEFORE_IMG + TARGET_NENDO + '/' + img_src + AFTER_IMG}"
         kotae_text = f"{answer},{mondai_kotae_elem.text}"
 
@@ -378,7 +382,7 @@ def get_mondai_failure(mondai_main, answer):
     for matigai in matigai_ls:
         matigai_elem = mondai_main.find_element(By.ID, matigai)
         if matigai_elem.find_elements(By.TAG_NAME, 'img') != []:
-            img_src = matigai_elem.find_element(By.TAG_NAME, 'img').get_attribute('alt')
+            img_src = matigai_elem.find_element(By.TAG_NAME, 'img').get_attribute('src').split("/img/")[1]
             matigai_text = f"{kotae_dict_sentakusi_r[matigai]},{BEFORE_IMG + TARGET_NENDO + '/' + img_src + AFTER_IMG}"
             matigai_texts.append(matigai_text)
             continue
@@ -401,24 +405,30 @@ def mondai_kaisetsu_li(li):
     br_flag = False
 
     for li_elem in li.contents:
+        # uがあればraise
+        if li_elem.name == "u":
+            raise Exception("この問題は除外します。 (uタグが含まれているため)")
+        # class preがあればraise
+        if li_elem.name == "div" and "pre" in (li_elem.get('class') or []):
+            raise Exception("この問題は除外します。 (preタグが含まれているため)")
         if li_elem.name == "span" and "cite" in (li_elem.get('class') or []):
             sentakusi_flag = True
             # あ、い、う、えを表示
-            if "lia" in li_elem.get('class'):
+            if "lia" in li.get('class'):
                 content_list.append("ア,")
-            elif "lii" in li_elem.get('class'):
+            elif "lii" in li.get('class'):
                 content_list.append("イ,")
-            elif "liu" in li_elem.get('class'):
+            elif "liu" in li.get('class'):
                 content_list.append("ウ,")
-            elif "lie" in li_elem.get('class'):
+            elif "lie" in li.get('class'):
                 content_list.append("エ,")
             
             # 画像ならば
             if li_elem.find_all('img') != []:
                 for img in li_elem.find_all('img'):
-                    content_list.append(BEFORE_IMG +TARGET_NENDO + '/' + img.get('alt') + AFTER_IMG)
+                    content_list[-1] += BEFORE_IMG +TARGET_NENDO + '/' + img.get('src').split("/img/")[1] + AFTER_IMG
             else:
-                content_list.append(li_elem.text)
+                content_list[-1] += li_elem.text
             continue
         else:
             if li_elem.name == "em" and "m" in (li_elem.get('class') or []):
@@ -441,7 +451,7 @@ def mondai_kaisetsu_li(li):
                     content_list[-1] += li_elem.text
             elif isinstance(li_elem, Tag) and "img_margin" in (li_elem.get('class') or []):
                 for img in li_elem.find_all('img'):
-                    content_list.append(BEFORE_IMG +TARGET_NENDO + '/' + img.get('alt') + AFTER_IMG)
+                    content_list.append(BEFORE_IMG +TARGET_NENDO + '/' + img.get('src').split("/img/")[1] + AFTER_IMG)
             elif li_elem.name == "sub":
                 lisub_flag = True
                 if br_flag:
@@ -538,6 +548,10 @@ def get_mondai_kaisetsu(mondai_main):
     kaisetsu_div = mondai_main.find_element(By.ID, 'kaisetsu')
     kaisetu_element = kaisetsu_div.find_element(By.CLASS_NAME, 'R3tfxFm5')
 
+    # 解説にfracがあればraise
+    if kaisetu_element.find_elements(By.CLASS_NAME, 'frac') != []:   
+        raise Exception("この問題は除外します。 (fracが含まれているため)")
+
     # innerHTMLを取得し、BeautifulSoupでパース
     html_content = kaisetu_element.get_attribute('innerHTML')
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -551,13 +565,19 @@ def get_mondai_kaisetsu(mondai_main):
     sub_flag = False
     sup_flag = False
     b_flag = False
+    emb_flag = False
+    emg_flag = False
     s_flag = False
     m_flag = False
     frac_flag = False
 
     for elem in soup.contents:
+        # uがあればraise
         if elem.name == "u":
             raise Exception("この問題は除外します。 (uタグが含まれているため)")
+        # class preがあればraise
+        if elem.name == "div" and "pre" in (elem.get('class') or []):
+            raise Exception("この問題は除外します。 (preタグが含まれているため)")
         if elem.name == "ul":
             text_list.append("")
             text_list.append("")
@@ -618,6 +638,12 @@ def get_mondai_kaisetsu(mondai_main):
         elif elem.name == "em" and "r" in (elem.get('class') or []):
             r_flag = True
             text_list[-1] += elem.text
+        elif elem.name == "em" and "b" in (elem.get('class') or []):
+            emb_flag = True
+            text_list[-1] += elem.text
+        elif elem.name == "em" and "g" in (elem.get('class') or []):
+            emg_flag = True
+            text_list[-1] += elem.text
         elif elem.name == "span" and "frac" in (elem.get('class') or []):
             frac_flag = True
             for frac in elem.contents:
@@ -642,6 +668,12 @@ def get_mondai_kaisetsu(mondai_main):
             elif b_flag:
                 text_list[-1] += elem.text
                 b_flag = False
+            elif emb_flag:
+                text_list[-1] += elem.text
+                emb_flag = False
+            elif emg_flag:
+                text_list[-1] += elem.text
+                emg_flag = False
             elif s_flag:
                 text_list[-1] += elem.text
                 s_flag = False
@@ -658,6 +690,8 @@ def get_mondai_kaisetsu(mondai_main):
                 sub_flag = False
                 sup_flag = False
                 b_flag = False
+                emb_flag = False
+                emg_flag = False
                 s_flag = False
                 m_flag = False
                 frac_flag = False
@@ -695,7 +729,6 @@ def get_img_url(mondai_main):
             img_urls.append(img.get_attribute('src'))
     return img_urls
 
-
 while True:
     try:
         wait.until(EC.presence_of_all_elements_located)
@@ -705,6 +738,9 @@ while True:
         mondai_main = driver.find_element(By.CLASS_NAME, 'main')
         mondai_data = []
 
+        # 問題文fracがあればraise
+        if mondai_main.find_elements(By.CLASS_NAME, 'frac') != []:
+            raise Exception("この問題は除外します。 (fracが含まれているため)")
         # 問題文を取得
         mondai_bun = get_mondai_bun(mondai_main)
         # 問題文を追加
@@ -752,6 +788,9 @@ while True:
         mondai_data.append(img_url_str)
         # print('画像取得済み')
 
+        # 選択肢にfracがあればraise
+        if mondai_main.find_element(By.CLASS_NAME, 'selectList').find_elements(By.CLASS_NAME, 'frac') != []:
+            raise Exception("この問題は除外します。 (fracが含まれているため)")
 
         # 正解を取得
         kotae_text = get_mondai_answer(mondai_main, answer)
@@ -819,7 +858,7 @@ while True:
             print("画像があった問題数" + str(img_count))
             driver.quit()
             quit()
-        if skip_count >= 20:
+        if skip_count >= 100:
             break
         try:
             next_button = driver.find_element(By.CLASS_NAME, 'submit')
@@ -849,63 +888,70 @@ client = gspread.authorize(creds)
 spreadsheet = client.open_by_key(SPREAD_SHEET_ID)  # スプレッドシートIDを指定
 sheet = spreadsheet.worksheet('問題')  # シート名を指定
 
-# mondai_datasをGoogleスプレッドシートのフォーマットに変換して書き込む関数
-def write_to_sheet(mondai_datas):
-    for mondai in mondai_datas:
-        print(mondai)
-        mondai_bun = mondai[0]
-        mondai_nendo = mondai[1]
-        mondai_category = mondai[2][0]
-        mondai_series = mondai[2][1]
-        mondai_stage = mondai[2][2]
-        mondai_answer = mondai[4]
-        mondai_failure1 = mondai[5][0]
-        mondai_failure2 = mondai[5][1]
-        mondai_failure3 = mondai[5][2]
-        mondai_comment = mondai[6]
-        mondai_url = mondai[3] 
-        if mondai_url == "":
-            mondai_url = "null"
 
-        # series_name　例外処理
-        if mondai_series in series_reigai:
-            mondai_series = series_reigai[mondai_series]
-        
-        # 番号割り振り
-        if mondai_series in series_num:
-            series_num_str = series_num[mondai_series]
-        else:
-            series_num_str = "0"
-        
-        if mondai_stage in stage_num.keys():
-            stage_num_str = stage_num[mondai_stage]
-        else:
-            stage_num_str = "0"
-        
-        
 
-        # スプレッドシートの列順にデータを並べる
-        row = [
-            "",       # id
-            mondai_category,    # category
-            series_num_str,      # series
-            stage_num_str,       # stage
-            mondai_series,       # series_name
-            mondai_stage,       # stage_name
-            mondai_bun,         # question
-            mondai_answer,      # answer
-            mondai_failure1,    # mistake1
-            mondai_failure2,    # mistake2
-            mondai_failure3,    # mistake3
-            mondai_comment,     # comment
-            mondai_url,          # url
-            mondai_nendo        # year(link)
-        ]
-        
-        # シートの最後に行を追加
-        sheet.append_row(row, value_input_option='USER_ENTERED')
+def write_to_sheet(mondai_datas, batch_size=20):
+    cnt = 1
+    data_len = len(mondai_datas)
 
-# 問題データをGoogleスプレッドシートに書き込む
+    # データを20行ずつに分割して書き込む
+    for i in range(0, data_len, batch_size):
+        batch = mondai_datas[i:i + batch_size]  # 20行ずつ取得
+        rows = []
+
+        for mondai in batch:
+            print(f'{cnt}/{data_len}')
+            cnt += 1
+            
+            # 各要素を取得
+            mondai_bun = mondai[0]
+            mondai_nendo = mondai[1]
+            mondai_category = mondai[2][0]
+            mondai_series = mondai[2][1]
+            mondai_stage = mondai[2][2]
+            mondai_answer = mondai[4]
+            mondai_failure1 = mondai[5][0]
+            mondai_failure2 = mondai[5][1]
+            mondai_failure3 = mondai[5][2]
+            mondai_comment = mondai[6]
+            mondai_url = mondai[3] or "null"  # URLが空なら "null"
+
+            # series_nameの例外処理
+            if mondai_series in series_reigai:
+                mondai_series = series_reigai[mondai_series]
+
+            # 番号の割り振り
+            series_num_str = series_num.get(mondai_series, "0")
+            stage_num_str = stage_num.get(mondai_stage, "0")
+
+            # スプレッドシートの列順にデータを並べる
+            row = [
+                "",       # id
+                mondai_category,    # category
+                series_num_str,     # series
+                stage_num_str,      # stage
+                mondai_series,      # series_name
+                mondai_stage,       # stage_name
+                mondai_bun,         # question
+                mondai_answer,      # answer
+                mondai_failure1,    # mistake1
+                mondai_failure2,    # mistake2
+                mondai_failure3,    # mistake3
+                mondai_comment,     # comment
+                mondai_url,         # url
+                mondai_nendo        # year(link)
+            ]
+
+            rows.append(row)  # 行を追加
+
+        # 20行をまとめて書き込む
+        print(f"{cnt-1}行目まで書き込み中...")
+        sheet.append_rows(rows, value_input_option='USER_ENTERED')
+
+        # API制限を避けるための待機時間
+        time.sleep(2)  # 2秒待機
+
+# 問題データを書き込む
 print("問題データを書き込み中...")
 write_to_sheet(mondai_datas)
 

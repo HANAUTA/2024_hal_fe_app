@@ -30,19 +30,19 @@ class SettingsPage extends StatelessWidget {
             _buildLinkTile(
               title: 'プライバシーポリシー',
               icon: Icons.privacy_tip,
-              url: 'https://note.com/assist_work/n/nb8efc32958b2',
+              url: 'https://sites.google.com/view/app777/privacy',
               context: context,
             ),
             _buildLinkTile(
               title: 'お問い合わせ',
               icon: Icons.contact_mail,
-              url: 'https://note.com/assist_work/n/n5988b2ffd70a',
+              url: 'https://sites.google.com/view/app777/%E3%83%9B%E3%83%BC%E3%83%A0',
               context: context,
             ),
             _buildLinkTile(
               title: '利用規約',
               icon: Icons.description,
-              url: 'https://note.com/assist_work/n/n28b44c01d91f',
+              url: 'https://sites.google.com/view/app777/terms',
               context: context,
             ),
             const Divider(),

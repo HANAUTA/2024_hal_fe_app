@@ -19,7 +19,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-SPREAD_SHEET_ID = os.getenv("SPREAD_SHEET_ID")
+SPREAD_SHEET_ID = os.getenv("SPREAD_SHEET_IMG_ID")
 
 mondai_datas = []
 category_name = {"ストラテジ系": "strategyStage", "テクノロジ系": "technologyStage", "マネジメント系": "managementStage"}
@@ -403,7 +403,22 @@ def mondai_kaisetsu_li(li):
     for li_elem in li.contents:
         if li_elem.name == "span" and "cite" in (li_elem.get('class') or []):
             sentakusi_flag = True
-            content_list.append(li_elem.text)
+            # あ、い、う、えを表示
+            if "lia" in li_elem.get('class'):
+                content_list.append("ア,")
+            elif "lii" in li_elem.get('class'):
+                content_list.append("イ,")
+            elif "liu" in li_elem.get('class'):
+                content_list.append("ウ,")
+            elif "lie" in li_elem.get('class'):
+                content_list.append("エ,")
+            
+            # 画像ならば
+            if li_elem.find_all('img') != []:
+                for img in li_elem.find_all('img'):
+                    content_list.append(BEFORE_IMG +TARGET_NENDO + '/' + img.get('alt') + AFTER_IMG)
+            else:
+                content_list.append(li_elem.text)
             continue
         else:
             if li_elem.name == "em" and "m" in (li_elem.get('class') or []):
@@ -541,6 +556,8 @@ def get_mondai_kaisetsu(mondai_main):
     frac_flag = False
 
     for elem in soup.contents:
+        if elem.name == "u":
+            raise Exception("この問題は除外します。 (uタグが含まれているため)")
         if elem.name == "ul":
             text_list.append("")
             text_list.append("")
@@ -646,10 +663,10 @@ def get_mondai_kaisetsu(mondai_main):
                 frac_flag = False
                 text_list.append(elem.text)
 
+    result_texts = '\n'.join(text_list).strip()
     print("--------------------")
-    print('\n'.join(text_list))
+    print(result_texts)
     print("--------------------")
-    
     return result_texts
 
 def tab_check():
@@ -682,6 +699,7 @@ def get_img_url(mondai_main):
 while True:
     try:
         wait.until(EC.presence_of_all_elements_located)
+        tab_check()
 
         # この問題のデータすべて取得
         mondai_main = driver.find_element(By.CLASS_NAME, 'main')
@@ -700,46 +718,46 @@ while True:
         mondai_nendo = get_mondai_nendo(mondai_main)
         # 問題年度を追加
         mondai_data.append(mondai_nendo)       
-        print('問題年度取得済み')
+        # print('問題年度取得済み')
 
 
         # 問題カテゴリを取得
         category, series, stage = get_mondai_category(mondai_main)
         # 問題カテゴリを追加
         mondai_data.append([category, series, stage])
-        print('問題カテゴリ取得済み')
+        # print('問題カテゴリ取得済み')
 
         wait.until(EC.presence_of_all_elements_located)
 
         # 答えと解説を表示
         actions = ActionChains(driver)
         answer_button = driver.find_element(By.ID, 'showAnswerBtn')
-        print('答え表示ボタン取得')
+        # print('答え表示ボタン取得')
         answer_button_style = answer_button.get_attribute('style')
         if "display: none;" not in answer_button_style:
-            print('答え表示ボタンクリック1')
+            # print('答え表示ボタンクリック1')
             actions.move_to_element(answer_button).click().perform()
-            print('答え表示ボタンクリック2')
+            # print('答え表示ボタンクリック2')
             wait.until(EC.presence_of_all_elements_located)
-            print('noneだった')
+            # print('noneだった')
 
         # 答え記号取得
         tab_check()
         answer = driver.find_element(By.ID, 'answerChar').text
-        print('答え取得済み')
+        # print('答え取得済み')
 
         # 画像を取得
         img_urls = get_img_url(mondai_main)
-        mondai_data.append(img_urls)
-        print('画像取得済み')
-        print(img_urls)
+        img_url_str = "\n".join(img_urls)
+        mondai_data.append(img_url_str)
+        # print('画像取得済み')
 
 
         # 正解を取得
         kotae_text = get_mondai_answer(mondai_main, answer)
         # 正解を追加
         mondai_data.append(kotae_text)
-        print('正解取得済み')
+        # print('正解取得済み')
         print("--------------------")
         print(kotae_text)
         print("--------------------")
@@ -752,32 +770,38 @@ while True:
             matigai_texts = get_mondai_failure(mondai_main, answer)
 
         mondai_data.append(matigai_texts)
-        print('間違い選択肢取得済み')
+        # print('間違い選択肢取得済み')
         
 
         # 解説を取得
         kaisetsu = get_mondai_kaisetsu(mondai_main)
         # 解説を追加
         mondai_data.append(kaisetsu)
-        print(kaisetsu)
-        print('解説取得済み')
+        # print('解説取得済み')
 
-        
-        mondai_datas.append(mondai_data)
-        print('問題データ取得完了')
+        # ID kaisetsu にスクロール
+        driver.execute_script("document.getElementById('kaisetsu').scrollIntoView();")
+        y_n = input("この問題を採用しますか？(文字を入れたらno, exitで書き出し): ")
+        if len(y_n) == 0:
+            mondai_datas.append(mondai_data)
+            print('問題データ取得完了')
+        elif y_n == "exit":
+            break
+        else:
+            print('問題データ破棄')
 
 
         cnt += 1
         if cnt >= LOOP_TIMES:
             break
         
-        input("一時停止")
         # 次の問題へ
         tab_check()
         next_button = driver.find_element(By.CLASS_NAME, 'submit')
         next_button.click()
 
         print('次の問題へ')
+        print("==============================================")
 
     except KeyboardInterrupt:
         quit()
@@ -828,6 +852,7 @@ sheet = spreadsheet.worksheet('問題')  # シート名を指定
 # mondai_datasをGoogleスプレッドシートのフォーマットに変換して書き込む関数
 def write_to_sheet(mondai_datas):
     for mondai in mondai_datas:
+        print(mondai)
         mondai_bun = mondai[0]
         mondai_nendo = mondai[1]
         mondai_category = mondai[2][0]
@@ -835,10 +860,12 @@ def write_to_sheet(mondai_datas):
         mondai_stage = mondai[2][2]
         mondai_answer = mondai[4]
         mondai_failure1 = mondai[5][0]
-        mondai_failure2 = mondai[6][1]
-        mondai_failure3 = mondai[7][2]
+        mondai_failure2 = mondai[5][1]
+        mondai_failure3 = mondai[5][2]
         mondai_comment = mondai[6]
-        mondai_url = mondai[3]  
+        mondai_url = mondai[3] 
+        if mondai_url == "":
+            mondai_url = "null"
 
         # series_name　例外処理
         if mondai_series in series_reigai:

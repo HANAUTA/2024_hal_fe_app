@@ -59,7 +59,7 @@ kotae_dict_sentakusi_r = {"select_a": "ア", "select_i": "イ", "select_u": "ウ
 20_aki
 20_haru
 """
-TARGET_NENDO = "02_menjo"
+TARGET_NENDO = "04_menjo"
 # 02免除より前は80問ある
 LOOP_TIMES = 80
 BEFORE_IMG = "<IMG>"
@@ -264,7 +264,7 @@ chrome_options.add_experimental_option("detach", True)
 # Chromeドライバーの自動設定
 service = Service(ChromeDriverManager().install())
 # backgroundで動かす
-# chrome_options.add_argument('--headless')
+chrome_options.add_argument('--headless')
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # 最大の読み込み時間を設定 今回は最大30秒待機できるようにする
@@ -711,9 +711,9 @@ def get_mondai_kaisetsu(mondai_main):
                 text_list.append(elem.text)
 
     result_texts = '\n'.join(text_list).strip()
-    print("--------------------")
-    print(result_texts)
-    print("--------------------")
+    # print("--------------------")
+    # print(result_texts)
+    # print("--------------------")
     return result_texts
 
 def tab_check():
@@ -765,10 +765,10 @@ while True:
         mondai_bun = get_mondai_bun(mondai_main)
         # 問題文を追加
         mondai_data.append(mondai_bun)
-        print('問題文取得済み')
-        print("--------------------")
-        print(mondai_bun)
-        print("--------------------")
+        # print('問題文取得済み')
+        # print("--------------------")
+        # print(mondai_bun)
+        # print("--------------------")
 
         # 問題年度を取得
         mondai_nendo = get_mondai_nendo(mondai_main)
@@ -819,9 +819,9 @@ while True:
         # 正解を追加
         mondai_data.append(kotae_text)
         # print('正解取得済み')
-        print("--------------------")
-        print(kotae_text)
-        print("--------------------")
+        # print("--------------------")
+        # print(kotae_text)
+        # print("--------------------")
 
         # 間違い選択肢を取得,追加
         if kotae_text[:4] == "null":

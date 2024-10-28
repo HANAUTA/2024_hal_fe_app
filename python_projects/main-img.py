@@ -59,7 +59,7 @@ kotae_dict_sentakusi_r = {"select_a": "ア", "select_i": "イ", "select_u": "ウ
 20_aki
 20_haru
 """
-TARGET_NENDO = "03_menjo"
+TARGET_NENDO = "02_menjo"
 # 02免除より前は80問ある
 LOOP_TIMES = 80
 BEFORE_IMG = "<IMG>"
@@ -317,7 +317,7 @@ wait.until(EC.presence_of_all_elements_located)
 cnt = 0
 def get_mondai_bun(mondai_main):
     # 問題文を取得
-    mondaibun_text = ""
+    mondaibun_text_list = []
     if cnt >= 1:
         mondai_bun = driver.find_element(By.XPATH, '/html/body/div[1]/div/main/div[2]/div[2]')
 
@@ -331,12 +331,25 @@ def get_mondai_bun(mondai_main):
     # preがあればraise
     if mondai_bun.find_elements(By.CLASS_NAME, 'pre') != []:
         raise Exception("この問題は除外します。 (preが含まれているため)")
-    # 画像があれば取得
-    img_srcs = mondai_bun.find_elements(By.TAG_NAME, 'img')
-    mondaibun_text += mondai_bun.text
-    for img_src in img_srcs:
-        mondaibun_text += "\n" + BEFORE_IMG + TARGET_NENDO + "/" + img_src.get_attribute("src").split("/img/")[1] + AFTER_IMG
+    
+        # innerHTMLを取得し、BeautifulSoupでパース
+    html_content = mondai_bun.get_attribute('innerHTML')
+    soup = BeautifulSoup(html_content, 'html.parser')
 
+    for elem in soup.contents:
+        if elem.name == "div" and "img_margin" in (elem.get('class') or []):
+            for img in elem.find_all('img'):
+                mondaibun_text_list.append("\n")
+                mondaibun_text_list.append(BEFORE_IMG + TARGET_NENDO + '/' + img.get('src').split("/img/")[1] + AFTER_IMG)
+        elif elem.name == "br":
+            mondaibun_text_list.append("\n")
+        
+        elif elem.name == "sup":
+            mondaibun_text_list.append(BEFORE_SMALL_U_TEXT + elem.text + AFTER_SMALL_U_TEXT)
+        else:
+            mondaibun_text_list.append(elem.text)
+    
+    mondaibun_text = ''.join(mondaibun_text_list).strip()
     return mondaibun_text
     
 def get_mondai_nendo(mondai_main):
@@ -741,6 +754,13 @@ while True:
         # 問題文fracがあればraise
         if mondai_main.find_elements(By.CLASS_NAME, 'frac') != []:
             raise Exception("この問題は除外します。 (fracが含まれているため)")
+        
+        # 問題文にタグがspanでクラスがolがあればraise
+        if mondai_main.find_elements(By.TAG_NAME, 'span') != []:
+            for span in mondai_main.find_elements(By.TAG_NAME, 'span'):
+                if "ol" in span.get_attribute('class'):
+                    raise Exception("この問題は除外します。 (span olが含まれているため)")
+        
         # 問題文を取得
         mondai_bun = get_mondai_bun(mondai_main)
         # 問題文を追加
@@ -792,6 +812,8 @@ while True:
         if mondai_main.find_element(By.CLASS_NAME, 'selectList').find_elements(By.CLASS_NAME, 'frac') != []:
             raise Exception("この問題は除外します。 (fracが含まれているため)")
 
+
+
         # 正解を取得
         kotae_text = get_mondai_answer(mondai_main, answer)
         # 正解を追加
@@ -820,7 +842,10 @@ while True:
 
         # ID kaisetsu にスクロール
         driver.execute_script("document.getElementById('kaisetsu').scrollIntoView();")
-        y_n = input("この問題を採用しますか？(文字を入れたらno, exitで書き出し): ")
+        # 手動
+        # y_n = input("この問題を採用しますか？(文字を入れたらno, exitで書き出し): ")
+        # 自動
+        y_n = ""
         if len(y_n) == 0:
             mondai_datas.append(mondai_data)
             print('問題データ取得完了')
@@ -850,7 +875,10 @@ while True:
         skip_count += 1
         print("エラーが発生したためスキップ")
         print("スキップした回数" + str(skip_count))
-        user_input = input("何も入れずで継続,exitで書き出し,quitで強制終了: ")
+        # 手動
+        # user_input = input("何も入れずで継続,exitで書き出し,quitで強制終了: ")
+        # 自動
+        user_input = ""
         if user_input == "exit":
             break
         elif user_input == "quit":

@@ -146,15 +146,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                             ),
                           ),
-                          // 背景の白いバー
-                          Container(
-                            width: screenWidth * 0.85,
-                            height: screenHeight * 0.035,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: const Color(0xFFF0F0F0), // 薄いグレーの背景
-                            ),
-                          ),
                           // 不正解の赤いバー
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 500),
